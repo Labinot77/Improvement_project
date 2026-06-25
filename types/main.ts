@@ -1,4 +1,4 @@
-export type DashboardCardProps = {
+export interface DashboardCardProps {
   index: number;
   title: string;
   subtitle: string;

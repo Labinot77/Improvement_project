@@ -5,8 +5,7 @@ import { DashboardCardProps } from "@/types/main";
 import { motion } from "framer-motion";
 import Link from "next/link";
 
-
-const MotionLink = motion(Link);
+const MotionLink = motion.create(Link);
 
 export default function DashboardCard({
   index,
@@ -18,6 +17,7 @@ export default function DashboardCard({
   size = "medium",
   className = "",
 }: DashboardCardProps) {
+
   return (
     <MotionLink
       href={href}

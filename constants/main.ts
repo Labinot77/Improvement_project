@@ -27,6 +27,13 @@ export const cards: Omit<DashboardCardProps, "index">[] = [
     accentGlow: "rgba(239,68,68,0.25)",
     size: "medium",
   },
+    {
+    title: "Sleep",
+    subtitle: "Recovery & rest",
+    emoji: "😴",
+    href: "/sleep",
+    accentGlow: "rgba(14,165,233,0.22)",
+  },
   {
     title: "Finance",
     subtitle: "Net worth & spending",
@@ -43,6 +50,7 @@ export const cards: Omit<DashboardCardProps, "index">[] = [
     accentGlow: "rgba(34,197,94,0.22)",
     size: "medium",
   },
+ 
   {
     title: "Caffeine",
     subtitle: "Intake & timing",
@@ -51,11 +59,14 @@ export const cards: Omit<DashboardCardProps, "index">[] = [
     accentGlow: "rgba(180,120,60,0.22)",
     size: "medium",
   },
-  {
-    title: "Sleep",
-    subtitle: "Recovery & rest",
-    emoji: "😴",
-    href: "/sleep",
-    accentGlow: "rgba(14,165,233,0.22)",
+
+     {
+    title: "Trading",
+    subtitle: "Workouts, splits, sessions",
+    emoji: "☕",
+    href: "/trading",
+    accentGlow: "rgba(100,55,38,0.28)",
+    size: "medium",
+    // className: "col-span-2",
   },
 ];

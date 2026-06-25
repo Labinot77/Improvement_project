@@ -1,7 +1,7 @@
 "use client"
 
 import { cards } from "@/constants/main";
-import DashboardCard from "./Dashboard_card";
+import DashboardCard from "./Card";
 import { motion } from "framer-motion";
 
 export default function DashboardGrid() {
