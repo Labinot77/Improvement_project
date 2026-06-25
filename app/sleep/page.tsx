@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { DEFAULT_SLEEP_GOAL, MOCK_SLEEP_DATA, SLEEP_IMPROVEMENT_TIPS } from "./sleep";
-import PageHeader from "./components/PageHeader";
+import PageHeader from "../components/Header/Page_header";
 import StatCard from "./components/Statcard";
 import SectionCard from "./components/SectionCartd";
 import SleepChart from "./components/Chart/Sleep_chart";
