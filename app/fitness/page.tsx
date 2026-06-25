@@ -1,8 +1,18 @@
-import React from 'react'
+import PageHeader from '../components/Header/Page_header'
 
 const page = () => {
   return (
-    <div>page</div>
+    <div className="min-h-screen px-4 py-6 sm:px-8 sm:py-8">
+          <div className="mx-auto max-w-7xl flex flex-col gap-6">
+            <PageHeader
+              emoji="😴"
+              title="Fitness"
+              subtitle=""
+              backHref="/"
+            />
+    
+          </div>
+        </div>
   )
 }
 

@@ -6,11 +6,9 @@ interface DashboardHeaderProps {
 }
 
 export default function DashboardHeader({ user }: DashboardHeaderProps) {
-  if (!user) return;
-  const username = user.user_metadata.user_name as string;
-  const avatarUrl = user.user_metadata.avatar_url as string | undefined;
+  const username = user?.user_metadata.user_name as string;
+  const avatarUrl = user?.user_metadata.avatar_url as string | undefined;
 
-  // console.log(user)
 
   return (
     <header className="flex items-center justify-between mb-8">

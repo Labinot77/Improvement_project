@@ -2,6 +2,7 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { AuthModal } from "./auth-modal";
+import { SignOutModal } from "./SignoutModal";
 
 interface UserAvatarProps {
   fullName?: string;
@@ -35,5 +36,6 @@ export default function UserAvatar({
     );
   }
 
-  return avatar;
+  return <SignOutModal trigger={avatar} />;
+
 }

@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { FileTextIcon } from "lucide-react";
@@ -26,7 +25,6 @@ export function JournalSection({ value, onChange }: Props) {
 //     onChange(TEMPLATE);
 //     setShowConfirm(false);
 //   }
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
@@ -45,7 +43,6 @@ export function JournalSection({ value, onChange }: Props) {
           <Button
             variant="outline"
             size="sm"
-            // onClick={applyTemplate}
             className="shrink-0 text-xs h-7 gap-1.5"
           >
             <FileTextIcon className="size-3"/>
