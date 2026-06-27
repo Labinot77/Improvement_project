@@ -9,7 +9,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { ReactNode } from "react";
 import { createClient } from "@/lib/supabase/client";
-
 interface SignOutModalProps {
   trigger?: ReactNode;
 }
@@ -19,7 +18,7 @@ export function SignOutModal({ trigger }: SignOutModalProps) {
 
   async function handleSignOut() {
     await supabase.auth.signOut();
-    window.location.reload(); // or router.refresh() if you're using Next router
+    window.location.reload(); 
   }
 
   return (

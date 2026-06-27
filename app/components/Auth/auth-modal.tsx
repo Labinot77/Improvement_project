@@ -39,6 +39,9 @@ export function AuthModal({ trigger }: AuthModalProps) {
         <Button onClick={() => handleOAuthLogin("github")}>
           Continue with Github
         </Button>
+        <Button onClick={() => handleOAuthLogin("google")}>
+          Continue with Google
+        </Button>
       </DialogContent>
     </Dialog>
   );

@@ -50,16 +50,6 @@ export const cards: Omit<DashboardCardProps, "index">[] = [
     accentGlow: "rgba(34,197,94,0.22)",
     size: "medium",
   },
- 
-  {
-    title: "Caffeine",
-    subtitle: "Intake & timing",
-    emoji: "☕",
-    href: "/caffeine",
-    accentGlow: "rgba(180,120,60,0.22)",
-    size: "medium",
-  },
-
      {
     title: "Trading",
     subtitle: "Workouts, splits, sessions",
@@ -67,6 +57,6 @@ export const cards: Omit<DashboardCardProps, "index">[] = [
     href: "/trading",
     accentGlow: "rgba(100,55,38,0.28)",
     size: "medium",
-    // className: "col-span-2",
+    // className: "col-",
   },
 ];

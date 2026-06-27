@@ -27,7 +27,6 @@ export default function DashboardCard({
       custom={index}
       className={`group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-white/[0.06] bg-[#0f0f0f] p-5 transition-colors duration-300 hover:border-white/[0.12] ${className}`}
     >
-      {/* Accent glow — scales, intensifies, and expands slightly on hover */}
       <motion.div
         className="pointer-events-none absolute inset-0 rounded-2xl transition-all duration-300"
         style={{

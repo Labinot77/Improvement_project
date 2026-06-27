@@ -1,4 +1,4 @@
-import PageHeader from '../components/Header/Page_header'
+import PageHeader from '../components/header/Header'
 
 const page = () => {
   return (

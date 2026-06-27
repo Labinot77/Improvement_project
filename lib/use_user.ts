@@ -11,7 +11,6 @@ export function useUser() {
   useEffect(() => {
     const supabase = createClient()
 
-    // Get current session on mount
     supabase.auth.getUser().then(({ data }) => {
       setUser(data.user)
       setLoading(false)
