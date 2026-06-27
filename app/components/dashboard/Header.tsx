@@ -1,7 +1,7 @@
 "use client"
 
-import UserAvatar from "../auth/user-avatar";
 import { useUser } from "@/lib/use_user";
+import UserAvatar from "../auth/user-avatar";
 
 
 export default function DashboardHeader() {
