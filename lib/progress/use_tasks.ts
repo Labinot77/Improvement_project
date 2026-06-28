@@ -81,7 +81,6 @@ export function useTasks() {
   }
 
 async function addTask(date: string, task: Task) {
-  // 1. Optimistically add to local state with temp id
   setDays((prev) => ({
     ...prev,
     [date]: {
@@ -91,7 +90,6 @@ async function addTask(date: string, task: Task) {
     },
   }));
 
-  // 2. Mark as pending
   setPendingTaskIds((prev) => new Set(prev).add(task.id));
 
   const dayId = await ensureDayId(date);
@@ -123,6 +121,8 @@ async function addTask(date: string, task: Task) {
     setPendingTaskIds((prev) => { const s = new Set(prev); s.delete(task.id); return s; });
     return;
   }
+
+  console.log(data, error)
 
   // 3. Swap temp id for real DB id
   setDays((prev) => ({
