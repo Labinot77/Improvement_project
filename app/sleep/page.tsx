@@ -1,193 +1,237 @@
 "use client";
 
-import { useState } from "react";
-import { DEFAULT_SLEEP_GOAL, MOCK_SLEEP_DATA, SLEEP_IMPROVEMENT_TIPS } from "./sleep";
+import { useState, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { formatDate } from "@/lib/mics/date";
+import { useSleep } from "@/lib/sleep/use_sleep";
+import StatCard from "../components/StatsCard";
 import PageHeader from "../components/header/Header";
-import StatCard from "./components/Statcard";
-import SectionCard from "./components/SectionCartd";
-import SleepChart from "./components/Chart/Sleep_chart";
-import SleepQualityBar from "./components/Sleep_quaility";
-import BedtimeGoalRing from "./components/Beadtime_goal";
-import LogSleepForm from "./components/Log_sleep";
-import SleepHistoryTable from "./components/Sleep_history_table";
-import SleepTipCard from "./components/Sleep_tip";
-import { SleepEntry } from "@/types/sleep";
+import { ACCENT, TARGET_HOURS } from "@/constants/sleep/main";
+import { formatDuration } from "@/lib/sleep/calc";
+import SectionCard from "../components/SectionCard";
+import { SleepLogForm } from "./components/SleepForm";
+import { SleepHistory } from "./components/SleepHistory";
+import { SleepChart } from "./components/SleepChart";
+import { SleepCalendar } from "./components/Calendar";
+import { container, fadeIn, fadeUp } from "@/constants/animations";
 
 
-const ACCENT = "rgba(99,102,241,0.2)";
+function useStats(days: ReturnType<typeof useSleep>["days"]) {
+  return useMemo(() => {
+    const entries = Object.values(days);
+    if (!entries.length) return { avgDuration: 0, avgQuality: 0, streak: 0, consistency: 0 };
 
-function computeStats(data: SleepEntry[]) {
-  if (!data.length)
-    return { avg: 0, avgLabel: "—", best: 0, bestLabel: "—", onTimeStreak: 0 };
+    const avgDuration = entries.reduce((s, e) => s + e.durationHours, 0) / entries.length;
 
-  const avg =
-    data.reduce((sum, e) => sum + e.duration_hours, 0) / data.length;
-  const avgHrs = Math.floor(avg);
-  const avgMins = Math.round((avg - avgHrs) * 60);
+    // Streak — consecutive days with an entry going back from yesterday
+    const today = formatDate(new Date());
+    let streak = 0;
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    while (true) {
+      const key = formatDate(d);
+      if (!days[key]) break;
+      streak++;
+      d.setDate(d.getDate() - 1);
+    }
 
-  const best = Math.max(...data.map((e) => e.duration_hours));
-  const bestHrs = Math.floor(best);
-  const bestMins = Math.round((best - bestHrs) * 60);
+    const last30 = Array.from({ length: 30 }, (_, i) => {
+      const dd = new Date();
+      dd.setDate(dd.getDate() - i - 1);
+      return formatDate(dd);
+    });
+    const consistency = Math.round((last30.filter((k) => days[k]).length / 30) * 100);
 
-  // Count consecutive on-time nights from most recent (within 30 min of target)
-  const targetMins = 23 * 60; // 23:00
-  let streak = 0;
-  for (let i = data.length - 1; i >= 0; i--) {
-    const [h, m] = data[i].bedtime.split(":").map(Number);
-    const actual = h * 60 + m < 360 ? h * 60 + m + 1440 : h * 60 + m;
-    if (Math.abs(actual - targetMins) <= 30) streak++;
-    else break;
-  }
 
-  return {
-    avg,
-    avgLabel: `${avgHrs}h ${avgMins}m`,
-    bestLabel: `${bestHrs}h ${bestMins}m`,
-    onTimeStreak: streak,
-  };
+    const longest = entries.reduce((max, e) => e.durationHours > max ? e.durationHours : max, 0);
+    return { avgDuration, streak, consistency, longest };
+  }, [days]);
 }
 
-export default function SleepPage() {
-  const [entries, setEntries] = useState<SleepEntry[]>(MOCK_SLEEP_DATA);
+const TABS = [
+  { key: "log",      label: "Log" },
+  { key: "history",  label: "History" },
+  { key: "calendar", label: "Calendar" },
+] as const;
+type Tab = typeof TABS[number]["key"];
 
-  const stats = computeStats(entries);
-  const latest = entries[entries.length - 1];
-  const avgQuality =
-    entries.reduce((sum, e) => sum + e.quality, 0) / entries.length;
+export default function SleepClient() {
+  const { days, loading, upsertEntry, deleteEntry } = useSleep();
+  const stats = useStats(days);
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [mobileTab, setMobileTab] = useState<Tab>("log");
 
-  const lastBedtime = latest?.bedtime ?? DEFAULT_SLEEP_GOAL.target_bedtime;
-  const [lh, lm] = lastBedtime.split(":").map(Number);
-  const lastMins = lh * 60 + lm < 360 ? lh * 60 + lm + 1440 : lh * 60 + lm;
-  const [th, tm] = DEFAULT_SLEEP_GOAL.target_bedtime.split(":").map(Number);
-  const targetMins = th * 60 + tm;
-  const isOnTime = Math.abs(lastMins - targetMins) <= 30;
+  const dateKey = formatDate(selectedDate);
+  const existing = days[dateKey];
+  const selectedLabel = selectedDate.toLocaleDateString("en-US", {
+    weekday: "long", month: "long", day: "numeric",
+  });
 
-  function handleLog(
-    entry: Omit<SleepEntry, "id" | "duration_hours">
-  ) {
-    const [bh, bm] = entry.bedtime.split(":").map(Number);
-    const [wh, wm] = entry.wake_time.split(":").map(Number);
-    let duration = wh * 60 + wm - (bh * 60 + bm);
-    if (duration < 0) duration += 1440; // crosses midnight
-    const newEntry: SleepEntry = {
-      ...entry,
-      id: String(Date.now()),
-      duration_hours: Math.round((duration / 60) * 10) / 10,
-    };
-    setEntries((prev) => [...prev, newEntry].sort((a, b) => a.date.localeCompare(b.date)));
+  function handleSelectFromHistory(date: string) {
+    const [y, m, d] = date.split("-").map(Number);
+    setSelectedDate(new Date(y, m - 1, d));
+    setMobileTab("log");
   }
 
+  // if (loading) return <div className="min-h-screen bg-[#080808]" />;
+
   return (
-    <div className="min-h-screen bg-[#080808] px-4 py-6 sm:px-8 sm:py-8">
-      <div className="mx-auto max-w-7xl flex flex-col gap-6">
-        <PageHeader
-          emoji="😴"
-          title="Sleep"
-          subtitle="Recovery & rest tracking"
-          backHref="/"
-        />
+    <div className="min-h-screen bg-[#080808] px-4 py-6 sm:px-6 lg:px-10 lg:py-8">
+      <div className="mx-auto max-w-7xl flex flex-col gap-5">
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <StatCard
-            label="Avg duration"
-            value={stats.avgLabel}
-            sub="last 14 days"
-            accentGlow={ACCENT}
-          />
-          <StatCard
-            label="Avg quality"
-            value={`${avgQuality.toFixed(1)} / 5`}
-            sub="last 14 days"
-            accentGlow={ACCENT}
-          />
-          <StatCard
-            label="Best night"
-            value={stats.bestLabel}
-            accentGlow={ACCENT}
-          />
-          <StatCard
-            label="Bedtime streak"
-            value={`${stats.onTimeStreak}d`}
-            sub="on-time nights"
-            accentGlow={ACCENT}
-          />
-        </div>
+        <motion.div initial="hidden" animate="show" variants={fadeIn}>
+          <PageHeader emoji="😴" title="Sleep" subtitle="Track your rest & recovery" backHref="/" />
+        </motion.div>
 
-        <SectionCard
-          title="Sleep duration"
-          subtitle="Hours of sleep per night over the last 14 days"
-          accentGlow={ACCENT}
-        >
-          <SleepChart data={entries} targetHours={DEFAULT_SLEEP_GOAL.target_duration} />
-        </SectionCard>
+        <motion.div className="flex flex-col gap-4" initial="hidden" animate="show" variants={container}>
 
-        <SectionCard
-          title="Sleep quality"
-          subtitle="Rated 1–5 each night"
-          accentGlow={ACCENT}
-        >
-          <SleepQualityBar data={entries} />
-          <div className="flex gap-4 mt-4 flex-wrap">
-            {[
-              { color: "#ef4444", label: "Terrible" },
-              { color: "#f97316", label: "Poor" },
-              { color: "#eab308", label: "Okay" },
-              { color: "#22c55e", label: "Good" },
-              { color: "#6366f1", label: "Excellent" },
-            ].map(({ color, label }) => (
-              <div key={label} className="flex items-center gap-1.5">
-                <div
-                  className="w-2.5 h-2.5 rounded-sm"
-                  style={{ background: color, opacity: 0.7 }}
-                />
-                <span className="text-xs text-zinc-500">{label}</span>
-              </div>
-            ))}
-          </div>
-        </SectionCard>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <SectionCard
-            title="Bedtime accountability"
-            subtitle="How closely you're hitting your target"
-            accentGlow={ACCENT}
-          >
-            <BedtimeGoalRing
-              targetBedtime={DEFAULT_SLEEP_GOAL.target_bedtime}
-              actualBedtime={lastBedtime}
-              onTime={isOnTime}
-              streakDays={stats.onTimeStreak}
+          {/* ── Stat cards ── */}
+          <motion.div variants={fadeUp} className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <StatCard
+              label="Avg duration"
+              value={stats.avgDuration ? formatDuration(stats.avgDuration) : "—"}
+              sub={`target ${TARGET_HOURS}h`}
+              accentGlow={ACCENT}
             />
-          </SectionCard>
-
-          <SectionCard
-            title="Log tonight's sleep"
-            subtitle="Track bedtime, wake time & quality"
+            <StatCard
+              label="Streak"
+              value={`${stats.streak}d`}
+              sub="consecutive nights logged"
+              accentGlow={ACCENT}
+            />
+            <StatCard
+              label="Consistency"
+              value={`${stats.consistency}%`}
+              sub="last 30 days"
+              accentGlow={ACCENT}
+            />
+            <StatCard
+            label="Best night"
+            value={stats.longest ? formatDuration(stats.longest) : "—"}
+            sub="longest sleep logged"
             accentGlow={ACCENT}
-          >
-            <LogSleepForm onLog={handleLog} />
-          </SectionCard>
-        </div>
+          />
+          </motion.div>
 
-        <SectionCard
-          title="Recent history"
-          subtitle="Last 7 nights"
-          accentGlow={ACCENT}
-        >
-          <SleepHistoryTable data={entries} />
-        </SectionCard>
-
-        <SectionCard
-          title="Ways to improve"
-          subtitle="Evidence-based habits for better sleep"
-          accentGlow={ACCENT}
-        >
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {SLEEP_IMPROVEMENT_TIPS.map((tip) => (
-              <SleepTipCard key={tip.title} {...tip} />
+          {/* ── Mobile tab switcher ── */}
+          <motion.div variants={fadeUp} className="flex lg:hidden rounded-xl border border-white/[0.06] bg-[#0f0f0f] p-1 gap-1">
+            {TABS.map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => setMobileTab(tab.key)}
+                className={`flex-1 rounded-lg py-2 text-xs font-medium transition-all ${
+                  mobileTab === tab.key
+                    ? "bg-[#1a1a1a] text-zinc-100 border border-white/[0.08]"
+                    : "text-zinc-500 hover:text-zinc-300"
+                }`}
+              >
+                {tab.label}
+              </button>
             ))}
+          </motion.div>
+
+          {/* ── Mobile selected date label ── */}
+          <motion.div variants={fadeUp} className="flex lg:hidden flex-col">
+            <p className="text-xs font-medium text-zinc-500 uppercase tracking-widest">Selected</p>
+            <p className="text-sm font-semibold text-zinc-100 mt-0.5">{selectedLabel}</p>
+          </motion.div>
+
+          {/* ── Mobile panels ── */}
+          <div className="flex lg:hidden flex-col gap-4">
+            <AnimatePresence mode="wait">
+              {mobileTab === "log" && (
+                <motion.div key="log"
+                  initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.2 }}>
+                  <SectionCard
+                    title={existing ? "Edit sleep log" : "Log sleep"}
+                    subtitle={selectedLabel}
+                    accentGlow={ACCENT}
+                  >
+                    <SleepLogForm
+                      date={dateKey}
+                      existing={existing}
+                      onSave={(fields) => upsertEntry(dateKey, fields)}
+                      onDelete={existing ? () => deleteEntry(dateKey) : undefined}
+                    />
+                  </SectionCard>
+                </motion.div>
+              )}
+
+              {mobileTab === "history" && (
+                <motion.div key="history"
+                  initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.2 }}>
+                  <SectionCard title="Recent nights" accentGlow={ACCENT}>
+                    <SleepHistory
+                      days={days}
+                      selectedDate={dateKey}
+                      onSelectDate={handleSelectFromHistory}
+                    />
+                  </SectionCard>
+                </motion.div>
+              )}
+
+              {mobileTab === "calendar" && (
+                <motion.div key="calendar"
+                  initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.2 }}>
+                  <SleepCalendar
+                    selected={selectedDate}
+                    onSelect={(d) => { setSelectedDate(d); setMobileTab("log"); }}
+                    days={days}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
-        </SectionCard>
+
+          <div className="hidden lg:grid lg:grid-cols-12 gap-5 items-start">
+            <motion.div variants={fadeUp} className="lg:col-span-3 flex flex-col gap-4">
+              <SleepCalendar selected={selectedDate} onSelect={setSelectedDate} days={days} />
+            </motion.div>
+            <motion.div variants={fadeUp} className="lg:col-span-5 flex flex-col gap-4">
+              <div>
+                <p className="text-xs font-medium text-zinc-500 uppercase tracking-widest">Selected</p>
+                <p className="text-sm font-semibold text-zinc-100 mt-0.5">{selectedLabel}</p>
+              </div>
+
+              <SectionCard
+                title={existing ? "Edit sleep log" : "Log sleep"}
+                accentGlow={ACCENT}
+              >
+                <SleepLogForm
+                  date={dateKey}
+                  existing={existing}
+                  onSave={(fields) => upsertEntry(dateKey, fields)}
+                  onDelete={existing ? () => deleteEntry(dateKey) : undefined}
+                />
+              </SectionCard>
+
+              <SectionCard title="Duration trend" subtitle="Last 14 nights" accentGlow={ACCENT}>
+                <SleepChart days={days} />
+              </SectionCard>
+            </motion.div>
+
+            {/* RIGHT — History */}
+            <motion.div variants={fadeUp} className="lg:col-span-4">
+              <SectionCard
+                title="Recent nights"
+                subtitle={`${Object.keys(days).length} nights logged`}
+                accentGlow={ACCENT}
+              >
+                <div className="max-h-[520px] overflow-y-auto pr-1">
+                  <SleepHistory
+                    days={days}
+                    selectedDate={dateKey}
+                    onSelectDate={handleSelectFromHistory}
+                  />
+                </div>
+              </SectionCard>
+            </motion.div>
+          </div>
+
+        </motion.div>
       </div>
     </div>
   );

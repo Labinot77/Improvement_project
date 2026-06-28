@@ -7,16 +7,16 @@ import { formatDate, today } from "@/lib/mics/date";
 import { useTasks } from "@/lib/progress/use_tasks";
 import { computeStreak } from "@/lib/progress/streak";
 import PageHeader from "../components/header/Header";
-import StatCard from "../sleep/components/Statcard";
-import SectionCard from "../sleep/components/SectionCartd";
-import { CalendarView } from "./components/Calendar_view";
-import { AddTaskForm } from "./components/Task_form";
-import { TaskCard } from "./components/task_card";
-import { TaskSkeleton } from "./components/Task_skeleton";
-import { WeeklyBar } from "./components/weekly";
+import StatCard from "../components/StatsCard";
+import SectionCard from "../components/SectionCard";
+import { CalendarView } from "./components/Calendar";
+import { AddTaskForm } from "./components/TaskForm";
+import { TaskCard } from "./components/TaskCard";
+import { WeeklyBar } from "./components/WeeklyBar";
 import { JournalSection } from "./components/Journal";
-import { fadeUp, container, fadeIn } from "@/constants/progress/animations";
+import { fadeUp, container, fadeIn } from "@/constants/animations";
 import { ACCENT_COLOR } from "@/constants/progress/template";
+import { TaskSkeleton } from "./components/TaskCard_skeleton";
 
 function computeGlobalStats(days: Days) {
   const allTasks = Object.values(days).flatMap((d) => d.tasks);
@@ -204,7 +204,6 @@ export default function ProgressPage() {
               <CalendarView selected={selectedDate} onSelect={setSelectedDate} days={days} />
             </motion.div>
 
-            {/* Add task + weekly bar */}
             <motion.div variants={fadeUp} className="lg:col-span-5 flex flex-col gap-4">
               <div>
                 <p className="text-xs font-medium text-zinc-500 uppercase tracking-widest">

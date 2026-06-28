@@ -29,7 +29,9 @@ export function ProfileModal({ open, onOpenChange }: Props) {
 
   async function handleSignOut() {
     setSigningOut(true);
-    await supabase.auth.signOut();
+    await supabase.auth.signOut({
+      scope: "global",
+    });
     window.location.reload();
   }
 
@@ -40,7 +42,6 @@ export function ProfileModal({ open, onOpenChange }: Props) {
           <DialogTitle className="sr-only">Profile</DialogTitle>
         </DialogHeader>
 
-        {/* Avatar + name */}
         <div className="flex items-center gap-4">
           {avatarUrl ? (
             <img
@@ -61,7 +62,6 @@ export function ProfileModal({ open, onOpenChange }: Props) {
           </div>
         </div>
 
-        {/* Account info */}
         <div className="rounded-xl border border-white/[0.06] bg-[#131313] p-4">
           <div className="flex items-center gap-2 mb-3">
             <BarChart2 className="size-3.5 text-zinc-500" />

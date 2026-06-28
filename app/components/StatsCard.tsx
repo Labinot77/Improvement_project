@@ -1,5 +1,3 @@
-"use client"
-
 interface StatCardProps {
   label: string;
   value: string;
@@ -19,7 +17,6 @@ export default function StatCard({
     <div
       className={`relative overflow-hidden rounded-2xl border border-white/[0.06] bg-[#0f0f0f] p-5 flex flex-col gap-1 ${className}`}
     >
-      {/* accent glow */}
       <div
         className="pointer-events-none absolute inset-0 rounded-2xl"
         style={{

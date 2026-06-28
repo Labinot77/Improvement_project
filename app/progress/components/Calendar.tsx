@@ -1,6 +1,8 @@
 "use client";
 
+import SectionCard from "@/app/components/SectionCard";
 import { Calendar } from "@/components/ui/calendar";
+import { ACCENT_COLOR } from "@/constants/progress/template";
 import { formatDate } from "@/lib/mics/date";
 import type { Days } from "@/types/progress";
 
@@ -23,27 +25,12 @@ function hasAnyTask(days: Days, date: Date): boolean {
 
 export function CalendarView({ selected, onSelect, days }: Props) {
   return (
-    <div
-      className="rounded-2xl self-start sticky top-8 border border-white/[0.06] bg-[#0f0f0f] p-5"
-      style={{
-        "--background": "transparent",
-        "--foreground": "#f4f4f5",
-        "--muted": "rgba(255,255,255,0.05)",
-        "--muted-foreground": "#71717a",
-        "--primary": "#f4f4f5",
-        "--primary-foreground": "#09090b",
-        "--accent": "rgba(255,255,255,0.07)",
-        "--accent-foreground": "#f4f4f5",
-        "--border": "rgba(255,255,255,0.06)",
-        "--ring": "#6366f1",
-      } as React.CSSProperties}
-    >
-      {/* <p className="text-xs font-medium text-zinc-500 uppercase tracking-widest mb-4">Calendar</p> */}
+    <SectionCard accentGlow={ACCENT_COLOR}>
       <Calendar
         mode="single"
         selected={selected}
         onSelect={(date) => { if (date) onSelect(date); }}
-        className="rounded-md w-full [&_.rdp-day_button]:relative"
+        className="rounded-md w-full [&_.rdp-day_button]:relative bg-transparent"
         modifiers={{
           completed: (date) => isAllDone(days, date),
           partial:   (date) => hasAnyTask(days, date) && !isAllDone(days, date),
@@ -70,6 +57,6 @@ export function CalendarView({ selected, onSelect, days }: Props) {
           </div>
         ))}
       </div>
-    </div>
+    </SectionCard>
   );
 }
