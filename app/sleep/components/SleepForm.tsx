@@ -8,6 +8,7 @@ import { calcDuration, formatDuration } from "@/lib/sleep/calc";
 import { useUser } from "@/lib/use_user";
 import { Textarea } from "@/components/ui/textarea";
 import No_access from "@/app/components/no_access";
+import DefaultButton from "@/app/components/button";
 
 const inputClass =
   "w-full rounded-xl border border-white/[0.08] bg-[#161616] px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 transition-all";
@@ -89,10 +90,10 @@ export function SleepLogForm({ date, existing, onSave, onDelete }: Props) {
         </div>
 
         <div className="flex gap-2 mt-4">
-          <motion.button
+          <DefaultButton
             whileTap={{ scale: 0.97 }}
             onClick={handleSave}
-            className="flex flex-1 items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-semibold transition-all"
+            className="flex flex-1 items-center justify-center gap-2 py-4 text-sm font-semibold transition-all"
             style={{
               background: saved ? "rgba(34,197,94,0.15)" : "rgba(99,102,241,0.18)",
               border: `1px solid ${saved ? "rgba(34,197,94,0.3)" : "rgba(99,102,241,0.28)"}`,
@@ -101,17 +102,17 @@ export function SleepLogForm({ date, existing, onSave, onDelete }: Props) {
           >
             <Save className="size-4" />
             {saved ? "Saved!" : existing ? "Update" : "Log sleep"}
-          </motion.button>
+          </DefaultButton>
 
           {existing && onDelete && (
-            <motion.button
+            <DefaultButton
               whileTap={{ scale: 0.97 }}
               onClick={onDelete}
-              className="flex items-center justify-center rounded-xl px-3 py-2.5 transition-all
+              className="flex items-center justify-center px-3 py-4 transition-all
                 border border-red-500/20 bg-red-500/10 text-red-400 hover:bg-red-500/20"
             >
               <Trash2 className="size-4" />
-            </motion.button>
+            </DefaultButton>
           )}
         </div>
       </div>

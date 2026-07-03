@@ -6,7 +6,6 @@ export function calcDuration(bedtime: string, wakeTime: string): number {
   let bedMins = bh * 60 + bm;
   let wakeMins = wh * 60 + wm;
 
-  // If wake time is earlier than bedtime, it crossed midnight
   if (wakeMins <= bedMins) wakeMins += 24 * 60;
 
   return Math.round(((wakeMins - bedMins) / 60) * 10) / 10;

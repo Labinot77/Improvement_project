@@ -69,14 +69,12 @@ export default function ProgressPage() {
     <div className="min-h-screen bg-[#080808] px-4 py-6 sm:px-6 lg:px-10 lg:py-8">
       <div className="mx-auto max-w-7xl flex flex-col gap-5">
 
-        {/* Header */}
         <motion.div initial="hidden" animate="show" variants={fadeIn}>
           <PageHeader emoji="📈" title="Progress" subtitle="Goals & daily plan" backHref="/" />
         </motion.div>
 
         <motion.div className="flex flex-col gap-4" initial="hidden" animate="show" variants={container}>
 
-          {/* ── Stat cards: 2-col on mobile, 4-col on desktop ── */}
           <motion.div variants={fadeUp} className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             <StatCard
               label="Tasks today"
@@ -199,7 +197,6 @@ export default function ProgressPage() {
           {/* ── Desktop: 12-col grid (hidden on mobile) ── */}
           <div className="hidden lg:grid lg:grid-cols-12 gap-5 items-start">
 
-            {/* Calendar */}
             <motion.div variants={fadeUp} className="lg:col-span-3">
               <CalendarView selected={selectedDate} onSelect={setSelectedDate} days={days} />
             </motion.div>
@@ -228,7 +225,7 @@ export default function ProgressPage() {
                 subtitle={total === 0 ? "No tasks yet — add one above" : undefined}
                 accentGlow={ACCENT_COLOR}
               >
-                <div className="flex flex-col gap-2 min-h-102.5 max-h-102.5 overflow-y-auto pr-1">
+                <div className="flex flex-col gap-2  overflow-y-auto pr-1 min-h-102.5 max-h-102.5">
                   <AnimatePresence initial={false}>
                     {total === 0 ? (
                       <motion.p key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }}

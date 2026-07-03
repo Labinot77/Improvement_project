@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { formatDate } from "@/lib/mics/date";
-import { useSleep } from "@/lib/sleep/use_sleep";
+import { useSleep } from "@/lib/use_sleep";
 import StatCard from "../components/StatsCard";
 import PageHeader from "../components/header/Header";
 import { ACCENT, TARGET_HOURS } from "@/constants/sleep/main";
@@ -23,7 +23,6 @@ function useStats(days: ReturnType<typeof useSleep>["days"]) {
 
     const avgDuration = entries.reduce((s, e) => s + e.durationHours, 0) / entries.length;
 
-    // Streak — consecutive days with an entry going back from yesterday
     const today = formatDate(new Date());
     let streak = 0;
     const d = new Date();
@@ -73,10 +72,8 @@ export default function SleepClient() {
     setMobileTab("log");
   }
 
-  // if (loading) return <div className="min-h-screen bg-[#080808]" />;
-
   return (
-    <div className="min-h-screen bg-[#080808] px-4 py-6 sm:px-6 lg:px-10 lg:py-8">
+    <div className="min-h-screen px-4 py-6 sm:px-6 lg:px-10 lg:py-8">
       <div className="mx-auto max-w-7xl flex flex-col gap-5">
 
         <motion.div initial="hidden" animate="show" variants={fadeIn}>
@@ -219,8 +216,9 @@ export default function SleepClient() {
                 title="Recent nights"
                 subtitle={`${Object.keys(days).length} nights logged`}
                 accentGlow={ACCENT}
+                className=""
               >
-                <div className="max-h-[520px] overflow-y-auto pr-1">
+                <div className="overflow-y-auto min-h-[55vh] max-h-[55vh] pr-1">
                   <SleepHistory
                     days={days}
                     selectedDate={dateKey}

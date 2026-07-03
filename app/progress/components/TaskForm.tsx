@@ -7,6 +7,7 @@ import { useUser } from "@/lib/use_user";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import No_access from "@/app/components/no_access";
+import DefaultButton from "@/app/components/button";
 
 type Props = {
   onAdd: (title: string, description: string) => void;
@@ -44,7 +45,7 @@ export function AddTaskForm({ onAdd }: Props) {
           rows={2}
           className={`${inputClass} resize-none mt-2`}
         />
-        <motion.button
+        <DefaultButton
           whileTap={{ scale: 0.97 }}
           onClick={handleAdd}
           disabled={!title.trim()}
@@ -57,7 +58,7 @@ export function AddTaskForm({ onAdd }: Props) {
         >
           <PlusIcon className="size-4" />
           Add Task
-        </motion.button>
+        </DefaultButton>
       </div>
 
       {!isLoggedIn && (

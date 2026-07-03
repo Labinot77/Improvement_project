@@ -14,9 +14,7 @@ interface Props {
 
 export function SleepCalendar({ selected, onSelect, days }: Props) {
   return (
-    <SectionCard accentGlow={ACCENT}
-      // className="rounded-2xl self-start sticky top-8 border border-white/[0.06] bg-[#0f0f0f] p-5"
-    >
+    <SectionCard accentGlow={ACCENT}>
       <Calendar
         mode="single"
         selected={selected}

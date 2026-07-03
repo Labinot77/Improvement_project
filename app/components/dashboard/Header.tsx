@@ -4,6 +4,8 @@ import { motion } from "framer-motion";
 import { User } from "lucide-react";
 import { useUser } from "@/lib/use_user";
 import { useModal } from "@/providers/Modalprovider";
+import DefaultButton from "../button";
+import { Button } from "@/components/ui/button";
 
 export default function DashboardHeader() {
   const { user, isLoggedIn, loading } = useUser();
@@ -21,12 +23,10 @@ export default function DashboardHeader() {
       {loading ? (
         <div className="size-9 rounded-full bg-white/[0.06] animate-pulse" />
       ) : isLoggedIn ? (
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+        <DefaultButton
           onClick={() => open("profile")}
           className="relative size-9 rounded-full border border-white/[0.10] overflow-hidden
-            hover:border-white/[0.20] transition-colors"
+            hover:border-white/[0.20] transition-colors p-0" // p-0 to override the default shadCN padding
         >
           {avatarUrl ? (
             <img src={avatarUrl} alt={username} className="size-full object-cover" />
@@ -35,18 +35,15 @@ export default function DashboardHeader() {
               <User className="size-4 text-zinc-400" />
             </div>
           )}
-        </motion.button>
+        </DefaultButton>
       ) : (
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.97 }}
-          onClick={() => open("login")}
-          className="rounded-xl border border-white/[0.08] bg-[#161616] px-4 py-1.5
+        <>
+        <DefaultButton variant={"outline"} onClick={() => open("login")} className="rounded-xl border border-white/[0.08] bg-[#161616] px-4 py-4
             text-sm font-medium text-zinc-300 transition-all hover:bg-[#1c1c1c]
-            hover:border-white/[0.14] hover:text-zinc-100"
-        >
-          Sign in
-        </motion.button>
+            hover:border-white/[0.14] hover:text-zinc-100">
+              Sign in
+        </DefaultButton>
+        </>
       )}
     </header>
   );

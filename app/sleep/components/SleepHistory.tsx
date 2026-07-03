@@ -22,7 +22,7 @@ export function SleepHistory({ days, selectedDate, onSelectDate }: Props) {
   if (entries.length === 0) {
     return (
       <p className="text-sm text-zinc-600 py-4 text-center">
-        No sleep logged yet — pick a date and log your first night.
+        No sleep logged yet.
       </p>
     );
   }

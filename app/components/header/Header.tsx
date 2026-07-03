@@ -1,3 +1,5 @@
+"use client"
+import { motion } from "framer-motion";
 import Link from "next/link";
 
 interface PageHeaderProps {
@@ -6,6 +8,8 @@ interface PageHeaderProps {
   emoji: string;
   backHref?: string;
 }
+
+const MotionLink = motion.create(Link);
 
 export default function PageHeader({
   title,
@@ -16,8 +20,12 @@ export default function PageHeader({
   return (
     <div className="flex items-start justify-between mb-8">
       <div className="flex items-center gap-4 justify-between w-full">
-        <Link
+        <MotionLink
           href={backHref}
+          initial="hidden"
+          animate="visible"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.97 }}
           className="flex items-center justify-center w-9 h-9 rounded-full border border-white/[0.08] bg-white/[0.04] text-zinc-400 hover:text-zinc-100 hover:bg-white/[0.08] transition-all duration-200 shrink-0"
           aria-label="Back to dashboard"
         >
@@ -34,7 +42,7 @@ export default function PageHeader({
           >
             <path d="M19 12H5M12 19l-7-7 7-7" />
           </svg>
-        </Link>
+        </MotionLink>
         <div>
           <div className="flex items-center gap-2">
             <span className="text-xl">{emoji}</span>

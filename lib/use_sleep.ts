@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { SleepEntry, SleepDays } from "@/types/sleep";
-import { calcDuration } from "./calc";
+import { calcDuration } from "./sleep/calc";
 
 const supabase = createClient();
 
