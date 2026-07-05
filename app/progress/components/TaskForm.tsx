@@ -6,8 +6,8 @@ import { PlusIcon } from "lucide-react";
 import { useUser } from "@/lib/use_user";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import No_access from "@/app/components/no_access";
-import DefaultButton from "@/app/components/button";
+import No_access from "@/app/components/NoAccess";
+import DefaultButton from "@/app/components/Button";
 
 type Props = {
   onAdd: (title: string, description: string) => void;

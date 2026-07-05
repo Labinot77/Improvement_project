@@ -1,3 +1,4 @@
 export type ModalName =
   | "login"
-  | "profile";
+  | "profile"
+  | "lesson";

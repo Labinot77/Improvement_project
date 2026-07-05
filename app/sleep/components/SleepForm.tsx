@@ -1,14 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
 import { Moon, Sun, Save, Trash2 } from "lucide-react";
 import type { SleepEntry } from "@/types/sleep";
 import { calcDuration, formatDuration } from "@/lib/sleep/calc";
 import { useUser } from "@/lib/use_user";
 import { Textarea } from "@/components/ui/textarea";
-import No_access from "@/app/components/no_access";
-import DefaultButton from "@/app/components/button";
+import No_access from "@/app/components/NoAccess";
+import DefaultButton from "@/app/components/Button";
 
 const inputClass =
   "w-full rounded-xl border border-white/[0.08] bg-[#161616] px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 transition-all";

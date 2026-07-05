@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { User } from "lucide-react";
 import { useUser } from "@/lib/use_user";
 import { useModal } from "@/providers/Modalprovider";
-import DefaultButton from "../button";
+import DefaultButton from "../Button";
 import { Button } from "@/components/ui/button";
 
 export default function DashboardHeader() {

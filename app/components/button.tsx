@@ -5,7 +5,7 @@ import { ComponentProps } from "react";
 type ButtonProps = ComponentProps<typeof Button>;
 type MotionButtonProps = ButtonProps & MotionProps;
 
-const MotionButton = motion(Button as React.ComponentType<React.PropsWithChildren<object>>) as React.ComponentType<MotionButtonProps>;
+const MotionButton = motion.create(Button as React.ComponentType<React.PropsWithChildren<object>>) as React.ComponentType<MotionButtonProps>;
 
 export default function DefaultButton({ children, ...props }: MotionButtonProps) {
   return (

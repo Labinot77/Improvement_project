@@ -34,6 +34,7 @@ export function CalendarView({ selected, onSelect, days }: Props) {
         modifiers={{
           completed: (date) => isAllDone(days, date),
           partial:   (date) => hasAnyTask(days, date) && !isAllDone(days, date),
+               
         }}
         modifiersClassNames={{
           today:

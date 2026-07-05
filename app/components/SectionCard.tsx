@@ -3,6 +3,7 @@ interface SectionCardProps {
   subtitle?: string;
   children: React.ReactNode;
   className?: string;
+  action?: React.ReactNode;
   accentGlow?: string;
 }
 
@@ -11,6 +12,7 @@ export default function SectionCard({
   subtitle,
   children,
   className = "",
+  action,
   accentGlow,
 }: SectionCardProps) {
   return (
