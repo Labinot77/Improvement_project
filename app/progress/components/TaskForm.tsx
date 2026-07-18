@@ -7,7 +7,7 @@ import { useUser } from "@/lib/use_user";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import No_access from "@/app/components/NoAccess";
-import DefaultButton from "@/app/components/Button";
+import DefaultButton from "@/app/components/DefaultButton";
 
 type Props = {
   onAdd: (title: string, description: string) => void;

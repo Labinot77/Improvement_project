@@ -2,7 +2,6 @@
 
 // dayRating is broken I dont have it in the front end, but is setup in the back end
 
-
 import { useEffect, useState, useCallback } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { DayData, Task } from "@/types/progress"
@@ -12,7 +11,26 @@ const supabase = createClient()
 export function useTasks() {
   const [days, setDays] = useState<Record<string, DayData>>({})
   const [loading, setLoading] = useState(true)
-  const [pendingTaskIds, setPendingTaskIds] = useState<Set<string>>(new Set());
+  const [pendingTaskIds, setPendingTaskIds] = useState<Set<string>>(new Set())
+
+  function setDayTasks(date: string, updater: (tasks: Task[]) => Task[]) {
+    setDays((prev) => ({
+      ...prev,
+      [date]: {
+        date,
+        journal: prev[date]?.journal ?? "",
+        tasks: updater(prev[date]?.tasks ?? []),
+      },
+    }))
+  }
+
+  function setPending(id: string, isPending: boolean) {
+    setPendingTaskIds((prev) => {
+      const next = new Set(prev)
+      isPending ? next.add(id) : next.delete(id)
+      return next
+    })
+  }
 
   const fetchAll = useCallback(async () => {
     const { data: dayRows, error: dayErr } = await supabase
@@ -33,7 +51,6 @@ export function useTasks() {
       next[row.date] = {
         date: row.date,
         journal: row.journal ?? "",
-        // dayRating: row.day_rating ?? 0,
         tasks: (taskRows ?? [])
           .filter((t) => t.day_id === row.id)
           .map((t) => ({
@@ -65,9 +82,7 @@ export function useTasks() {
 
     if (existing) return existing.id
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
+    const { data: { user } } = await supabase.auth.getUser()
     if (!user) return null
 
     const { data: created, error } = await supabase
@@ -76,80 +91,64 @@ export function useTasks() {
       .select("id")
       .single()
 
-    if (error || !created) return null
-    return created.id
+    return error || !created ? null : created.id
   }
 
-async function addTask(date: string, task: Task) {
-  setDays((prev) => ({
-    ...prev,
-    [date]: {
-      date,
-      journal: prev[date]?.journal ?? "",
-      tasks: [...(prev[date]?.tasks ?? []), task],
-    },
-  }));
+  async function addTask(date: string, task: Task) {
+    // Optimistic insert
+    setDayTasks(date, (tasks) => [...tasks, task])
+    setPending(task.id, true)
 
-  setPendingTaskIds((prev) => new Set(prev).add(task.id));
+    const dayId = await ensureDayId(date)
+    const { data: { user } } = await supabase.auth.getUser()
 
-  const dayId = await ensureDayId(date);
-  if (!dayId) {
-    // Rollback
-    setDays((prev) => ({
-      ...prev,
-      [date]: { ...prev[date], tasks: prev[date].tasks.filter((t) => t.id !== task.id) },
-    }));
-    setPendingTaskIds((prev) => { const s = new Set(prev); s.delete(task.id); return s; });
-    return;
-  }
+    if (!dayId || !user) {
+      setDayTasks(date, (tasks) => tasks.filter((t) => t.id !== task.id))
+      setPending(task.id, false)
+      return
+    }
 
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return;
+    const { data, error } = await supabase
+      .from("tasks")
+      .insert({
+        day_id: dayId,
+        user_id: user.id,
+        title: task.title,
+        description: task.description,
+        completed: task.completed,
+        reflection: task.reflection ?? "",
+      })
+      .select()
+      .single()
 
-  const { data, error } = await supabase
-    .from("tasks")
-    .insert({ day_id: dayId, user_id: user.id, title: task.title, description: task.description, completed: task.completed, reflection: task.reflection ?? "" })
-    .select()
-    .single();
+    if (error || !data) {
+      setDayTasks(date, (tasks) => tasks.filter((t) => t.id !== task.id))
+      setPending(task.id, false)
+      return
+    }
 
-  if (error || !data) {
-    // Rollback
-    setDays((prev) => ({
-      ...prev,
-      [date]: { ...prev[date], tasks: prev[date].tasks.filter((t) => t.id !== task.id) },
-    }));
-    setPendingTaskIds((prev) => { const s = new Set(prev); s.delete(task.id); return s; });
-    return;
-  }
-
-  console.log(data, error)
-
-  // 3. Swap temp id for real DB id
-  setDays((prev) => ({
-    ...prev,
-    [date]: {
-      ...prev[date],
-      tasks: prev[date].tasks.map((t) =>
+    // Swap temp id for real DB id
+    setDayTasks(date, (tasks) =>
+      tasks.map((t) =>
         t.id === task.id
-          ? { id: data.id, title: data.title, description: data.description, completed: data.completed, reflection: data.reflection ?? "", createdAt: data.created_at }
+          ? {
+              id: data.id,
+              title: data.title,
+              description: data.description,
+              completed: data.completed,
+              reflection: data.reflection ?? "",
+              createdAt: data.created_at,
+            }
           : t
-      ),
-    },
-  }));
-
-  setPendingTaskIds((prev) => { const s = new Set(prev); s.delete(task.id); return s; });
-}
+      )
+    )
+    setPending(task.id, false)
+  }
 
   async function updateTask(date: string, updatedTask: Task) {
-    setDays((prev) => ({
-      ...prev,
-      [date]: {
-        ...prev[date],
-        tasks: prev[date].tasks.map((t) =>
-          t.id === updatedTask.id ? updatedTask : t
-        ),
-      },
-    }))
+    setDayTasks(date, (tasks) =>
+      tasks.map((t) => (t.id === updatedTask.id ? updatedTask : t))
+    )
 
     await supabase
       .from("tasks")
@@ -163,14 +162,7 @@ async function addTask(date: string, task: Task) {
   }
 
   async function deleteTask(date: string, taskId: string) {
-    setDays((prev) => ({
-      ...prev,
-      [date]: {
-        ...prev[date],
-        tasks: prev[date].tasks.filter((t) => t.id !== taskId),
-      },
-    }))
-
+    setDayTasks(date, (tasks) => tasks.filter((t) => t.id !== taskId))
     await supabase.from("tasks").delete().eq("id", taskId)
   }
 
@@ -180,34 +172,11 @@ async function addTask(date: string, task: Task) {
 
     setDays((prev) => ({
       ...prev,
-      [date]: {
-        date,
-        journal,
-        // dayRating: prev[date]?.dayRating ?? 0,
-        tasks: prev[date]?.tasks ?? [],
-      },
+      [date]: { date, journal, tasks: prev[date]?.tasks ?? [] },
     }))
 
     await supabase.from("days").update({ journal }).eq("id", dayId)
   }
 
-  // async function updateDayRating(date: string, rating: number) {
-  //   const dayId = await ensureDayId(date)
-  //   if (!dayId) return
-
-  //   setDays((prev) => ({
-  //     ...prev,
-  //     [date]: {
-  //       date,
-  //       journal: prev[date]?.journal ?? "",
-  //       dayRating: rating,
-  //       tasks: prev[date]?.tasks ?? [],
-  //     },
-  //   }))
-
-  //   await supabase.from("days").update({ day_rating: rating }).eq("id", dayId)
-  // }
-
-return { days, addTask, updateTask, deleteTask, updateJournal, loading, pendingTaskIds };
-
+  return { days, addTask, updateTask, deleteTask, updateJournal, loading, pendingTaskIds }
 }

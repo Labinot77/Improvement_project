@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, Pencil, Trash2 } from "lucide-react";
 import type { Lesson } from "@/types/lessons";
 import { CATEGORY_META, IMPACT_META } from "@/constants/mental";
-import DefaultButton from "@/app/components/Button";
+import DefaultButton from "@/app/components/DefaultButton";
 
 interface Props {
   lesson: Lesson;

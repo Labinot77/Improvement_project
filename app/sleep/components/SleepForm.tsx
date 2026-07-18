@@ -7,7 +7,8 @@ import { calcDuration, formatDuration } from "@/lib/sleep/calc";
 import { useUser } from "@/lib/use_user";
 import { Textarea } from "@/components/ui/textarea";
 import No_access from "@/app/components/NoAccess";
-import DefaultButton from "@/app/components/Button";
+import DefaultButton from "@/app/components/DefaultButton";
+import { Input } from "@/components/ui/input";
 
 const inputClass =
   "w-full rounded-xl border border-white/[0.08] bg-[#161616] px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 transition-all";
@@ -52,17 +53,17 @@ export function SleepLogForm({ date, existing, onSave, onDelete }: Props) {
             <label className="flex items-center gap-1.5 text-xs font-medium text-zinc-500">
               <Moon className="size-3 text-indigo-400" /> Bedtime
             </label>
-            <input type="time" value={bedtime} onChange={(e) => setBedtime(e.target.value)} className={inputClass} />
+            <Input type="time" value={bedtime} onChange={(e) => setBedtime(e.target.value)} className={inputClass} />
           </div>
           <div className="flex flex-col gap-1.5">
             <label className="flex items-center gap-1.5 text-xs font-medium text-zinc-500">
               <Sun className="size-3 text-amber-400" /> Wake up
             </label>
-            <input type="time" value={wakeTime} onChange={(e) => setWakeTime(e.target.value)} className={inputClass} />
+            <Input type="time" value={wakeTime} onChange={(e) => setWakeTime(e.target.value)} className={inputClass} />
           </div>
         </div>
 
-        <div className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-[#131313] px-3 py-2 mt-4">
+        <div className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-input/30 px-3 py-2 mt-4">
           <span className="text-xs text-zinc-500">Duration</span>
           <div className="flex items-center gap-2">
             <span

@@ -8,7 +8,6 @@ import { Input } from "@/components/ui/input";
 import type { Lesson, LessonCategory, LessonImpact } from "@/types/lessons";
 import { ALL_CATEGORIES, ALL_IMPACTS, CATEGORY_META, IMPACT_META } from "@/constants/mental";
 import { formatDate } from "@/lib/mics/date";
-import DefaultButton from "@/app/components/Button";
 import { useUser } from "@/lib/use_user";
 import No_access from "@/app/components/NoAccess";
 import {
@@ -19,8 +18,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import DefaultButton from "@/app/components/DefaultButton";
 
-// Dropdown menu, instead of butoons
+// Dropdown menu, instead of butoons - Done 
 // Fix the glitchy animation when adding 
 // Make the calendar match the mathc the UI
 
@@ -128,7 +128,7 @@ export function LessonForm({ initial, onSave, onCancel }: Props) {
               <DefaultButton
                 key={imp}
                 onClick={() => setImpact(imp)}
-                className="flex-1 rounded-xl text-xs font-medium transition-all"
+                className="flex-1 rounded-xl text-xs font-medium transition-all "
                 style={{
                   borderColor: impact === imp ? IMPACT_META[imp].color : "rgba(255,255,255,0.06)",
                   background:  impact === imp ? `${IMPACT_META[imp].color}20` : "transparent",
