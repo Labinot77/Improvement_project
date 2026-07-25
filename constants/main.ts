@@ -11,7 +11,7 @@ export const cards: Omit<DashboardCardProps, "index">[] = [
     className: "row-span-2",
   },
   {
-    title: "Fitness",
+    title: "Physical Activity",
     subtitle: "Workouts, splits, sessions",
     emoji: "💪",
     href: "/fitness",
