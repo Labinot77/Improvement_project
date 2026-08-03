@@ -1,49 +1,29 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { LessonForm, type LessonFormValues } from "@/app/lessons/components/Form";
-import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  type LessonFormValues,
+} from "@/app/lessons/components/Form";
 import type { Lesson } from "@/types/lessons";
+import { LessonFormModal } from "../Form_modal";
 
 const supabase = createClient();
 
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  lessonId: string;
+  lesson: Lesson;
   onSave: (id: string, values: LessonFormValues) => void;
 }
 
-export function LessonModal({ open, onOpenChange, lessonId, onSave }: Props) {
-  const [lesson, setLesson] = useState<Lesson | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (!open || !lessonId) return;
-    setLoading(true);
-    setLesson(null);
-
-    supabase
-      .from("lessons")
-      .select("*")
-      .eq("id", lessonId)
-      .single()
-      .then(({ data }) => {
-        if (data) setLesson({
-          id: data.id,
-          title: data.title,
-          body: data.body,
-          category: data.category,
-          impact: data.impact,
-          date: data.date,
-          createdAt: data.created_at,
-        });
-        setLoading(false);
-      });
-  }, [open, lessonId]);
-
+export function LessonModal({ open, onOpenChange, lesson, onSave }: Props) {
+  console.log("LessonModal props:", { open, lesson });
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg border-white/[0.08] bg-[#0f0f0f] p-6 shadow-2xl">
@@ -51,24 +31,19 @@ export function LessonModal({ open, onOpenChange, lessonId, onSave }: Props) {
           <DialogTitle className="text-zinc-100">Edit lesson</DialogTitle>
         </DialogHeader>
 
-        {loading ? (
-          <div className="flex flex-col gap-3">
-            <Skeleton className="h-9 w-full rounded-xl bg-white/[0.04]" />
-            <Skeleton className="h-28 w-full rounded-xl bg-white/[0.04]" />
-            <Skeleton className="h-9 w-2/3 rounded-xl bg-white/[0.04]" />
-            <Skeleton className="h-9 w-full rounded-xl bg-white/[0.04]" />
-          </div>
-        ) : lesson ? (
-          <LessonForm
+        {lesson ? (
+          <LessonFormModal
             initial={lesson}
             onSave={(values) => {
-              onSave(lessonId, values);
+              onSave(lesson.id, values); // ← values not lesson
               onOpenChange(false);
             }}
             onCancel={() => onOpenChange(false)}
           />
         ) : (
-          <p className="text-sm text-zinc-600 py-4 text-center">Lesson not found.</p>
+          <p className="text-sm text-zinc-600 py-4 text-center">
+            Lesson not found.
+          </p>
         )}
       </DialogContent>
     </Dialog>

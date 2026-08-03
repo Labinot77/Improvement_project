@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckIcon, Trash2Icon, ChevronDownIcon } from "lucide-react";
+import { CheckIcon, Trash2Icon, ChevronDownIcon, Trash2 } from "lucide-react";
 import type { Task } from "@/types/progress";
+import { useModal } from "@/providers/Modalprovider";
+import DefaultButton from "@/app/components/DefaultButton";
 
 type Props = {
   task: Task;
@@ -13,7 +15,7 @@ type Props = {
 
 export function TaskCard({ task, onUpdate, onDelete }: Props) {
   const [showReflection, setShowReflection] = useState(!!task.reflection);
-
+  const { open } = useModal()
   return (
     <motion.div
       layout
@@ -26,7 +28,6 @@ export function TaskCard({ task, onUpdate, onDelete }: Props) {
     >
       <div className="p-3.5">
         <div className="flex items-start gap-2.5">
-          {/* Checkbox */}
           <motion.button
             whileTap={{ scale: 0.82 }}
             onClick={() => onUpdate({ ...task, completed: !task.completed })}
@@ -58,13 +59,14 @@ export function TaskCard({ task, onUpdate, onDelete }: Props) {
               </p>
             </div>
             {task.description && (
-              <p className="mt-0.5 text-xs text-zinc-500 leading-relaxed">{task.description}</p>
+              <p className="mt-1.5 -ml-7 text-xs text-zinc-500 leading-relaxed">{task.description}</p>
             )}
           </div>
 
           {/* Actions */}
           <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
-            <button
+            <DefaultButton
+                          variant='ghost'
               onClick={() => setShowReflection((s) => !s)}
               className="p-1.5 rounded-lg text-zinc-600 hover:text-zinc-300 hover:bg-white/[0.06] transition-colors"
               title="Reflection"
@@ -72,14 +74,21 @@ export function TaskCard({ task, onUpdate, onDelete }: Props) {
               <motion.span animate={{ rotate: showReflection ? 180 : 0 }} transition={{ duration: 0.2 }} className="block">
                 <ChevronDownIcon className="size-3.5" />
               </motion.span>
-            </button>
-            <button
-              onClick={onDelete}
-              className="p-1.5 rounded-lg text-zinc-600 hover:text-red-400 hover:bg-red-400/10 transition-colors"
-              title="Delete"
-            >
-              <Trash2Icon className="size-3.5" />
-            </button>
+            </DefaultButton>
+              <DefaultButton
+                  variant={'outline'}
+                  onClick={() => open('delete', {
+                      title: "Delete task",
+                      description: `Are you sure you want to delete "${task.title}"? This action cannot be undone. `,
+                      itemName: `"${task.title}"`,
+                      onConfirm: onDelete,
+                      
+                  })}
+                  className="flex items-center border border-red-500/20
+                    text-xs font-medium text-red-400 hover:bg-red-500/10 transition-all"
+                >
+                  <Trash2 className="size-3" /> Delete
+                </DefaultButton>
           </div>
         </div>
 
@@ -92,7 +101,7 @@ export function TaskCard({ task, onUpdate, onDelete }: Props) {
               transition={{ duration: 0.2, ease: "easeInOut" }}
               className="overflow-hidden"
             >
-              <div className="mt-3 pl-7">
+              <div className="mt-3 -pl-7">
                 <textarea
                   placeholder="Add a reflection…"
                   value={task.reflection || ""}

@@ -71,47 +71,21 @@ export function ActivityForm({ onSave }: Props) {
             </Select>
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <p className="text-xs font-medium text-zinc-500">Date</p>
-            <input
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className={inputClass}
-            />
-          </div>
         </div>
 
         {/* Duration */}
         <div className="flex flex-col gap-1.5 mt-3">
           <p className="text-xs font-medium text-zinc-500">Duration (minutes)</p>
-          <div className="flex gap-2">
-            {[30, 45, 60, 90, 120].map((m) => (
-              <button
-                key={m}
-                onClick={() => setDuration(String(m))}
-                className="flex-1 rounded-xl border py-1.5 text-xs font-medium transition-all"
-                style={{
-                  borderColor: duration === String(m) ? "#ef4444" : "rgba(255,255,255,0.06)",
-                  background:  duration === String(m) ? "rgba(239,68,68,0.15)" : "transparent",
-                  color:       duration === String(m) ? "#ef4444" : "#71717a",
-                }}
-              >
-                {m}m
-              </button>
-            ))}
-            <input
-              type="number"
-              value={duration}
-              onChange={(e) => setDuration(e.target.value)}
-              placeholder="min"
-              min={1}
-              className={`${inputClass} w-16 text-center`}
-            />
-          </div>
+          <input
+            type="number"
+            value={duration}
+            onChange={(e) => setDuration(e.target.value)}
+            placeholder="e.g. 60"
+            min={1}
+            className={inputClass}
+          />
         </div>
 
-        {/* Intensity */}
         <div className="flex flex-col gap-1.5 mt-3">
           <p className="text-xs font-medium text-zinc-500">Intensity</p>
           <div className="flex gap-2">

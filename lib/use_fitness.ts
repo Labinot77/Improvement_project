@@ -77,6 +77,7 @@ export function useActivities() {
     );
   }
 
+
   async function deleteActivity(id: string): Promise<void> {
     setActivities((prev) => prev.filter((a) => a.id !== id));
     await supabase.from("activities").delete().eq("id", id);

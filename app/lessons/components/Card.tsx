@@ -6,14 +6,17 @@ import { ChevronDown, Pencil, Trash2 } from "lucide-react";
 import type { Lesson } from "@/types/lessons";
 import { CATEGORY_META, IMPACT_META } from "@/constants/mental";
 import DefaultButton from "@/app/components/DefaultButton";
+import { useModal } from "@/providers/Modalprovider";
+import { LessonFormValues } from "./Form";
 
 interface Props {
   lesson: Lesson;
-  onEdit: () => void;
+  onUpdate: (id: string, values: LessonFormValues) => void; // ← replace onEdit
   onDelete: () => void;
 }
 
-export function LessonCard({ lesson, onEdit, onDelete }: Props) {
+export function LessonCard({ lesson, onUpdate, onDelete }: Props) {
+  const { open } = useModal(); 
   const [expanded, setExpanded] = useState(false);
   const catMeta    = CATEGORY_META[lesson.category];
   const impactMeta = IMPACT_META[lesson.impact];
@@ -110,7 +113,13 @@ export function LessonCard({ lesson, onEdit, onDelete }: Props) {
               <div className="flex gap-2">
                 <DefaultButton
                   variant={'outline'}
-                  onClick={(e) => { e.stopPropagation(); onEdit(); }}
+                  // onClick={(e) => { e.stopPropagation(); onEdit(); }}
+                onClick={() => open('lesson', {
+                  lesson: lesson,
+                  onSave: (id: string, values: LessonFormValues) => onUpdate(id, values),
+
+  
+                })}
                   className="flex items-center gap-1.5 rounded-lg border border-white/[0.06] px-3 py-1.5
                     text-xs font-medium text-zinc-400 hover:text-zinc-100 hover:border-white/[0.12] transition-all"
                 >
@@ -118,7 +127,13 @@ export function LessonCard({ lesson, onEdit, onDelete }: Props) {
                 </DefaultButton>
                 <DefaultButton
                   variant={'outline'}
-                  onClick={(e) => { e.stopPropagation(); onDelete(); }}
+                  onClick={() => open('delete', {
+                      title: "Delete lesson",
+                      description: `Are you sure you want to delete "${lesson.title}"? This action cannot be undone. `,
+                      itemName: `"${lesson.title}"`,
+                      onConfirm: onDelete,
+                      
+                  })}
                   className="flex items-center gap-1.5 rounded-lg border border-red-500/20 px-3 py-1.5
                     text-xs font-medium text-red-400 hover:bg-red-500/10 transition-all"
                 >
@@ -129,6 +144,7 @@ export function LessonCard({ lesson, onEdit, onDelete }: Props) {
           </motion.div>
         )}
       </AnimatePresence>
+
     </motion.div>
   );
 }

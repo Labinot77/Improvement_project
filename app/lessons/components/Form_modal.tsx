@@ -28,12 +28,12 @@ export type LessonFormValues = {
 
 interface Props {
   initial?: Lesson;
-  selectedDate?: string;
+  selectedDate?: string;   // controlled from parent (calendar)
   onSave: (values: LessonFormValues) => void;
   onCancel?: () => void;
 }
 
-export function LessonForm({ initial, selectedDate, onSave, onCancel }: Props) {
+export function LessonFormModal({ initial, selectedDate, onSave, onCancel }: Props) {
   const [title, setTitle]       = useState(initial?.title ?? "");
   const [body, setBody]         = useState(initial?.body ?? "");
   const [category, setCategory] = useState<LessonCategory>(initial?.category ?? "Life");
@@ -41,6 +41,7 @@ export function LessonForm({ initial, selectedDate, onSave, onCancel }: Props) {
   const [saved, setSaved]       = useState(false);
   const { isLoggedIn } = useUser();
 
+  // Sync with initial when editing
   useEffect(() => {
     if (!initial) return;
     setTitle(initial.title);
@@ -49,6 +50,7 @@ export function LessonForm({ initial, selectedDate, onSave, onCancel }: Props) {
     setImpact(initial.impact);
   }, [initial?.id]);
 
+  // Use selectedDate from calendar, fall back to initial date or today
   const date = initial?.date ?? selectedDate ?? formatDate(new Date());
 
   function handleSave() {
@@ -62,45 +64,55 @@ export function LessonForm({ initial, selectedDate, onSave, onCancel }: Props) {
   }
 
   return (
-    <div className="relative">
+    <div className="flex flex-col gap-3 max-w-82">
       <div className={!isLoggedIn ? "blur-sm pointer-events-none select-none" : ""}>
 
-        <div className="grid grid-cols-12 gap-3">
-          <div className="col-span-5">
-            <Input
-              type="text"
-              placeholder="What did you learn?"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSave()}
-              className={inputClass}
-            />
-          </div>
+        <Input
+          type="text"
+          placeholder="What did you learn?"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSave()}
+          className={inputClass}
+        />
 
-          <div className="col-span-4">
-            <Select value={category} onValueChange={(v) => setCategory(v as LessonCategory)}>
-              <SelectTrigger className="rounded-xl border border-white/[0.08] bg-[#161616] text-sm text-zinc-100 focus:ring-yellow-500/20 focus:border-yellow-500/50 w-full">
-                <SelectValue>
+        <Textarea
+          placeholder="Describe the lesson, context, what happened and what you'll do differently…"
+          value={body}
+          onChange={(e) => setBody(e.target.value)}
+          rows={4}
+          className={`${inputClass} resize-none mt-3`}
+        />
+
+        {/* Category */}
+        <div className="flex flex-col gap-1.5 mt-3">
+          <p className="text-xs font-medium text-zinc-500">Category</p>
+          <Select value={category} onValueChange={(v) => setCategory(v as LessonCategory)}>
+            <SelectTrigger className="rounded-xl border border-white/[0.08] bg-[#161616] text-sm text-zinc-100 focus:ring-yellow-500/20 focus:border-yellow-500/50">
+              <SelectValue>
+                <span className="flex items-center gap-2">
+                  <span>{CATEGORY_META[category].icon}</span>
+                  <span>{category}</span>
+                </span>
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent className="border-white/[0.08] bg-[#161616] text-zinc-100">
+              {ALL_CATEGORIES.map((cat) => (
+                <SelectItem key={cat} value={cat} className="focus:bg-white/[0.06] focus:text-zinc-100">
                   <span className="flex items-center gap-2">
-                    <span>{CATEGORY_META[category].icon}</span>
-                    <span>{category}</span>
+                    <span>{CATEGORY_META[cat].icon}</span>
+                    <span style={{ color: CATEGORY_META[cat].color }}>{cat}</span>
                   </span>
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent className="border-white/[0.08] bg-[#161616] text-zinc-100">
-                {ALL_CATEGORIES.map((cat) => (
-                  <SelectItem key={cat} value={cat} className="focus:bg-white/[0.06] focus:text-zinc-100">
-                    <span className="flex items-center gap-2">
-                      <span>{CATEGORY_META[cat].icon}</span>
-                      <span style={{ color: CATEGORY_META[cat].color }}>{cat}</span>
-                    </span>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-          <div className="col-span-3 flex gap-1">
+        {/* Impact */}
+        <div className="flex flex-col gap-1.5 mt-3">
+          <p className="text-xs font-medium text-zinc-500">Impact</p>
+          <div className="flex gap-1.5">
             {ALL_IMPACTS.map((imp) => (
               <DefaultButton
                 key={imp}
@@ -118,40 +130,29 @@ export function LessonForm({ initial, selectedDate, onSave, onCancel }: Props) {
           </div>
         </div>
 
-        <div className="flex gap-3 mt-3">
-          <Textarea
-            placeholder="Describe the lesson, context, what happened…"
-            value={body}
-            onChange={(e) => setBody(e.target.value)}
-            rows={2}
-            className={`${inputClass} resize-none flex-1`}
-          />
-
-          <div className="flex flex-col justify-between gap-2 shrink-0">
-            <DefaultButton
-              onClick={handleSave}
-              disabled={!title.trim()}
-              className="h-full transition-all disabled:opacity-30 flex items-center gap-2"
-              style={{
-                background: saved ? "rgba(34,197,94,0.15)" : "rgba(234,179,8,0.15)",
-                border:     `1px solid ${saved ? "rgba(34,197,94,0.3)" : "rgba(234,179,8,0.3)"}`,
-                color:      saved ? "#86efac" : "#fbbf24",
-              }}
-            >
-              <Save className="size-4 shrink-0" />
-              {/* {saved ? "Saved!" : initial ? "Update" : "Save"} */}
-            </DefaultButton>
-          </div>
-        </div>
-
-        {/* <p className="text-xs text-zinc-600 mt-2">
+        {/* Date label — read-only, driven by calendar */}
+        <p className="text-xs text-zinc-600 mt-2">
           Logging for{" "}
-          <span className="text-zinc-500">
+          <span className="text-zinc-400">
             {new Date(date + "T12:00:00").toLocaleDateString("en-US", {
               weekday: "long", month: "long", day: "numeric",
             })}
           </span>
-        </p> */}
+        </p>
+
+        <DefaultButton
+          onClick={handleSave}
+          disabled={!title.trim()}
+          className="mt-3 flex w-full rounded-xl font-semibold transition-all disabled:opacity-30"
+          style={{
+            background: saved ? "rgba(34,197,94,0.15)" : "rgba(234,179,8,0.15)",
+            border:     `1px solid ${saved ? "rgba(34,197,94,0.3)" : "rgba(234,179,8,0.3)"}`,
+            color:      saved ? "#86efac" : "#fbbf24",
+          }}
+        >
+          <Save className="size-4" />
+          {saved ? "Saved!" : initial ? "Update lesson" : "Save lesson"}
+        </DefaultButton>
       </div>
 
       {!isLoggedIn && <No_access />}

@@ -6,7 +6,7 @@ import { useModal } from "../../providers/Modalprovider"
 const No_access = () => {
   const { open } = useModal();
   return (
-     <div className="absolute flex flex-col items-center justify-center gap-3 h-full w-full">
+     <div className="absolute flex flex-col items-center justify-center inset-0 gap-3 z-50">
           <p className="text-sm font-medium text-zinc-300">You are not logged in</p>
           <Button
             onClick={() => open("login", {})}
@@ -22,5 +22,6 @@ const No_access = () => {
         </div>
   )
 }
+
 
 export default No_access

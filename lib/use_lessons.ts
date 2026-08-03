@@ -144,57 +144,145 @@ export function useLessons() {
     fetchAll();
   }, [fetchAll]);
 
-  async function addLesson(input: LessonInput) {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+  // async function addLesson(input: LessonInput) {
+  //   const { data: { user } } = await supabase.auth.getUser();
+  //   if (!user) return;
 
-    // Optimistic insert
-    const tempId = crypto.randomUUID();
-    const optimistic: Lesson = { id: tempId, ...input, createdAt: new Date().toISOString() };
-    setLessons((prev) => [optimistic, ...prev]);
-    setPending(tempId, true);
+  //   // Optimistic insert
+  //   const tempId = crypto.randomUUID();
+  //   const optimistic: Lesson = { id: tempId, ...input, createdAt: new Date().toISOString() };
+  //   setLessons((prev) => [optimistic, ...prev]);
+  //   setPending(tempId, true);
 
-    const { data, error } = await supabase
-      .from("lessons")
-      .insert({ user_id: user.id, ...input })
-      .select()
-      .single();
+  //   const { data, error } = await supabase
+  //     .from("lessons")
+  //     .insert({ user_id: user.id, ...input })
+  //     .select()
+  //     .single();
 
-    if (error || !data) {
-      // Rollback
-      setLessons((prev) => prev.filter((l) => l.id !== tempId));
-      setPending(tempId, false);
-      return;
-    }
+  //   if (error || !data) {
+  //     // Rollback
+  //     setLessons((prev) => prev.filter((l) => l.id !== tempId));
+  //     setPending(tempId, false);
+  //     return;
+  //   }
 
-    // Swap temp id for real DB id
-    setLessons((prev) =>
-      prev.map((l) =>
-        l.id === tempId
-          ? {
-              id: data.id,
-              title: data.title,
-              body: data.body,
-              category: data.category,
-              impact: data.impact,
-              date: data.date,
-              createdAt: data.created_at,
-            }
-          : l
-      )
-    );
-    setPending(tempId, false);
+  //   // Swap temp id for real DB id
+  //   setLessons((prev) =>
+  //     prev.map((l) =>
+  //       l.id === tempId
+  //         ? {
+  //             id: data.id,
+  //             title: data.title,
+  //             body: data.body,
+  //             category: data.category,
+  //             impact: data.impact,
+  //             date: data.date,
+  //             createdAt: data.created_at,
+  //           }
+  //         : l
+  //     )
+  //   );
+  //   setPending(tempId, false);
+  // }
+
+async function addLesson(input: LessonInput): Promise<void> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return;
+
+  const tempId = crypto.randomUUID();
+
+  const optimistic: Lesson = {
+    id: tempId,
+    ...input,
+    createdAt: new Date().toISOString(),
+  };
+
+  // Mark it pending before rendering it
+  setPendingLessonIds((prev) => new Set(prev).add(tempId));
+  setLessons((prev) => [optimistic, ...prev]);
+
+  const { data, error } = await supabase
+    .from("lessons")
+    .insert({
+      user_id: user.id,
+      ...input,
+    })
+    .select()
+    .single();
+
+  if (error || !data) {
+    setLessons((prev) => prev.filter((lesson) => lesson.id !== tempId));
+
+    setPendingLessonIds((prev) => {
+      const next = new Set(prev);
+      next.delete(tempId);
+      return next;
+    });
+
+    return;
   }
 
-  async function updateLesson(id: string, input: LessonInput) {
-    setLessons((prev) => prev.map((l) => (l.id === id ? { ...l, ...input } : l)));
-    await supabase.from("lessons").update(input).eq("id", id);
-  }
+  setLessons((prev) =>
+    prev.map((lesson) =>
+      lesson.id === tempId
+        ? {
+            ...lesson,
+            id: data.id,
+            createdAt: data.created_at,
+          }
+        : lesson
+    )
+  );
 
-  async function deleteLesson(id: string) {
-    setLessons((prev) => prev.filter((l) => l.id !== id));
-    await supabase.from("lessons").delete().eq("id", id);
+  setPendingLessonIds((prev) => {
+    const next = new Set(prev);
+    next.delete(tempId);
+    return next;
+  });
+}
+
+async function updateLesson(id: string, input: LessonInput) {
+  setLessons((prev) => prev.map((l) => (l.id === id ? { ...l, ...input } : l)));
+
+  await supabase
+    .from("lessons")
+    .update({
+      title:    input.title,
+      body:     input.body,
+      category: input.category,
+      impact:   input.impact,
+      date:     input.date,
+    })
+    .eq("id", id);
+}
+
+ async function deleteLesson(id: string) {
+  const lessonToDelete = lessons.find((lesson) => lesson.id === id);
+  if (!lessonToDelete) return;
+
+  const originalIndex = lessons.findIndex((lesson) => lesson.id === id);
+
+  setLessons((prev) => prev.filter((lesson) => lesson.id !== id));
+
+  const { error } = await supabase
+    .from("lessons")
+    .delete()
+    .eq("id", id);
+
+  if (!error) {
+    setLessons((prev) => {
+      const restored = [...prev];
+      restored.splice(originalIndex, 0, lessonToDelete);
+      return restored;
+    });
+
+    console.error("Failed to delete lesson:", error);
   }
+}
 
   return { lessons, loading, pendingLessonIds, addLesson, updateLesson, deleteLesson };
 }

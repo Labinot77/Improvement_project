@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import No_access from "@/app/components/NoAccess";
 import DefaultButton from "@/app/components/DefaultButton";
+import { capitalizeFirstLetter } from "@/lib/mics/helpers";
 
 type Props = {
   onAdd: (title: string, description: string) => void;
@@ -23,13 +24,14 @@ export function AddTaskForm({ onAdd }: Props) {
 
   function handleAdd() {
     if (!title.trim()) return;
-    onAdd(title.trim(), description.trim());
+    const trimmedTitle = capitalizeFirstLetter(title)
+    onAdd(trimmedTitle, description.trim());
     setTitle("");
     setDescription("");
   }
 
   return (
-    <div className="relative flex flex-col gap-3">
+    <div className="flex flex-col gap-3">
       <div className={!isLoggedIn ? "blur-sm pointer-events-none select-none" : ""}>
         <Input
           placeholder="Task title…"
