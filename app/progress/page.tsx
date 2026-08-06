@@ -17,6 +17,8 @@ import { JournalSection } from "./components/Journal";
 import { fadeUp, container, fadeIn } from "@/constants/animations";
 import { ACCENT_COLOR } from "@/constants/progress/template";
 import { TaskSkeleton } from "./components/TaskCard_skeleton";
+import { TemplateModal } from "./components/TemplateModal";
+import { useProgressTemplates } from "@/lib/progress/use_templates";
 
 function computeGlobalStats(days: Days) {
   const allTasks = Object.values(days).flatMap((d) => d.tasks);
@@ -44,8 +46,8 @@ export default function ProgressPage() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [mobileTab, setMobileTab] = useState<"tasks" | "calendar" | "week">(
     "tasks",
-  );
-
+  );  const [templateModalOpen, setTemplateModalOpen] = useState(false);
+  const { templates, addTemplate, removeTemplate } = useProgressTemplates();
   const dateKey = formatDate(selectedDate);
   const dayData = days[dateKey] ?? { tasks: [], journal: "" };
   const isToday = dateKey === today();
@@ -175,7 +177,18 @@ export default function ProgressPage() {
                   transition={{ duration: 0.2 }}
                   className="flex flex-col gap-4"
                 >
-                  <SectionCard title="New task" accentGlow={ACCENT_COLOR}>
+                  <SectionCard
+                    title="New task"
+                    accentGlow={ACCENT_COLOR}
+                    action={
+                      <button
+                        onClick={() => setTemplateModalOpen(true)}
+                        className="rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-xs font-medium text-zinc-400 transition-colors hover:text-zinc-200"
+                      >
+                        Templates
+                      </button>
+                    }
+                  >
                     <AddTaskForm onAdd={handleAddTask} />
                   </SectionCard>
 
@@ -283,7 +296,18 @@ export default function ProgressPage() {
                 </p>
               </div>
 
-              <SectionCard title="New task" accentGlow={ACCENT_COLOR}>
+              <SectionCard
+                title="New task"
+                accentGlow={ACCENT_COLOR}
+                action={
+                  <button
+                    onClick={() => setTemplateModalOpen(true)}
+                    className="rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-xs font-medium text-zinc-400 transition-colors hover:text-zinc-200"
+                  >
+                    Templates
+                  </button>
+                }
+              >
                 <AddTaskForm onAdd={handleAddTask} />
               </SectionCard>
 
@@ -349,6 +373,18 @@ export default function ProgressPage() {
           </motion.div>
         </motion.div>
       </div>
+
+      <TemplateModal
+        open={templateModalOpen}
+        onOpenChange={setTemplateModalOpen}
+        templates={templates}
+        onAddTemplate={addTemplate}
+        onRemoveTemplate={removeTemplate}
+        onApplyTemplate={(template) => {
+          void handleAddTask(template.title, template.description ?? "");
+          setTemplateModalOpen(false);
+        }}
+      />
     </div>
   );
 }

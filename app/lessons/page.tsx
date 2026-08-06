@@ -61,7 +61,7 @@ export default function LessonsClient() {
 
         <motion.div className="flex flex-col gap-5" initial="hidden" animate="show" variants={container}>
 
-          {/* Stat cards */}
+          {/* Stat cards
           <motion.div variants={fadeUp} className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             <StatCard label="Total lessons" value={`${stats.total}`}     sub="recorded so far"    accentGlow={ACCENT} />
             <StatCard label="This month"    value={`${stats.thisMonth}`} sub="lessons this month" accentGlow={ACCENT} />
@@ -72,7 +72,7 @@ export default function LessonsClient() {
               accentGlow={ACCENT}
             />
             <StatCard label="High impact" value={`${stats.highImpact}`} sub="critical lessons" accentGlow={ACCENT} />
-          </motion.div>
+          </motion.div> */}
 
           {/* Main grid */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">

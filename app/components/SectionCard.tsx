@@ -27,14 +27,17 @@ export default function SectionCard({
           }}
         />
       )}
-      {(title || subtitle) && (
-        <div className="relative mb-5">
-          {title && (
-            <h2 className="text-base font-semibold text-zinc-100">{title}</h2>
-          )}
-          {subtitle && (
-            <p className="text-sm text-zinc-500 mt-0.5">{subtitle}</p>
-          )}
+      {(title || subtitle || action) && (
+        <div className="relative mb-5 flex items-start justify-between gap-3">
+          <div>
+            {title && (
+              <h2 className="text-base font-semibold text-zinc-100">{title}</h2>
+            )}
+            {subtitle && (
+              <p className="text-sm text-zinc-500 mt-0.5">{subtitle}</p>
+            )}
+          </div>
+          {action && <div className="shrink-0">{action}</div>}
         </div>
       )}
       <div className="relative">{children}</div>
