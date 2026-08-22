@@ -1,4 +1,4 @@
-import { Days } from "@/types/progress";
+import { Days } from "@/types/Progress/progress";
 import { formatDate } from "../mics/date";
 
 export function computeStreak(days: Days): number {

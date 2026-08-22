@@ -4,7 +4,7 @@ import SectionCard from "@/app/components/SectionCard";
 import { Calendar } from "@/components/ui/calendar";
 import { ACCENT_COLOR } from "@/constants/progress/template";
 import { formatDate } from "@/lib/mics/date";
-import type { Days } from "@/types/progress";
+import type { Days } from "@/types/Progress/progress";
 
 type Props = {
   selected: Date;

@@ -1,3 +1,5 @@
+// ! On phone use carrousel for templates, on desktop use grid with 2 columns. On desktop, the create form should be fixed width and the list of templates should take up the rest of the space. On mobile, the create form should be at the top and the list of templates should be below it. The modal should be scrollable if there are too many templates to fit on the screen.
+
 "use client";
 
 import { useMemo, useState } from "react";
@@ -13,28 +15,22 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import DefaultButton from "@/app/components/DefaultButton";
-import type { ProgressTemplate } from "@/types/progress";
+import type { ProgressTemplate } from "@/types/Progress/progress";
+import { useProgressTemplates } from "@/lib/progress/use_templates";
+import { inputClass } from "@/constants/misc";
+import { useModal } from "@/providers/Modalprovider";
+import TemplateSkeleton from "./components/Skeleton";
 
-const inputClass =
-  "w-full rounded-xl border border-white/[0.08] bg-[#161616] px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 transition-all";
 
 type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  templates: ProgressTemplate[];
-  onAddTemplate: (template: ProgressTemplate) => void;
-  onRemoveTemplate: (templateId: string) => void;
   onApplyTemplate: (template: ProgressTemplate) => void;
 };
 
-export function TemplateModal({
-  open,
-  onOpenChange,
-  templates,
-  onAddTemplate,
-  onRemoveTemplate,
-  onApplyTemplate,
-}: Props) {
+export function TemplateModal({ open, onOpenChange, onApplyTemplate }: Props) {
+  const { templates, addTemplate, removeTemplate, loading } = useProgressTemplates();
+  const { open: openModal } = useModal();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
 
@@ -43,25 +39,22 @@ export function TemplateModal({
   function handleCreate() {
     if (!title.trim()) return;
 
-    const template: ProgressTemplate = {
-      id: crypto.randomUUID(),
-      title: title.trim(),
-      description: description.trim(),
-      createdAt: new Date().toISOString(),
-    };
-
-    onAddTemplate(template);
+    addTemplate({ title: title.trim(), description: description.trim()});
     setTitle("");
     setDescription("");
-    onOpenChange(false);
   }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-xl border-white/[0.08] bg-[#0f0f0f] p-0 shadow-2xl">
-        <div className="p-6">
-          <DialogHeader className="mb-4">
-            <DialogTitle className="text-lg font-semibold text-zinc-100">
+      <DialogContent
+        className="flex flex-col border-white/[0.08] bg-[#0f0f0f] p-0 shadow-2xl
+          w-[calc(100vw-1.5rem)] sm:w-[calc(100vw-3rem)]
+          max-w-[calc(100vw-1.5rem)] sm:max-w-2xl lg:max-w-4xl
+          h-[calc(100dvh-3rem)] sm:h-auto sm:max-h-[85dvh]"
+      >
+        <div className="flex flex-1 flex-col overflow-hidden p-4 sm:p-6">
+          <DialogHeader className="mb-4 shrink-0">
+            <DialogTitle className="text-lg font-semibold text-zinc-100 sm:text-xl">
               Progress templates
             </DialogTitle>
             <DialogDescription className="text-sm text-zinc-500">
@@ -69,8 +62,8 @@ export function TemplateModal({
             </DialogDescription>
           </DialogHeader>
 
-          <div className="grid gap-4 md:grid-cols-[1.05fr_0.95fr]">
-            <div className="rounded-2xl border border-white/[0.08] bg-[#121212] p-4">
+          <div className="flex flex-1 flex-col gap-4 overflow-hidden lg:flex-row">
+            <div className="shrink-0 rounded-2xl border border-white/[0.08] bg-[#121212] p-4 lg:w-72">
               <div className="flex items-center gap-2 text-sm font-semibold text-zinc-100">
                 <SparklesIcon className="size-4 text-indigo-400" />
                 Create a new shortcut
@@ -86,13 +79,13 @@ export function TemplateModal({
                   placeholder="Optional description"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  rows={3}
+                  rows={7}
                   className={`${inputClass} resize-none`}
                 />
                 <DefaultButton
                   onClick={handleCreate}
                   disabled={!isReady}
-                  className="flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-semibold transition-all disabled:opacity-30"
+                  className="flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-semibold transition-all disabled:opacity-30 "
                   style={{
                     background: "rgba(99,102,241,0.18)",
                     border: "1px solid rgba(99,102,241,0.28)",
@@ -105,14 +98,20 @@ export function TemplateModal({
               </div>
             </div>
 
-            <div className="rounded-2xl border border-white/[0.08] bg-[#121212] p-4">
-              <div className="flex items-center justify-between">
+            <div className="flex flex-1 flex-col overflow-hidden rounded-2xl border border-white/[0.08] bg-[#121212] p-4">
+              <div className="flex items-center justify-between shrink-0">
                 <p className="text-sm font-semibold text-zinc-100">Your shortcuts</p>
                 <span className="text-xs text-zinc-500">{templates.length}/12</span>
               </div>
 
-              <div className="mt-3 flex max-h-72 flex-col gap-2 overflow-y-auto pr-1">
-                {templates.length === 0 ? (
+              <div className="mt-3 flex flex-1 flex-col gap-2 overflow-y-auto pr-1">
+                {loading ? (
+                  <>
+                  <TemplateSkeleton/>
+                  <TemplateSkeleton/>
+                  <TemplateSkeleton/>
+                  </>
+                ) : templates.length === 0 ? (
                   <div className="rounded-xl border border-dashed border-white/[0.08] bg-[#0b0b0b] px-3 py-6 text-center text-sm text-zinc-500">
                     No templates yet. Save one to speed up daily tasks.
                   </div>
@@ -125,21 +124,30 @@ export function TemplateModal({
                     >
                       <div className="flex items-start justify-between gap-3">
                         <button
-                          className="flex-1 text-left"
-                          onClick={() => onApplyTemplate(template)}
+                          className="flex-1 justify-start text-left"
+                          onClick={() => {
+                            onApplyTemplate(template)
+                            onOpenChange(false)
+                          }}
                         >
                           <p className="text-sm font-medium text-zinc-100">{template.title}</p>
-                          {template.description ? (
+                          {template.description ?? (
                             <p className="mt-1 text-xs text-zinc-500">{template.description}</p>
-                          ) : null}
+                          )}
                         </button>
-                        <button
-                          onClick={() => onRemoveTemplate(template.id)}
-                          className="rounded-lg p-1.5 text-zinc-500 transition-colors hover:bg-white/[0.06] hover:text-red-400"
+                        <DefaultButton
+                          variant="ghost"
+                          onClick={() => openModal('delete', {
+                            title: "Delete shortcut",
+                            description: `Are you sure you want to delete "${template.title}"? This action cannot be undone.`,
+                            itemName: `"${template.title}"`,
+                            onConfirm: () => removeTemplate(template.id),
+                          })}
+                          className="text-zinc-500 transition-colors  hover:text-red-400"
                           title="Delete shortcut"
                         >
                           <Trash2Icon className="size-3.5" />
-                        </button>
+                        </DefaultButton>
                       </div>
                     </motion.div>
                   ))

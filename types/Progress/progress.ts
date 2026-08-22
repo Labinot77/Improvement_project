@@ -13,11 +13,5 @@ export interface DayData {
   journal: string;
 }
 
-export interface ProgressTemplate {
-  id: string;
-  title: string;
-  description?: string;
-  createdAt: string;
-}
 
 export type Days = Record<string, DayData>; // key = "YYYY-MM-DD"

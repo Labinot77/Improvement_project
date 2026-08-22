@@ -4,7 +4,7 @@
 
 import { useEffect, useState, useCallback } from "react"
 import { createClient } from "@/lib/supabase/client"
-import { DayData, Task } from "@/types/progress"
+import { DayData, Task } from "@/types/Progress/progress"
 
 const supabase = createClient()
 

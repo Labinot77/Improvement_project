@@ -84,6 +84,7 @@ export function ActivityHeatmap({ activities }: Props) {
     activities.some((a) => a.type === type)
   );
 
+
   if (activities.length === 0) {
     return (
       <p className="text-sm text-zinc-600 py-6 text-center">

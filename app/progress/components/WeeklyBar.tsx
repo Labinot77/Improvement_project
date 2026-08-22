@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import type { Days } from "@/types/progress";
+import type { Days } from "@/types/Progress/progress";
 import { getLast7Days } from "@/lib/mics/date";
 
 type Props = { days: Days };

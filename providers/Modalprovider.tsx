@@ -10,13 +10,26 @@ import type { LessonFormValues } from "@/app/lessons/components/Form";
 import type { Activity } from "@/types/fitness";
 import { DayActivityModal } from "@/app/fitness/components/modal/Day";
 import { Lesson } from "@/types/lessons";
+import { TemplateModal } from "@/app/progress/components/Modal/Template";
+import { ProgressTemplate } from "@/types/Progress/progress";
+import { LessonsExpandedModal } from "@/app/lessons/components/Modal/List";
+import { RecipeForm, RecipeFormValues } from "@/app/recipes/components/modal/Form";
+import { MealType, Recipe, RecipeFilters } from "@/types/Recipies/main";
+import { RecipeFilterModal } from "@/app/recipes/components/modal/Filter";
+import { RecipePreviewModal } from "@/app/recipes/components/modal/Preview";
 
 type ModalProps = {
-  login:       Record<string, never>;
-  profile:     Record<string, never>;
+  login: Record<string, never>;
+  profile: Record<string, never>;
   lesson: {
     lesson: Lesson;
     onSave: (id: string, values: LessonFormValues) => void;
+  };
+    lessons_list: {
+    lessons: Lesson[];
+    onUpdate: (id: string, values: LessonFormValues) => void;
+    onDelete: (id: string) => void;
+    pendingLessonIds: Set<string>;
   };
   delete: {
     onConfirm: () => void | Promise<void>;
@@ -31,17 +44,34 @@ type ModalProps = {
     date: string;
     sessions: Activity[];
   };
+  progressTemplate: {
+    onApplyTemplate: (template: ProgressTemplate) => void;
+  };
+  recipe_form: {
+    recipe?: Recipe
+    onSave: (id: string, values: RecipeFormValues) => void;
+  }
+    recipe_filter: {
+    value: RecipeFilters;
+    onApply: (value: RecipeFilters) => void;
+    recipes: Recipe[];
+  };
+  recipe_preview: {
+    recipe: Recipe;
+    onSave: (id: string, values: RecipeFormValues) => void;
+  };
 };
 
 export type ModalName = keyof ModalProps;
 
-type ActiveModal = {
-  [K in ModalName]: { name: K; props: ModalProps[K] };
+type StackEntry = {
+  [K in ModalName]: { id: number; name: K; props: ModalProps[K] };
 }[ModalName];
 
 interface ModalContextValue {
   open: <K extends ModalName>(name: K, props: ModalProps[K]) => void;
-  close: () => void;
+  close: () => void; // closes the topmost modal
+  closeAll: () => void;
 }
 
 const ModalContext = createContext<ModalContextValue | null>(null);
@@ -53,37 +83,54 @@ export function useModal() {
 }
 
 const MODALS = {
-  login:       LoginModal,
-  profile:     ProfileModal,
-  lesson:      LessonModal,
-  delete:      DeleteModal,
+  login: LoginModal,
+  profile: ProfileModal,
+  lesson: LessonModal,
+  lessons_list: LessonsExpandedModal,
+  delete: DeleteModal,
   dayActivity: DayActivityModal,
+  progressTemplate: TemplateModal,
+  recipe_form: RecipeForm,
+  recipe_filter: RecipeFilterModal,
+  recipe_preview: RecipePreviewModal,
 } as const;
 
+let nextId = 0;
+
 export function ModalProvider({ children }: { children: ReactNode }) {
-  const [active, setActive] = useState<ActiveModal | null>(null);
+  const [stack, setStack] = useState<StackEntry[]>([]);
 
   const open = <K extends ModalName>(name: K, props: ModalProps[K]) => {
-    setActive({ name, props } as ActiveModal);
+    setStack((prev) => [...prev, { id: nextId++, name, props } as StackEntry]);
   };
 
-  const close = () => setActive(null);
+  // closes the topmost modal only
+  const close = () => setStack((prev) => prev.slice(0, -1));
 
-  const context = useMemo(() => ({ open, close }), []);
+  const closeAll = () => setStack([]);
 
-  const sharedProps = {
-    open: active !== null,
-    onOpenChange: (o: boolean) => { if (!o) close(); },
-  };
-
-  const ActiveComponent = active && MODALS[active.name];
+  const context = useMemo(() => ({ open, close, closeAll }), []);
 
   return (
     <ModalContext.Provider value={context}>
       {children}
-      {ActiveComponent && (
-        <ActiveComponent {...sharedProps} {...(active.props as any)} />
-      )}
+      {stack.map((entry, index) => {
+        const ActiveComponent = MODALS[entry.name];
+        const isTop = index === stack.length - 1;
+
+        return (
+          <ActiveComponent
+            key={entry.id}
+            open={true}
+            onOpenChange={(o: boolean) => {
+              if (!o && isTop) {
+                setStack((prev) => prev.filter((e) => e.id !== entry.id));
+              }
+            }}
+            {...(entry.props as any)}
+          />
+        );
+      })}
     </ModalContext.Provider>
   );
 }

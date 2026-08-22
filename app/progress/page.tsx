@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import type { Days } from "@/types/progress";
+import type { Days } from "@/types/Progress/progress";
 import { formatDate, today } from "@/lib/mics/date";
 import { useTasks } from "@/lib/progress/use_tasks";
 import { computeStreak } from "@/lib/progress/streak";
@@ -17,8 +17,8 @@ import { JournalSection } from "./components/Journal";
 import { fadeUp, container, fadeIn } from "@/constants/animations";
 import { ACCENT_COLOR } from "@/constants/progress/template";
 import { TaskSkeleton } from "./components/TaskCard_skeleton";
-import { TemplateModal } from "./components/TemplateModal";
-import { useProgressTemplates } from "@/lib/progress/use_templates";
+import { useModal } from "@/providers/Modalprovider";
+import DefaultButton from "../components/DefaultButton";
 
 function computeGlobalStats(days: Days) {
   const allTasks = Object.values(days).flatMap((d) => d.tasks);
@@ -46,12 +46,12 @@ export default function ProgressPage() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [mobileTab, setMobileTab] = useState<"tasks" | "calendar" | "week">(
     "tasks",
-  );  const [templateModalOpen, setTemplateModalOpen] = useState(false);
-  const { templates, addTemplate, removeTemplate } = useProgressTemplates();
+  );
+
   const dateKey = formatDate(selectedDate);
   const dayData = days[dateKey] ?? { tasks: [], journal: "" };
   const isToday = dateKey === today();
-
+  const { open } = useModal();
   const streak = useMemo(() => computeStreak(days), [days]);
   const gStats = useMemo(() => computeGlobalStats(days), [days]);
 
@@ -181,12 +181,17 @@ export default function ProgressPage() {
                     title="New task"
                     accentGlow={ACCENT_COLOR}
                     action={
-                      <button
-                        onClick={() => setTemplateModalOpen(true)}
+                      <DefaultButton
+                        onClick={() => open('progressTemplate', {
+                          onApplyTemplate: (template) => {
+                            void handleAddTask(template.title, template.description ?? "");
+                          }
+                        })}
+                        variant='ghost'
                         className="rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-xs font-medium text-zinc-400 transition-colors hover:text-zinc-200"
                       >
                         Templates
-                      </button>
+                      </DefaultButton>
                     }
                   >
                     <AddTaskForm onAdd={handleAddTask} />
@@ -300,12 +305,17 @@ export default function ProgressPage() {
                 title="New task"
                 accentGlow={ACCENT_COLOR}
                 action={
-                  <button
-                    onClick={() => setTemplateModalOpen(true)}
-                    className="rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-xs font-medium text-zinc-400 transition-colors hover:text-zinc-200"
+                  <DefaultButton
+                    variant="outline"
+                   onClick={() => open('progressTemplate', {
+                    onApplyTemplate: (template) => {
+                      void handleAddTask(template.title, template.description ?? "");
+                    }
+                  })}
+                    className="text-xs font-medium text-zinc-400 transition-colors "
                   >
                     Templates
-                  </button>
+                  </DefaultButton>
                 }
               >
                 <AddTaskForm onAdd={handleAddTask} />
@@ -320,7 +330,6 @@ export default function ProgressPage() {
               </SectionCard>
             </motion.div>
 
-            {/* Task list */}
             <motion.div variants={fadeUp} className="lg:col-span-4">
               <SectionCard
                 title="Tasks"
@@ -364,7 +373,6 @@ export default function ProgressPage() {
             </motion.div>
           </div>
 
-          {/* Journal — full width on both */}
           <motion.div variants={fadeUp}>
             <JournalSection
               value={dayData.journal}
@@ -373,18 +381,6 @@ export default function ProgressPage() {
           </motion.div>
         </motion.div>
       </div>
-
-      <TemplateModal
-        open={templateModalOpen}
-        onOpenChange={setTemplateModalOpen}
-        templates={templates}
-        onAddTemplate={addTemplate}
-        onRemoveTemplate={removeTemplate}
-        onApplyTemplate={(template) => {
-          void handleAddTask(template.title, template.description ?? "");
-          setTemplateModalOpen(false);
-        }}
-      />
     </div>
   );
 }

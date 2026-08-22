@@ -11,7 +11,7 @@ import { LessonFormValues } from "./Form";
 
 interface Props {
   lesson: Lesson;
-  onUpdate: (id: string, values: LessonFormValues) => void; // ← replace onEdit
+  onUpdate: (id: string, values: LessonFormValues) => void; 
   onDelete: () => void;
 }
 
@@ -113,12 +113,9 @@ export function LessonCard({ lesson, onUpdate, onDelete }: Props) {
               <div className="flex gap-2">
                 <DefaultButton
                   variant={'outline'}
-                  // onClick={(e) => { e.stopPropagation(); onEdit(); }}
                 onClick={() => open('lesson', {
                   lesson: lesson,
                   onSave: (id: string, values: LessonFormValues) => onUpdate(id, values),
-
-  
                 })}
                   className="flex items-center gap-1.5 rounded-lg border border-white/[0.06] px-3 py-1.5
                     text-xs font-medium text-zinc-400 hover:text-zinc-100 hover:border-white/[0.12] transition-all"

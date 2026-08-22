@@ -139,19 +139,9 @@ export function LessonForm({ initial, selectedDate, onSave, onCancel }: Props) {
               }}
             >
               <Save className="size-4 shrink-0" />
-              {/* {saved ? "Saved!" : initial ? "Update" : "Save"} */}
             </DefaultButton>
           </div>
         </div>
-
-        {/* <p className="text-xs text-zinc-600 mt-2">
-          Logging for{" "}
-          <span className="text-zinc-500">
-            {new Date(date + "T12:00:00").toLocaleDateString("en-US", {
-              weekday: "long", month: "long", day: "numeric",
-            })}
-          </span>
-        </p> */}
       </div>
 
       {!isLoggedIn && <No_access />}

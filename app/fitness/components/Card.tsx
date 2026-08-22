@@ -58,7 +58,7 @@ export function ActivityCard({
             {activity.durationMins}m
           </span>
 
-          <span
+          {/* <span
             className="rounded-full border px-2 py-0.5 text-xs"
             style={{
               color: intMeta.color,
@@ -67,7 +67,7 @@ export function ActivityCard({
             }}
           >
             {intMeta.label}
-          </span>
+          </span> */}
 
           <motion.span
             animate={{ rotate: isOpen ? 180 : 0 }}

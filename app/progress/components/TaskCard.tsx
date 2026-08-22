@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckIcon, Trash2Icon, ChevronDownIcon, Trash2 } from "lucide-react";
-import type { Task } from "@/types/progress";
+import type { Task } from "@/types/Progress/progress";
 import { useModal } from "@/providers/Modalprovider";
 import DefaultButton from "@/app/components/DefaultButton";
 

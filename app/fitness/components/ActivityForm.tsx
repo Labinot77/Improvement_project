@@ -45,7 +45,6 @@ export function ActivityForm({ onSave }: Props) {
     <div className="relative flex flex-col gap-4">
       <div className={!isLoggedIn ? "blur-sm pointer-events-none select-none" : ""}>
 
-        {/* Type + Date row */}
         <div className="grid grid-cols-2 gap-3">
           <div className="flex flex-col gap-1.5">
             <p className="text-xs font-medium text-zinc-500">Activity</p>
@@ -73,7 +72,6 @@ export function ActivityForm({ onSave }: Props) {
 
         </div>
 
-        {/* Duration */}
         <div className="flex flex-col gap-1.5 mt-3">
           <p className="text-xs font-medium text-zinc-500">Duration (minutes)</p>
           <input
@@ -86,7 +84,7 @@ export function ActivityForm({ onSave }: Props) {
           />
         </div>
 
-        <div className="flex flex-col gap-1.5 mt-3">
+        {/* <div className="flex flex-col gap-1.5 mt-3">
           <p className="text-xs font-medium text-zinc-500">Intensity</p>
           <div className="flex gap-2">
             {ALL_INTENSITIES.map((lvl) => (
@@ -105,9 +103,8 @@ export function ActivityForm({ onSave }: Props) {
               </button>
             ))}
           </div>
-        </div>
+        </div> */}
 
-        {/* Notes */}
         <div className="flex flex-col gap-1.5 mt-3">
           <p className="text-xs font-medium text-zinc-500">Notes</p>
           <Textarea

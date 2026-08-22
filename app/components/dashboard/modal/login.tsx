@@ -27,7 +27,7 @@ export function LoginModal({ open, onOpenChange }: Props) {
     await supabase.auth.signInWithOAuth({
       provider,
       options: {
-        redirectTo: `${location.origin}/auth/callback`,
+        redirectTo: `${window.location.origin}/auth/callback`,
       },
     });
   }
