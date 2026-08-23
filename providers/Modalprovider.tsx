@@ -11,12 +11,12 @@ import type { Activity } from "@/types/fitness";
 import { DayActivityModal } from "@/app/fitness/components/modal/Day";
 import { Lesson } from "@/types/lessons";
 import { TemplateModal } from "@/app/progress/components/Modal/Template";
-import { ProgressTemplate } from "@/types/Progress/progress";
 import { LessonsExpandedModal } from "@/app/lessons/components/Modal/List";
 import { RecipeForm, RecipeFormValues } from "@/app/recipes/components/modal/Form";
 import { MealType, Recipe, RecipeFilters } from "@/types/Recipies/main";
 import { RecipeFilterModal } from "@/app/recipes/components/modal/Filter";
 import { RecipePreviewModal } from "@/app/recipes/components/modal/Preview";
+import { ProgressTemplate } from "@/types/Progress/templates";
 
 type ModalProps = {
   login: Record<string, never>;
