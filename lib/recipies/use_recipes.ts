@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
-import type { Recipe, Ingredient, MealType, Difficulty } from "../types/Recipies/main";
+import type { Recipe, Ingredient, MealType, Difficulty } from "../../types/Recipies/main";
 
 const supabase = createClient();
 
