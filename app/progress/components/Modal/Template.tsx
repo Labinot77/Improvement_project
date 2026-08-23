@@ -15,11 +15,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import DefaultButton from "@/app/components/DefaultButton";
-import type { ProgressTemplate } from "@/types/Progress/progress";
 import { useProgressTemplates } from "@/lib/progress/use_templates";
 import { inputClass } from "@/constants/misc";
 import { useModal } from "@/providers/Modalprovider";
 import TemplateSkeleton from "./components/Skeleton";
+import { ProgressTemplate } from "@/types/Progress/templates";
 
 
 type Props = {
