@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ModalProvider } from "../providers/Modalprovider";
@@ -16,6 +16,18 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Life Tracker",
   description: "Track everything. Improve everything.",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Life Tracker",
+  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#000000",
 };
 
 export default function RootLayout({
@@ -30,7 +42,7 @@ export default function RootLayout({
     >
       <body className="min-h-full dark">
         <ModalProvider>
-        {children}
+          {children}
         </ModalProvider>
       </body>
     </html>

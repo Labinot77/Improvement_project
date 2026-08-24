@@ -3,6 +3,8 @@
 import { Clock, Moon, Trash2, ImageIcon } from "lucide-react";
 import type { Recipe } from "@/types/Recipies/main";
 import { MEAL_META, DIFFICULTY_META } from "@/constants/recipes";
+import { Button } from "@/components/ui/button";
+import { useModal } from "@/providers/Modalprovider";
 
 interface Props {
   recipe: Recipe;
@@ -22,7 +24,7 @@ export function RecipeCard({ recipe, onClick, onDelete }: Props) {
   const meal = MEAL_META[recipe.mealType];
   const difficulty = DIFFICULTY_META[recipe.difficulty];
   const totalLabel = formatMinutes(recipe.cookMinutes);
-
+  const { open } = useModal();
   const previewIngredients = recipe.ingredients.slice(0, 3);
   const remainingCount = recipe.ingredients.length - previewIngredients.length;
 
@@ -60,15 +62,20 @@ export function RecipeCard({ recipe, onClick, onDelete }: Props) {
               </span>
             )}
           </div>
-          <button
+          <Button
+            variant={"ghost"}
             onClick={(e) => {
               e.stopPropagation();
-              onDelete();
-            }}
+            open("delete", {
+              onConfirm() {
+                onDelete();
+              },
+            }
+            )}}
             className="text-zinc-600 hover:text-red-400 transition-colors shrink-0"
           >
             <Trash2 className="size-3.5" />
-          </button>
+          </Button>
         </div>
 
         <h3 className="text-sm font-medium text-zinc-100 line-clamp-2">{recipe.title}</h3>
