@@ -91,7 +91,7 @@ function handleSubmit(e: any) {
     imageUrl: imageUrls,
     date,
   });
-
+  console.log(imageUrls)
   onOpenChange(false);
 }
   return (

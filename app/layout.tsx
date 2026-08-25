@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   description: "Track everything. Improve everything.",
   appleWebApp: {
     capable: true,
-    statusBarStyle: "black-translucent",
+    statusBarStyle: "default",
     title: "Life Tracker",
   },
 };
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  viewportFit: "cover",
+  viewportFit: "auto",
   themeColor: "#000000",
 };
 
