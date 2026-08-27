@@ -15,9 +15,9 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { LessonSkeleton } from "../Skeleton";
 import { LessonCard } from "../Card";
 import type { LessonFormValues } from "@/app/lessons/components/Form";
+import LessonSkeleton from "../Card_skeleton";
 
 interface Props {
   open: boolean;
@@ -54,10 +54,9 @@ export function LessonsExpandedModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         showCloseButton={false}
-  className="flex h-[90vh] w-full lg:min-w-[55dvw] min-w-[80dvw] flex-col gap-0 overflow-hidden
+        className="flex h-[90vh] w-full lg:min-w-[55dvw] min-w-[80dvw] flex-col gap-0 overflow-hidden
     rounded-2xl border border-white/[0.08] bg-zinc-950 p-0 shadow-2xl"
       >
-        {/* Header */}
         <DialogHeader className="flex-row items-center justify-between space-y-0 border-b border-white/[0.06] px-6 py-4">
           <div className="text-left">
             <DialogTitle className="text-base font-semibold text-zinc-100">
@@ -132,7 +131,11 @@ export function LessonsExpandedModal({
         </div>
 
         {/* List — bigger, grid on wide screens, generous scroll area */}
-        <motion.div layoutScroll layout className="flex-1 overflow-y-auto px-6 py-5">
+        <motion.div
+          layoutScroll
+          layout
+          className="flex-1 overflow-y-auto px-6 py-5"
+        >
           <AnimatePresence initial={false} mode="popLayout">
             {filtered.length === 0 ? (
               <motion.p
@@ -146,7 +149,7 @@ export function LessonsExpandedModal({
                   : "No lessons yet — add your first one."}
               </motion.p>
             ) : (
-              <div className="md:flex md:flex-col">
+              <div className="md:flex md:flex-col gap-3">
                 {filtered.map((lesson) =>
                   pendingLessonIds.has(lesson.id) ? (
                     <LessonSkeleton key={lesson.id} />

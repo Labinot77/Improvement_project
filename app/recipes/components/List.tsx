@@ -5,13 +5,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Search, X, LayersPlus, Moon } from "lucide-react";
 import { useModal } from "@/providers/Modalprovider";
 import { Input } from "@/components/ui/input";
-import { LessonSkeleton } from "@/app/lessons/components/Skeleton";
 import { RecipeCard } from "./Card";
 import { Recipe, RecipeFilters, EMPTY_RECIPE_FILTERS } from "@/types/Recipies/main";
 import { MEAL_META } from "@/constants/recipes";
 import { Button } from "@/components/ui/button";
 import type { RecipeFormValues } from "./modal/Form";
-import Card_Skeleton from "./Card_Skeleton";
+import RecipeSkeleton from "./Card_skeleton";
 
 interface Props {
   recipes: Recipe[];
@@ -161,9 +160,9 @@ export function RecipeList({
         <AnimatePresence initial={false} mode="popLayout">
           {loading ? (
             <>
-              <Card_Skeleton/>
-              <Card_Skeleton/>
-              <Card_Skeleton/>
+              <RecipeSkeleton/>
+              <RecipeSkeleton/>
+              <RecipeSkeleton/>
             </>
           ) : filtered.length === 0 ? (
             <motion.p
@@ -179,7 +178,7 @@ export function RecipeList({
           ) : (
             filtered.map((recipe) =>
               pendingRecipeIds.has(recipe.id) ? (
-                <LessonSkeleton key={recipe.id} />
+                <RecipeSkeleton key={recipe.id} />
               ) : (
                 <motion.div
                   key={recipe.id}

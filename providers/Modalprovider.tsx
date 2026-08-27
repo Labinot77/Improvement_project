@@ -25,11 +25,12 @@ type ModalProps = {
     lesson: Lesson;
     onSave: (id: string, values: LessonFormValues) => void;
   };
-    lessons_list: {
+  lessons_list: {
     lessons: Lesson[];
     onUpdate: (id: string, values: LessonFormValues) => void;
     onDelete: (id: string) => void;
     pendingLessonIds: Set<string>;
+    onClose?: () => void; // NEW: fired when this modal closes, for any reason
   };
   delete: {
     onConfirm: () => void | Promise<void>;
@@ -48,10 +49,10 @@ type ModalProps = {
     onApplyTemplate: (template: ProgressTemplate) => void;
   };
   recipe_form: {
-    recipe?: Recipe
+    recipe?: Recipe;
     onSave: (id: string, values: RecipeFormValues) => void;
-  }
-    recipe_filter: {
+  };
+  recipe_filter: {
     value: RecipeFilters;
     onApply: (value: RecipeFilters) => void;
     recipes: Recipe[];
@@ -124,6 +125,8 @@ export function ModalProvider({ children }: { children: ReactNode }) {
             open={true}
             onOpenChange={(o: boolean) => {
               if (!o && isTop) {
+                // fire any per-modal onClose callback before removing it
+                (entry.props as { onClose?: () => void }).onClose?.();
                 setStack((prev) => prev.filter((e) => e.id !== entry.id));
               }
             }}

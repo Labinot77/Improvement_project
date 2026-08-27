@@ -41,7 +41,6 @@ export function LessonFormModal({ initial, selectedDate, onSave, onCancel }: Pro
   const [saved, setSaved]       = useState(false);
   const { isLoggedIn } = useUser();
 
-  // Sync with initial when editing
   useEffect(() => {
     if (!initial) return;
     setTitle(initial.title);

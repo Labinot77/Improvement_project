@@ -63,10 +63,9 @@ export function TaskCard({ task, onUpdate, onDelete }: Props) {
             )}
           </div>
 
-          {/* Actions */}
           <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
             <DefaultButton
-                          variant='ghost'
+              variant='ghost'
               onClick={() => setShowReflection((s) => !s)}
               className="p-1.5 rounded-lg text-zinc-600 hover:text-zinc-300 hover:bg-white/[0.06] transition-colors"
               title="Reflection"

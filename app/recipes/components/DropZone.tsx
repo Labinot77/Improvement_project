@@ -15,6 +15,7 @@ import {
 
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
+import { wait } from "@/lib/mics/helpers";
 
 interface UploadedFile {
   id: string;
@@ -23,8 +24,15 @@ interface UploadedFile {
   path: string;
 }
 
+export interface PhotoDropzoneRenderState extends _DropzoneState {
+  uploading: boolean;
+  hasImage: boolean;
+  currentImageUrl: string | null;
+  removeImage: () => Promise<void>;
+}
+
 interface Props extends Omit<_DropzoneProps, "children" | "onDrop"> {
-  children?: (dropzone: _DropzoneState) => React.ReactNode;
+  children?: (dropzone: PhotoDropzoneRenderState) => React.ReactNode;
 
   showFilesList?: boolean;
   showErrorMessage?: boolean;
@@ -78,7 +86,6 @@ export function PhotoDropzone({
       });
 
     if (error) throw error;
-
     const { data } = supabase.storage.from("recipe-images").getPublicUrl(filePath);
 
     return { id, file, url: data.publicUrl, path: filePath };
@@ -159,6 +166,20 @@ export function PhotoDropzone({
     }
   };
 
+  // Full override mode — caller owns all visuals, we just wire up root/input props + state.
+if (children) {
+  return (
+    <div className="flex flex-col gap-2">
+      {children({ ...dropzone, uploading, hasImage, currentImageUrl, removeImage: removeCurrentImage })}
+
+      {showErrorMessage && errorMessage && (
+        <div className="flex items-center gap-2 rounded-lg border border-red-500/10 bg-red-500/5 px-3 py-2 text-xs text-red-400">
+          <span>{errorMessage}</span>
+        </div>
+      )}
+    </div>
+  );
+}
   return (
     <div className="flex flex-col gap-2">
       <div className={cn("flex gap-3", hasImage ? "flex-col sm:flex-row" : "flex-col")}>
@@ -183,8 +204,6 @@ export function PhotoDropzone({
               <Loader2 className="size-5 animate-spin" />
               <span className="text-xs font-medium">Uploading image...</span>
             </div>
-          ) : children ? (
-            children(dropzone)
           ) : dropzone.isDragAccept ? (
             <div className="text-sm font-medium text-amber-500">Drop your files here</div>
           ) : dropzone.isDragReject ? (

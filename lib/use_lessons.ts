@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Lesson, LessonCategory, LessonImpact } from "../types/lessons";
+import { wait } from "./mics/helpers";
 
 const supabase = createClient();
 
@@ -43,7 +44,6 @@ export function useLessons() {
       .from("lessons")
       .select("*")
       .order("date", { ascending: false });
-
     if (!error && data) setLessons(data.map(toLesson));
     setLoading(false);
   }, []);

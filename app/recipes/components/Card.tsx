@@ -99,17 +99,17 @@ export function RecipeCard({ recipe, onClick, onDelete }: Props) {
         )}
 
         <div className="mt-auto flex items-center gap-3 text-xs text-zinc-500 flex-wrap">
-          {totalLabel && (
-            <span className="flex items-center gap-1">
-              <Clock className="size-3" /> {totalLabel}
-            </span>
-          )}
           <span
             className="rounded-full px-1.5 py-0.5 text-[10px] font-medium"
             style={{ color: difficulty.color, background: `${difficulty.color}1a` }}
           >
             {difficulty.label}
           </span>
+          {totalLabel && (
+            <span className="flex items-center gap-1">
+              <Clock className="size-3" /> {totalLabel}
+            </span>
+          )}
           {recipe.servings && <span>{recipe.servings} servings</span>}
         </div>
       </div>

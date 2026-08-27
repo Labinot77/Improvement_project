@@ -34,36 +34,37 @@ const ShoppingList = () => {
           onChange={(e) => setQuickValue(e.target.value)}
           placeholder="Add an item…"
           className="flex-1 border border-white/[0.08] px-3 py-2 text-sm text-zinc-100
-            placeholder-zinc-600 focus:outline-none focus:border-emerald-500/50
-            focus:ring-1 focus:ring-emerald-500/20 transition-all"
+            placeholder-zinc-600 focus:outline-none focus:border-amber-500/50
+            focus:ring-1 focus:ring-amber-500/20 transition-all"
         />
         <DefaultButton
           type="submit"
-          className="flex items-center gap-1.5 border border-emerald-500/30 bg-emerald-500/10
-            text-emerald-500 hover:bg-emerald-500/20 px-3"
+          disabled={!quickValue.trim()}
+          className="flex items-center gap-1.5 rounded-xl border border-amber-500/30 bg-amber-500/10
+            px-3 text-amber-500 transition-all hover:bg-amber-500/20 disabled:opacity-30"
         >
           <Plus className="size-4" />
         </DefaultButton>
       </form>
 
       {/* Items */}
-      <div className="flex flex-col gap-1.5">
+      <div className="flex flex-col gap-2 max-h-76 overflow-y-auto pr-1">
         {loading ? (
-          <p className="text-sm text-zinc-600 py-4 text-center">Loading…</p>
+          <p className="text-sm text-zinc-600 py-6 text-center">Loading…</p>
         ) : ordered.length === 0 ? (
           <p className="text-sm text-zinc-600 py-6 text-center">
             No items yet — add your first one.
           </p>
         ) : (
-          <AnimatePresence initial={false}>
+          <AnimatePresence initial={false} mode="popLayout">
             {ordered.map((item) => (
               <motion.div
                 key={item.id}
                 layout
-                initial={{ opacity: 0, y: -4 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, x: -8 }}
-                transition={{ layout: { duration: 0.25 } }}
+                initial={{ opacity: 0, y: 12, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, x: 25, scale: 0.5 }}
+                transition={{ duration: 0.25 }}
                 className={`flex items-center gap-3 rounded-xl border px-3 py-2.5 transition-colors ${
                   item.completed
                     ? "border-white/[0.04] bg-[#0f0f0f]/50"
@@ -74,7 +75,7 @@ const ShoppingList = () => {
                   type="checkbox"
                   checked={item.completed}
                   onChange={() => toggleItem(item.id)}
-                  className="size-4 shrink-0 accent-emerald-500 cursor-pointer"
+                  className="size-4 shrink-0 accent-amber-500 cursor-pointer"
                 />
                 <label className="flex-1 min-w-0 cursor-pointer" onClick={() => toggleItem(item.id)}>
                   <p

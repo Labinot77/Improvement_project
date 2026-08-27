@@ -16,3 +16,4 @@ export function getLast7Days(): string[] {
   })
 }
 
+

@@ -1,25 +1,24 @@
 "use client";
 
-// TODO: Expanded list view (full screen modal) for better UX when there are many lessons. Currently, the list is cramped in a sidebar and can be hard to navigate.
-
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, X, Maximize2 } from "lucide-react";
+import { Search, X, Maximize2, Minimize2 } from "lucide-react";
 import type { Lesson, LessonCategory } from "@/types/lessons";
 import { ALL_CATEGORIES, CATEGORY_META, ACCENT } from "@/constants/mental";
 import { LessonCard } from "./Card";
-import SectionCard from "@/app/components/SectionCard";
-import { useModal } from "@/providers/Modalprovider";
 import type { LessonFormValues } from "@/app/lessons/components/Form";
 import { Input } from "@/components/ui/input";
-import { LessonSkeleton } from "./Skeleton";
 import DefaultButton from "@/app/components/DefaultButton";
+import LessonSkeleton from "./Card_skeleton";
 
 interface Props {
   lessons: Lesson[];
   onUpdate: (id: string, values: LessonFormValues) => void;
   onDelete: (id: string) => void;
   pendingLessonIds: Set<string>;
+  loading: boolean;
+  expanded: boolean;
+  onExpandedChange: (expanded: boolean) => void;
 }
 
 export function LessonList({
@@ -27,8 +26,10 @@ export function LessonList({
   onUpdate,
   onDelete,
   pendingLessonIds,
+  loading,
+  expanded,
+  onExpandedChange,
 }: Props) {
-  const { open } = useModal();
   const [search, setSearch] = useState("");
   const [filterCat, setFilterCat] = useState<LessonCategory | "All">("All");
 
@@ -68,19 +69,12 @@ export function LessonList({
         <DefaultButton
           variant="ghost"
           size="icon"
-          onClick={() =>
-            open("lessons_list", {
-              lessons,
-              onUpdate,
-              onDelete,
-              pendingLessonIds,
-            })
-          }
-          title="Expand list"
+          onClick={() => onExpandedChange(!expanded)}
+          title={expanded ? "Collapse list" : "Expand list"}
           className="border border-white/[0.08] text-zinc-600 hover:text-amber-500
     hover:border-amber-500/30 hover:bg-amber-500/10 transition-all"
         >
-          <Maximize2 className="size-3.5" />
+          {expanded ? <Minimize2 className="size-3.5" /> : <Maximize2 className="size-3.5" />}
         </DefaultButton>
       </div>
 
@@ -118,13 +112,22 @@ export function LessonList({
         ))}
       </div>
 
-      <motion.div
-        layoutScroll
-        layout
-        className="flex flex-col gap-2 h-76 max-h-76 overflow-y-auto pr-3"
-      >
+<motion.div
+  layoutScroll
+  layout
+  transition={{ duration: 0.35, ease: "easeInOut" }}
+  className={`flex flex-col gap-2 overflow-y-auto pr-3 ${
+    expanded ? "h-[65vh] max-h-[65vh]" : "h-76 max-h-76"
+  }`}
+>
         <AnimatePresence initial={false} mode="popLayout">
-          {filtered.length === 0 ? (
+          {loading ? (
+            <>
+              <LessonSkeleton />
+              <LessonSkeleton />
+              <LessonSkeleton />
+            </>
+          ) : filtered.length === 0 ? (
             <motion.p
               key="empty"
               initial={{ opacity: 0 }}

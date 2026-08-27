@@ -66,8 +66,9 @@ export function useRecipes() {
     const {
       data: { user },
     } = await supabase.auth.getUser();
+    console.log(input)
     if (!user) return;
-
+    
     const tempId = crypto.randomUUID();
     const optimistic: Recipe = { id: tempId, ...input, createdAt: new Date().toISOString() };
 

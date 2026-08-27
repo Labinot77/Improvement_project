@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Clock, Moon, X, Pencil, ImageIcon, ChefHat, Check, Users, Flame } from "lucide-react";
+import { Clock, Moon, X, Pencil, ImageIcon, ChefHat, Check, Users } from "lucide-react";
 import type { Recipe } from "@/types/Recipies/main";
 import { MEAL_META, DIFFICULTY_META } from "@/constants/recipes";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -64,10 +64,9 @@ export function RecipePreviewModal({ open, onOpenChange, recipe, onSave }: Props
           <X className="size-4" />
         </button>
 
-        <div className="flex-1 overflow-y-auto">
-          {/* Hero: compact image (left) + title, badges & notes (right), top-aligned */}
+        <div className="flex-1 overflow-y-auto overflow-x-hidden">
           <div className="flex gap-5 px-6 pt-6 pb-5">
-            <div className="relative size-28 sm:size-32 shrink-0 overflow-hidden rounded-2xl bg-white/[0.03] flex items-center justify-center">
+            <div className="relative size-28 sm:size-52 shrink-0 overflow-hidden rounded-2xl bg-white/[0.03] flex items-center justify-center">
               {recipe.imageUrl?.[0] ? (
                 <img
                   src={recipe.imageUrl[0]}
@@ -80,23 +79,40 @@ export function RecipePreviewModal({ open, onOpenChange, recipe, onSave }: Props
             </div>
 
             <div className="flex-1 min-w-0 flex flex-col gap-2 pt-1">
-              <p
-                className="flex items-center gap-1.5 text-xs font-medium"
-                style={{ color: meal.color }}
-              >
-                {meal.icon} {recipe.mealType}
-              </p>
-              <h2 className="text-xl font-semibold text-zinc-100 leading-tight pr-8">
+              <div>
+                <span
+                  className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium border"
+                  style={{
+                    borderColor: meal.color,
+                    background: `${meal.color}20`,
+                    color: meal.color,
+                  }}
+                >
+                  {meal.icon} {recipe.mealType}
+                </span>
+              </div>
+
+              <h2 className="text-xl font-semibold text-zinc-100 leading-tight pr-8 border-b border-white/[0.08] -mb-0.5 break-words">
                 {recipe.title}
               </h2>
 
-              <div className="flex items-center gap-1.5 flex-wrap mt-0.5">
+              <div>
+                <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-600 mb-1.5">
+                  Difficulty
+                </p>
                 <span
-                  className="rounded-full px-2 py-0.5 text-[11px] font-medium"
-                  style={{ color: difficulty.color, background: `${difficulty.color}1a` }}
+                  className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium border"
+                  style={{
+                    borderColor: difficulty.color,
+                    background: `${difficulty.color}20`,
+                    color: difficulty.color,
+                  }}
                 >
                   {difficulty.label}
                 </span>
+              </div>
+
+              <div className="flex items-center gap-1.5 flex-wrap mt-0.5">
                 {totalLabel && (
                   <span className="flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium text-zinc-400 bg-white/[0.04]">
                     <Clock className="size-3" /> {totalLabel}
@@ -116,42 +132,37 @@ export function RecipePreviewModal({ open, onOpenChange, recipe, onSave }: Props
             </div>
           </div>
 
-          {/* Notes — full width, only rendered when present so no empty block */}
+          {/* Notes */}
           {recipe.notes && (
-            <div className="px-6 pb-5">
-              <p className="text-sm text-zinc-400 whitespace-pre-wrap leading-relaxed border-l-2 border-white/[0.08] pl-3">
-                {recipe.notes}
+            <div className="px-6 pb-5 min-w-0">
+              <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-600 mb-2">
+                Notes
               </p>
+              <div className="border-l-2 border-white/[0.08] pl-3 min-w-0">
+                <p className="text-sm text-zinc-400 leading-relaxed min-w-0 whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
+                  {recipe.notes}
+                </p>
+              </div>
             </div>
           )}
 
-          {/* Prep / cook breakdown — small inline row, only if there's timing to show */}
-            <div className="flex gap-5 px-6 pb-5 text-xs text-zinc-500">
-              {recipe.cookMinutes > 0 && (
-                <span className="flex items-center gap-1.5">
-                  <Flame className="size-3.5 text-zinc-600" />
-                  Cook <span className="text-zinc-300">{formatMinutes(recipe.cookMinutes)}</span>
-                </span>
-              )}
-            </div>
-
-          {/* Ingredients — single flowing column, natural height */}
+          {/* Ingredients — matches RecipeForm's row layout, read-only */}
           {hasIngredients && (
-            <div className="border-t border-white/[0.06] px-6 py-5">
+            <div className="border-t border-white/[0.06] px-6 py-5 min-w-0">
               <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-600 mb-2">
                 Ingredients
               </p>
-              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 min-w-0">
                 {recipe.ingredients.map((ing) => (
-                  <li
+                  <div
                     key={ing.id}
-                    className="text-sm text-zinc-300 flex justify-between gap-3 border-b border-white/[0.04] py-1.5"
+                    className="flex items-center justify-between gap-2 border-b border-white/[0.04] py-1.5 min-w-0"
                   >
-                    <span className="truncate">{ing.name}</span>
-                    <span className="text-zinc-500 shrink-0">{ing.amount}</span>
-                  </li>
+                    <span className="text-sm text-zinc-300 truncate min-w-0">{ing.name}</span>
+                    <span className="text-sm text-zinc-500 shrink-0">{ing.amount}</span>
+                  </div>
                 ))}
-              </ul>
+              </div>
             </div>
           )}
         </div>

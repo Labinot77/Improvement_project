@@ -32,7 +32,7 @@ export function LessonCard({ lesson, onUpdate, onDelete }: Props) {
     rounded-xl
     border
     border-white/[0.06]
-    bg-[#0f0f0f]
+    bg-[#0f0f0f]/75
     overflow-hidden
     hover:border-white/[0.10]
     transition-colors"
@@ -40,9 +40,8 @@ export function LessonCard({ lesson, onUpdate, onDelete }: Props) {
       {/* The use of DefaultButton breaks the components visually */}
       <button
         onClick={() => setExpanded((p) => !p)}
-        className="flex w-full items-start gap-3 px-4 py-3 text-left"
+        className="flex w-full items-start gap-3 px-4 py-3 text-left group transition-colors duration-150"
       >
-        {/* Category icon */}
         <span className="text-base shrink-0 mt-0.5">{catMeta.icon}</span>
 
         {/* Title + meta */}
@@ -70,7 +69,6 @@ export function LessonCard({ lesson, onUpdate, onDelete }: Props) {
               {impactMeta.label} impact
             </span>
 
-            {/* Date */}
             <span className="text-xs text-zinc-600">
               {new Date(lesson.date + "T12:00:00").toLocaleDateString("en-US", {
                 month: "short", day: "numeric", year: "numeric",
@@ -82,8 +80,8 @@ export function LessonCard({ lesson, onUpdate, onDelete }: Props) {
         {/* Chevron */}
         <motion.span
           animate={{ rotate: expanded ? 180 : 0 }}
-          transition={{ duration: 0.2 }}
-          className="text-zinc-600 shrink-0 mt-1"
+            transition={{ duration: 0.2 }}
+            className="text-zinc-600 shrink-0 mt-1 group-hover:opacity-100 opacity-0 transition-opacity duration-150"
         >
           <ChevronDown className="size-4" />
         </motion.span>
@@ -97,10 +95,11 @@ export function LessonCard({ lesson, onUpdate, onDelete }: Props) {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
+            onClick={() => setExpanded((s) => !s)}
             transition={{ duration: 0.2, ease: "easeInOut" }}
             className="overflow-hidden"
           >
-            <div className="px-4 pb-4 flex flex-col gap-3 border-t border-white/[0.04] pt-3">
+            <div className="px-4 pb-4 flex flex-col gap-3 border-t border-white/[0.04] pt-3 ">
               {lesson.body ? (
                 <p className="text-sm text-zinc-400 leading-relaxed whitespace-pre-wrap">
                   {lesson.body}
@@ -124,13 +123,15 @@ export function LessonCard({ lesson, onUpdate, onDelete }: Props) {
                 </DefaultButton>
                 <DefaultButton
                   variant={'outline'}
-                  onClick={() => open('delete', {
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    open('delete', {
                       title: "Delete lesson",
                       description: `Are you sure you want to delete "${lesson.title}"? This action cannot be undone. `,
                       itemName: `"${lesson.title}"`,
                       onConfirm: onDelete,
                       
-                  })}
+                  })}}
                   className="flex items-center gap-1.5 rounded-lg border border-red-500/20 px-3 py-1.5
                     text-xs font-medium text-red-400 hover:bg-red-500/10 transition-all"
                 >

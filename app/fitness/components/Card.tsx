@@ -38,7 +38,7 @@ export function ActivityCard({
       initial={{ opacity: 0, y: -4 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, x: -8 }}
-      className="overflow-hidden rounded-xl border border-white/[0.06] bg-[#0f0f0f] transition-colors hover:border-white/[0.10]"
+      className="overflow-hidden rounded-xl border border-white/[0.06] bg-[#0f0f0f]/75 transition-colors hover:border-white/[0.10]"
     >
       <button
         onClick={onToggle}

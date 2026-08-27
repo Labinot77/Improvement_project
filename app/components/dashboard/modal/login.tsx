@@ -53,7 +53,6 @@ export function LoginModal({ open, onOpenChange }: Props) {
           </DialogDescription>
         </DialogHeader>
 
-        {/* Stats teaser */}
         <div className="grid grid-cols-3 gap-2">
           {[
             { label: "Modules", value: "7" },
