@@ -5,6 +5,7 @@ import type { Recipe } from "@/types/Recipies/main";
 import { MEAL_META, DIFFICULTY_META } from "@/constants/recipes";
 import { Button } from "@/components/ui/button";
 import { useModal } from "@/providers/Modalprovider";
+import { formatCurrency } from "@/lib/mics/helpers";
 
 interface Props {
   recipe: Recipe;
@@ -66,12 +67,12 @@ export function RecipeCard({ recipe, onClick, onDelete }: Props) {
             variant={"ghost"}
             onClick={(e) => {
               e.stopPropagation();
-            open("delete", {
-              onConfirm() {
-                onDelete();
-              },
-            }
-            )}}
+              open("delete", {
+                onConfirm() {
+                  onDelete();
+                },
+              });
+            }}
             className="text-zinc-600 hover:text-red-400 transition-colors shrink-0"
           >
             <Trash2 className="size-3.5" />
@@ -111,6 +112,11 @@ export function RecipeCard({ recipe, onClick, onDelete }: Props) {
             </span>
           )}
           {recipe.servings && <span>{recipe.servings} servings</span>}
+          {recipe.estimatedCost != null && (
+            <span className="ml-auto text-zinc-400 tabular-nums whitespace-nowrap">
+              {formatCurrency(recipe.estimatedCost, recipe.costCurrency)}
+            </span>
+          )}
         </div>
       </div>
     </div>

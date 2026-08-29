@@ -6,52 +6,60 @@ import { Search, X, LayersPlus, Moon } from "lucide-react";
 import { useModal } from "@/providers/Modalprovider";
 import { Input } from "@/components/ui/input";
 import { RecipeCard } from "./Card";
-import { Recipe, RecipeFilters, EMPTY_RECIPE_FILTERS } from "@/types/Recipies/main";
+import {
+  Recipe,
+  RecipeFilters,
+  EMPTY_RECIPE_FILTERS,
+} from "@/types/Recipies/main";
 import { MEAL_META } from "@/constants/recipes";
 import { Button } from "@/components/ui/button";
 import type { RecipeFormValues } from "./modal/Form";
 import RecipeSkeleton from "./Card_skeleton";
+import { useRecipes } from "@/lib/recipies/use_recipes";
 
 interface Props {
   recipes: Recipe[];
   onAdd: (values: RecipeFormValues) => void;
-  loading: boolean
+  loading: boolean;
   onUpdate: (id: string, values: RecipeFormValues) => void;
   onDelete: (id: string) => void;
   pendingRecipeIds: Set<string>;
 }
 
-export function RecipeList({
-  recipes,
-  onAdd,
-  loading,
-  onUpdate,
-  onDelete,
-  pendingRecipeIds,
-}: Props) {
+export function RecipeList({}) {
+  const { recipes, saveRecipe, loading, updateRecipe, deleteRecipe, pendingRecipeIds } = useRecipes();
+  // const { recipes, pendingRecipeIds, updateRecipe, deleteRecipe, addRecipe} = useRecipes(initialRecipies)
   const { open } = useModal();
+
   const [search, setSearch] = useState("");
   const [filters, setFilters] = useState<RecipeFilters>(EMPTY_RECIPE_FILTERS);
-
+  
   const hasActiveFilters =
-    filters.mealType !== "All" || filters.overnightOnly || filters.ingredients.length > 0;
+    filters.mealType !== "All" ||
+    filters.overnightOnly ||
+    filters.ingredients.length > 0;
 
   const filtered = useMemo(() => {
     return recipes.filter((r) => {
-      const matchesMeal = filters.mealType === "All" || r.mealType === filters.mealType;
+      const matchesMeal =
+        filters.mealType === "All" || r.mealType === filters.mealType;
       const matchesOvernight = !filters.overnightOnly || r.needsOvernightRest;
       // ALL selected ingredients must be present in the recipe
-      const recipeIngredientNames = r.ingredients.map((i) => i.name.toLowerCase());
+      const recipeIngredientNames = r.ingredients.map((i) =>
+        i.name.toLowerCase(),
+      );
       const matchesIngredients =
         filters.ingredients.length === 0 ||
         filters.ingredients.every((sel) =>
-          recipeIngredientNames.includes(sel.toLowerCase())
+          recipeIngredientNames.includes(sel.toLowerCase()),
         );
       const matchesSearch =
         !search.trim() ||
         r.title.toLowerCase().includes(search.toLowerCase()) ||
         r.notes.toLowerCase().includes(search.toLowerCase());
-      return matchesMeal && matchesOvernight && matchesIngredients && matchesSearch;
+      return (
+        matchesMeal && matchesOvernight && matchesIngredients && matchesSearch
+      );
     });
   }, [recipes, filters, search]);
 
@@ -96,7 +104,7 @@ export function RecipeList({
           onClick={() =>
             open("recipe_form", {
               recipe: undefined,
-              onSave: (_id: string, values: RecipeFormValues) => onAdd(values),
+              onSave: saveRecipe,
             })
           }
           className="border border-amber-500/30 bg-amber-500/10 text-amber-500 hover:bg-amber-500/20"
@@ -105,52 +113,55 @@ export function RecipeList({
         </Button>
       </div>
 
-
-      {/* Active filters, set via the filter modal */}
-      {hasActiveFilters && (
-        <div className="flex gap-1.5 flex-wrap">
-          {filters.mealType !== "All" && (
-            <button
-              onClick={() => setFilters((f) => ({ ...f, mealType: "All" }))}
-              className="flex items-center gap-1.5 rounded-full pl-2.5 pr-1.5 py-1 text-xs font-medium border transition-all"
-              style={{
-                borderColor: MEAL_META[filters.mealType].color,
-                background: `${MEAL_META[filters.mealType].color}20`,
-                color: MEAL_META[filters.mealType].color,
-              }}
-            >
-              {MEAL_META[filters.mealType].icon} {filters.mealType}
-              <X className="size-3" />
-            </button>
-          )}
-          {filters.overnightOnly && (
-            <button
-              onClick={() => setFilters((f) => ({ ...f, overnightOnly: false }))}
-              className="flex items-center gap-1.5 rounded-full pl-2.5 pr-1.5 py-1 text-xs font-medium border
-                border-indigo-400/30 bg-indigo-400/10 text-indigo-400 transition-all"
-            >
-              <Moon className="size-3" /> Overnight
-              <X className="size-3" />
-            </button>
-          )}
-          {filters.ingredients.map((name) => (
-            <button
-              key={name}
-              onClick={() =>
-                setFilters((f) => ({
-                  ...f,
-                  ingredients: f.ingredients.filter((i) => i !== name),
-                }))
-              }
-              className="flex items-center gap-1.5 rounded-full pl-2.5 pr-1.5 py-1 text-xs font-medium border
-                border-amber-500/30 bg-amber-500/10 text-amber-500 transition-all"
-            >
-              {name}
-              <X className="size-3" />
-            </button>
-          ))}
-        </div>
+      {/* Active filters */}
+      <div className="flex gap-1.5 flex-wrap min-h-[30px]">
+  {hasActiveFilters && (
+    <>
+      {filters.mealType !== "All" && (
+        <button
+          onClick={() => setFilters((f) => ({ ...f, mealType: "All" }))}
+          className="flex items-center gap-1.5 rounded-full pl-2.5 pr-1.5 py-1 text-xs font-medium border transition-all"
+          style={{
+            borderColor: MEAL_META[filters.mealType].color,
+            background: `${MEAL_META[filters.mealType].color}20`,
+            color: MEAL_META[filters.mealType].color,
+          }}
+        >
+          {MEAL_META[filters.mealType].icon} {filters.mealType}
+          <X className="size-3" />
+        </button>
       )}
+      {filters.overnightOnly && (
+        <button
+          onClick={() =>
+            setFilters((f) => ({ ...f, overnightOnly: false }))
+          }
+          className="flex items-center gap-1.5 rounded-full pl-2.5 pr-1.5 py-1 text-xs font-medium border
+            border-indigo-400/30 bg-indigo-400/10 text-indigo-400 transition-all"
+        >
+          <Moon className="size-3" /> Overnight
+          <X className="size-3" />
+        </button>
+      )}
+      {filters.ingredients.map((name) => (
+        <button
+          key={name}
+          onClick={() =>
+            setFilters((f) => ({
+              ...f,
+              ingredients: f.ingredients.filter((i) => i !== name),
+            }))
+          }
+          className="flex items-center gap-1.5 rounded-full pl-2.5 pr-1.5 py-1 text-xs font-medium border
+            border-amber-500/30 bg-amber-500/10 text-amber-500 transition-all"
+        >
+          {name}
+          <X className="size-3" />
+        </button>
+      ))}
+    </>
+  )}
+</div>
 
       <motion.div
         layoutScroll
@@ -160,9 +171,9 @@ export function RecipeList({
         <AnimatePresence initial={false} mode="popLayout">
           {loading ? (
             <>
-              <RecipeSkeleton/>
-              <RecipeSkeleton/>
-              <RecipeSkeleton/>
+              <RecipeSkeleton />
+              <RecipeSkeleton />
+              <RecipeSkeleton />
             </>
           ) : filtered.length === 0 ? (
             <motion.p
@@ -193,10 +204,11 @@ export function RecipeList({
                     onClick={() =>
                       open("recipe_preview", {
                         recipe,
-                        onSave: (id: string, values: RecipeFormValues) => onUpdate(id, values),
+                        onSave: (id: string, values: RecipeFormValues) =>
+                          updateRecipe(id, values),
                       })
                     }
-                    onDelete={() => onDelete(recipe.id)}
+                    onDelete={() => deleteRecipe(recipe.id)}
                   />
                 </motion.div>
               ),

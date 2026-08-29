@@ -14,6 +14,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import DefaultButton from "../../DefaultButton";
 
+// TODO: Users are able to add their API key for GEMINI, to as of current get up-to-date prices on food from recipies tile.
+
+
 const supabase = createClient();
 
 interface Props {

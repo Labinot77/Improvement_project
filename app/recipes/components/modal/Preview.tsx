@@ -9,6 +9,7 @@ import DefaultButton from "@/app/components/DefaultButton";
 import { useModal } from "@/providers/Modalprovider";
 import type { RecipeFormValues } from "./Form";
 import { useCookLog } from "@/lib/recipies/RecentlyCooked";
+import { formatCurrency } from "@/lib/mics/helpers";
 
 interface Props {
   open: boolean;
@@ -126,6 +127,11 @@ export function RecipePreviewModal({ open, onOpenChange, recipe, onSave }: Props
                 {recipe.needsOvernightRest && (
                   <span className="flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium text-indigo-400 bg-indigo-400/10">
                     <Moon className="size-3" /> Overnight
+                  </span>
+                )}
+                {recipe.estimatedCost != null && (
+                  <span className="ml-auto text-xs text-zinc-500 tabular-nums whitespace-nowrap">
+                    {formatCurrency(recipe.estimatedCost, recipe.costCurrency)}
                   </span>
                 )}
               </div>

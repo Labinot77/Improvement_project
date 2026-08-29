@@ -15,8 +15,10 @@ export type RecipeInput = {
   cookMinutes: number;
   needsOvernightRest: boolean;
   servings: number | null;
-  imageUrl?: string[]; // real Supabase Storage public URLs, persisted in image_url (jsonb)
+  imageUrl?: string[];
   date: string;
+  estimatedCost?: number | null;
+  costCurrency?: string | null;
 };
 
 function toRecipe(r: any): Recipe {
@@ -33,7 +35,9 @@ function toRecipe(r: any): Recipe {
     imageUrl: (r.image_url ?? []) as string[],
     date: r.date,
     createdAt: r.created_at,
-  };
+    estimatedCost: r.estimated_cost ?? null,
+    costCurrency: r.cost_currency ?? null,
+  } as Recipe;
 }
 
 export function useRecipes() {
@@ -54,6 +58,9 @@ export function useRecipes() {
       .select("*")
       .order("date", { ascending: false });
 
+    if (error) {
+      console.error("Failed to fetch recipes:", error);
+    }
     if (!error && data) setRecipes(data.map(toRecipe));
     setLoading(false);
   }, []);
@@ -62,15 +69,22 @@ export function useRecipes() {
     fetchAll();
   }, [fetchAll]);
 
-  async function addRecipe(input: RecipeInput): Promise<void> {
+  async function addRecipe(_draftId: string, input: RecipeInput): Promise<void> {
     const {
       data: { user },
     } = await supabase.auth.getUser();
-    console.log(input)
-    if (!user) return;
-    
-    const tempId = crypto.randomUUID();
-    const optimistic: Recipe = { id: tempId, ...input, createdAt: new Date().toISOString() };
+
+    if (!user) {
+      console.error("Cannot add recipe: no authenticated user.");
+      return;
+    }
+
+    const tempId = _draftId || crypto.randomUUID();
+    const optimistic: Recipe = {
+      id: tempId,
+      ...input,
+      createdAt: new Date().toISOString(),
+    } as Recipe;
 
     setPending(tempId, true);
     setRecipes((prev) => [optimistic, ...prev]);
@@ -89,11 +103,14 @@ export function useRecipes() {
         servings: input.servings,
         image_url: input.imageUrl ?? [],
         date: input.date,
+        estimated_cost: input.estimatedCost ?? null,
+        cost_currency: input.costCurrency ?? null,
       })
       .select()
       .single();
 
     if (error || !data) {
+      console.error("Failed to add recipe:", error);
       setRecipes((prev) => prev.filter((r) => r.id !== tempId));
       setPending(tempId, false);
       return;
@@ -108,7 +125,7 @@ export function useRecipes() {
   async function updateRecipe(id: string, input: RecipeInput) {
     setRecipes((prev) => prev.map((r) => (r.id === id ? { ...r, ...input } : r)));
 
-    await supabase
+    const { error } = await supabase
       .from("recipes")
       .update({
         title: input.title,
@@ -121,8 +138,14 @@ export function useRecipes() {
         servings: input.servings,
         image_url: input.imageUrl ?? [],
         date: input.date,
+        estimated_cost: input.estimatedCost ?? null,
+        cost_currency: input.costCurrency ?? null,
       })
       .eq("id", id);
+
+    if (error) {
+      console.error("Failed to update recipe:", error);
+    }
   }
 
   async function deleteRecipe(id: string) {
@@ -135,7 +158,6 @@ export function useRecipes() {
     const { error } = await supabase.from("recipes").delete().eq("id", id);
 
     if (error) {
-      // Delete failed — restore the optimistically removed recipe
       setRecipes((prev) => {
         const restored = [...prev];
         restored.splice(originalIndex, 0, recipeToDelete);
@@ -145,5 +167,21 @@ export function useRecipes() {
     }
   }
 
-  return { recipes, loading, pendingRecipeIds, addRecipe, updateRecipe, deleteRecipe };
+  function saveRecipe(id: string, input: RecipeInput) {
+    const exists = recipes.some((r) => r.id === id);
+    if (exists) {
+      return updateRecipe(id, input);
+    }
+    return addRecipe(id, input);
+  }
+
+  return {
+    recipes,
+    loading,
+    pendingRecipeIds,
+    addRecipe,
+    updateRecipe,
+    deleteRecipe,
+    saveRecipe,
+  };
 }

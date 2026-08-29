@@ -27,6 +27,8 @@ export interface Recipe {
   imageUrl?: string[]; // Array for future-proofing, in case we want to support multiple images per recipe
   date: string;
   createdAt: string;
+  estimatedCost?: number | null;   // NEW
+  costCurrency?: string | null;    // NEW
 }
 
 export interface RecipeFilters {
