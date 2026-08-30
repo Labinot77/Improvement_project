@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import SectionCard from "@/app/components/SectionCard";
 import { Calendar } from "@/components/ui/calendar";
 import { ACCENT_COLOR } from "@/constants/progress/template";
@@ -24,17 +25,29 @@ function hasAnyTask(days: Days, date: Date): boolean {
 }
 
 export function CalendarView({ selected, onSelect, days }: Props) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  function handleSelect(date: Date) {
+    onSelect(date);
+
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("date", formatDate(date));
+    router.push(`${pathname}?${params.toString()}`);
+  }
+
   return (
     <SectionCard accentGlow={ACCENT_COLOR}>
       <Calendar
         mode="single"
         selected={selected}
-        onSelect={(date) => { if (date) onSelect(date); }}
+        onSelect={(date) => { if (date) handleSelect(date); }}
         className="rounded-md w-full [&_.rdp-day_button]:relative bg-transparent"
         modifiers={{
           completed: (date) => isAllDone(days, date),
           partial:   (date) => hasAnyTask(days, date) && !isAllDone(days, date),
-               
+               
         }}
         modifiersClassNames={{
           today:

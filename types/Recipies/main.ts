@@ -24,7 +24,7 @@ export interface Recipe {
   cookMinutes: number;
   needsOvernightRest: boolean;
   servings: number | null;
-  imageUrl?: string[]; // Array for future-proofing, in case we want to support multiple images per recipe
+  imageUrl?: string[];
   date: string;
   createdAt: string;
   estimatedCost?: number | null;   // NEW

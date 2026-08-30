@@ -35,7 +35,7 @@ export function useTasks() {
   const fetchAll = useCallback(async () => {
     const { data: dayRows, error: dayErr } = await supabase
       .from("days")
-      .select("id, date, journal, day_rating")
+      .select("id, date, journal")
 
     if (dayErr || !dayRows) {
       setLoading(false)

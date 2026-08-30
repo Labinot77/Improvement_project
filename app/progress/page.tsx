@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Days } from "@/types/Progress/progress";
 import { formatDate, today } from "@/lib/mics/date";
@@ -19,6 +19,7 @@ import { ACCENT_COLOR } from "@/constants/progress/template";
 import { TaskSkeleton } from "./components/TaskCard_skeleton";
 import { useModal } from "@/providers/Modalprovider";
 import DefaultButton from "../components/DefaultButton";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 function computeGlobalStats(days: Days) {
   const allTasks = Object.values(days).flatMap((d) => d.tasks);
@@ -48,12 +49,18 @@ export default function ProgressPage() {
     "tasks",
   );
 
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
   const dateKey = formatDate(selectedDate);
   const dayData = days[dateKey] ?? { tasks: [], journal: "" };
   const isToday = dateKey === today();
   const { open } = useModal();
   const streak = useMemo(() => computeStreak(days), [days]);
   const gStats = useMemo(() => computeGlobalStats(days), [days]);
+
+  const dateParam = searchParams.get("date");
 
   const completedCount = dayData.tasks.filter((t) => t.completed).length;
   const total = dayData.tasks.length;
@@ -70,6 +77,16 @@ export default function ProgressPage() {
       createdAt: new Date().toISOString(),
     });
   }
+
+  useEffect(() => {
+    if (dateParam) {
+      const parsed = new Date(dateParam);
+      if (!isNaN(parsed.getTime())) {
+        setSelectedDate(parsed);
+        setMobileTab("tasks");
+      }
+    }
+  }, [dateParam]);
 
   const selectedLabel = selectedDate.toLocaleDateString("en-US", {
     weekday: "long",
@@ -182,12 +199,17 @@ export default function ProgressPage() {
                     accentGlow={ACCENT_COLOR}
                     action={
                       <DefaultButton
-                        onClick={() => open('progressTemplate', {
-                          onApplyTemplate: (template) => {
-                            void handleAddTask(template.title, template.description ?? "");
-                          }
-                        })}
-                        variant='ghost'
+                        onClick={() =>
+                          open("progressTemplate", {
+                            onApplyTemplate: (template) => {
+                              void handleAddTask(
+                                template.title,
+                                template.description ?? "",
+                              );
+                            },
+                          })
+                        }
+                        variant="ghost"
                         className="rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-xs font-medium text-zinc-400 transition-colors hover:text-zinc-200"
                       >
                         Templates
@@ -307,11 +329,16 @@ export default function ProgressPage() {
                 action={
                   <DefaultButton
                     variant="outline"
-                   onClick={() => open('progressTemplate', {
-                    onApplyTemplate: (template) => {
-                      void handleAddTask(template.title, template.description ?? "");
+                    onClick={() =>
+                      open("progressTemplate", {
+                        onApplyTemplate: (template) => {
+                          void handleAddTask(
+                            template.title,
+                            template.description ?? "",
+                          );
+                        },
+                      })
                     }
-                  })}
                     className="text-xs font-medium text-zinc-400 transition-colors "
                   >
                     Templates

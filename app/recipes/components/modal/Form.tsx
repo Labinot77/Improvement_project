@@ -11,6 +11,9 @@ import { PhotoDropzone } from "../DropZone";
 import { estimateRecipeCost } from "@/lib/recipies/estimateCost";
 import { Button } from "@/components/ui/button";
 
+
+// TODO: Organanise/Split the Form into multiple components to reduce its size.
+
 export type RecipeFormValues = {
   title: string;
   notes: string;

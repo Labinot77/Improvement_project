@@ -14,8 +14,8 @@ import {
 import { MEAL_META } from "@/constants/recipes";
 import { Button } from "@/components/ui/button";
 import type { RecipeFormValues } from "./modal/Form";
-import RecipeSkeleton from "./Card_skeleton";
 import { useRecipes } from "@/lib/recipies/use_recipes";
+import RecipeSkeleton from "./Skeleton";
 
 interface Props {
   recipes: Recipe[];

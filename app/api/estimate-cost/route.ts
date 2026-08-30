@@ -70,7 +70,9 @@ export async function POST(req: NextRequest) {
     .map((i) => `- ${i.name.trim()}${i.amount?.trim() ? ` — ${i.amount.trim()}` : ""}`)
     .join("\n");
 
-  const prompt = `You are a strict grocery cost estimator for Bulgaria. Given a list of recipe ingredients with their amounts (always in grams, even if the g is not present), estimate the realistic cost to buy each ingredient, then sum them into a total.
+    console.log(ingredientList)
+
+const prompt = `You are a strict grocery cost estimator for Bulgaria. Given a list of recipe ingredients with their amounts (always in grams, even if the g is not present), estimate the realistic cost to buy each ingredient, then sum them into a total.
 
 LOCATION AND CURRENCY (mandatory, do not deviate):
 - Location is always Bulgaria.
