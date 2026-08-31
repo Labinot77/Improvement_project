@@ -166,7 +166,7 @@ export function RecipeList({}) {
       <motion.div
         layoutScroll
         layout
-        className="grid grid-cols-1 xl:grid-cols-2 gap-3 h-[70dvh] overflow-y-auto content-start pr-1"
+        className="grid grid-cols-1 xl:grid-cols-2 gap-3 h-[70dvh] lg:h-[55dvh] overflow-y-auto content-start pr-1"
       >
         <AnimatePresence initial={false} mode="popLayout">
           {loading ? (
