@@ -29,9 +29,9 @@ export default function Recipes() {
           {/* </div> */}
 
         
-        <SectionCard accentGlow={ACCENT} className="col-span-12">
+        {/* <SectionCard accentGlow={ACCENT} className="col-span-12">
           <MealPlanSection />
-        </SectionCard>
+        </SectionCard> */}
         </div>
       </div>
     </div>

@@ -17,8 +17,6 @@ interface Props {
   onDelete: (id: string) => void;
   pendingLessonIds: Set<string>;
   loading: boolean;
-  expanded: boolean;
-  onExpandedChange: (expanded: boolean) => void;
 }
 
 export function LessonList({
@@ -27,8 +25,6 @@ export function LessonList({
   onDelete,
   pendingLessonIds,
   loading,
-  expanded,
-  onExpandedChange,
 }: Props) {
   const [search, setSearch] = useState("");
   const [filterCat, setFilterCat] = useState<LessonCategory | "All">("All");
@@ -66,16 +62,16 @@ export function LessonList({
             </button>
           )}
         </div>
-        <DefaultButton
+        {/* <DefaultButton
           variant="ghost"
           size="icon"
-          onClick={() => onExpandedChange(!expanded)}
+          // onClick={() => onExpandedChange(!expanded)}
           title={expanded ? "Collapse list" : "Expand list"}
           className="border border-white/[0.08] text-zinc-600 hover:text-amber-500
     hover:border-amber-500/30 hover:bg-amber-500/10 transition-all"
         >
           {expanded ? <Minimize2 className="size-3.5" /> : <Maximize2 className="size-3.5" />}
-        </DefaultButton>
+        </DefaultButton> */}
       </div>
 
       {/* Category filter */}
@@ -116,9 +112,7 @@ export function LessonList({
   layoutScroll
   layout
   transition={{ duration: 0.35, ease: "easeInOut" }}
-  className={`flex flex-col gap-2 overflow-y-auto pr-3 ${
-    expanded ? "h-[65vh] max-h-[65vh]" : "h-76 max-h-76"
-  }`}
+  className="flex flex-col gap-2 overflow-y-auto pr-3 h-[65vh] max-h-[65vh]"
 >
         <AnimatePresence initial={false} mode="popLayout">
           {loading ? (

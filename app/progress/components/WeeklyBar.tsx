@@ -9,15 +9,7 @@ type Props = { days: Days };
 
 export function WeeklyBar({ days }: Props) {
   const week = getLast7Days();
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
 
-  function handleDayClick(date: string) {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("date", date);
-    router.push(`${pathname}?${params.toString()}`);
-  }
 
   return (
     <div className="flex items-end gap-2 h-20">
@@ -32,7 +24,7 @@ export function WeeklyBar({ days }: Props) {
         return (
           <div
             key={date}
-            onClick={() => handleDayClick(date)}
+            // onClick={() => handleDayClick(date)}
             className="group flex-1 flex flex-col items-center gap-1.5 cursor-pointer"
           >
             <div className="relative w-full flex items-end justify-center h-14">

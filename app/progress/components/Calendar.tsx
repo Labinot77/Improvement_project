@@ -25,24 +25,12 @@ function hasAnyTask(days: Days, date: Date): boolean {
 }
 
 export function CalendarView({ selected, onSelect, days }: Props) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-
-  function handleSelect(date: Date) {
-    onSelect(date);
-
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("date", formatDate(date));
-    router.push(`${pathname}?${params.toString()}`);
-  }
-
   return (
     <SectionCard accentGlow={ACCENT_COLOR}>
       <Calendar
         mode="single"
         selected={selected}
-        onSelect={(date) => { if (date) handleSelect(date); }}
+        onSelect={(date) => { if (date) onSelect(date); }}
         className="rounded-md w-full [&_.rdp-day_button]:relative bg-transparent"
         modifiers={{
           completed: (date) => isAllDone(days, date),

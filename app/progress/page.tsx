@@ -49,18 +49,12 @@ export default function ProgressPage() {
     "tasks",
   );
 
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const pathname = usePathname();
-
   const dateKey = formatDate(selectedDate);
   const dayData = days[dateKey] ?? { tasks: [], journal: "" };
   const isToday = dateKey === today();
   const { open } = useModal();
   const streak = useMemo(() => computeStreak(days), [days]);
   const gStats = useMemo(() => computeGlobalStats(days), [days]);
-
-  const dateParam = searchParams.get("date");
 
   const completedCount = dayData.tasks.filter((t) => t.completed).length;
   const total = dayData.tasks.length;
@@ -78,16 +72,6 @@ export default function ProgressPage() {
     });
   }
 
-  useEffect(() => {
-    if (dateParam) {
-      const parsed = new Date(dateParam);
-      if (!isNaN(parsed.getTime())) {
-        setSelectedDate(parsed);
-        setMobileTab("tasks");
-      }
-    }
-  }, [dateParam]);
-
   const selectedLabel = selectedDate.toLocaleDateString("en-US", {
     weekday: "long",
     month: "long",
@@ -101,7 +85,7 @@ export default function ProgressPage() {
   ] as const;
 
   return (
-    <div className="min-h-screen bg-[#080808] px-4 py-6 sm:px-6 lg:px-10 lg:py-8">
+    <div className="min-h-screen px-4 py-6 sm:px-6 lg:px-10 lg:py-8">
       <div className="mx-auto max-w-7xl flex flex-col gap-5">
         <motion.div initial="hidden" animate="show" variants={fadeIn}>
           <PageHeader
