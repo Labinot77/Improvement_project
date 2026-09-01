@@ -37,18 +37,15 @@ export function LessonCard({ lesson, onUpdate, onDelete }: Props) {
     hover:border-white/[0.10]
     transition-colors"
     >
-      {/* The use of DefaultButton breaks the components visually */}
       <button
         onClick={() => setExpanded((p) => !p)}
         className="flex w-full items-start gap-3 px-4 py-3 text-left group transition-colors duration-150"
       >
         <span className="text-base shrink-0 mt-0.5">{catMeta.icon}</span>
 
-        {/* Title + meta */}
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-zinc-100 truncate">{lesson.title}</p>
           <div className="flex items-center gap-2 mt-1 flex-wrap">
-            {/* Category badge */}
             <span
               className="text-xs px-2 py-0.5 rounded-full border"
               style={{
@@ -60,7 +57,6 @@ export function LessonCard({ lesson, onUpdate, onDelete }: Props) {
               {lesson.category}
             </span>
 
-            {/* Impact dot */}
             <span className="flex items-center gap-1 text-xs text-zinc-600">
               <span
                 className="size-1.5 rounded-full"
@@ -95,7 +91,6 @@ export function LessonCard({ lesson, onUpdate, onDelete }: Props) {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            onClick={() => setExpanded((s) => !s)}
             transition={{ duration: 0.2, ease: "easeInOut" }}
             className="overflow-hidden"
           >
@@ -108,11 +103,10 @@ export function LessonCard({ lesson, onUpdate, onDelete }: Props) {
                 <p className="text-sm text-zinc-600 italic">No description added.</p>
               )}
 
-              {/* Actions */}
               <div className="flex gap-2">
                 <DefaultButton
                   variant={'outline'}
-                onClick={() => open('lesson', {
+                  onClick={() => open('lesson', {
                   lesson: lesson,
                   onSave: (id: string, values: LessonFormValues) => onUpdate(id, values),
                 })}

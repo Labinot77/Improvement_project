@@ -6,7 +6,7 @@ const page = () => {
                <div className="mx-auto max-w-7xl flex flex-col gap-6">
                 <PageHeader
                   emoji="😴"
-                  title="Finance"
+                  title=""
                   subtitle="Net worth & spending"
                   backHref="/"
                 />

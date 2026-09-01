@@ -12,6 +12,9 @@ import { formatDate } from "@/lib/mics/date";
 import { CalendarView } from "./components/Calendar";
 import { container, fadeIn, fadeUp } from "@/constants/animations";
 
+
+// TODO: Move lib, types, constants, to their tile, instead of having them in the root of the app folder. This will make it easier to maintain and scale the codebase in the future.
+
 export default function LessonsClient() {
   const {
     lessons,
