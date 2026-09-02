@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 export default function DashboardGrid() {
   return (
     <motion.div
-      className="grid gap-3 grid-cols-1 lg:grid-cols-[5fr_3fr_3fr]"
+      className="flex flex-col md:grid gap-3 grid-cols-1 md:grid-cols-[5fr_3fr_3fr]"
       style={{
         gridTemplateRows: "repeat(3, minmax(150px, 1fr))",
       }}
