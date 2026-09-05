@@ -51,10 +51,10 @@ export const cards: Omit<DashboardCardProps, "index">[] = [
     size: "medium",
   },
      {
-    title: "Trading",
-    subtitle: "Workouts, splits, sessions",
+    title: "Journal",
+    subtitle: "Thoughts & reflections",
     emoji: "☕",
-    href: "/trading",
+    href: "/journal",
     accentGlow: "rgba(100,55,38,0.28)",
     size: "medium",
     // className: "col-",

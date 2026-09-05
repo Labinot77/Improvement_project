@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ModalProvider } from "../providers/Modalprovider";
+import MobileNav from "./components/dashboard/Phone/navigation";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -43,6 +44,7 @@ export default function RootLayout({
       <body className="min-h-full dark">
         <ModalProvider>
           {children}
+          <MobileNav />
         </ModalProvider>
       </body>
     </html>

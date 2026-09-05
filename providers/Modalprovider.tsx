@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
 
+
 import { LoginModal } from "@/app/components/dashboard/modal/login";
 import { ProfileModal } from "@/app/components/dashboard/modal/profile";
 import { LessonModal } from "@/app/lessons/components/Modal/Edit";
@@ -17,6 +18,7 @@ import { MealType, Recipe, RecipeFilters } from "@/types/Recipies/main";
 import { RecipeFilterModal } from "@/app/recipes/components/modal/Filter";
 import { RecipePreviewModal } from "@/app/recipes/components/modal/Preview";
 import { ProgressTemplate } from "@/types/Progress/templates";
+import { ResponsiveModal } from "@/app/components/ResponsiveModa";
 
 type ModalProps = {
   login: Record<string, never>;
@@ -30,7 +32,7 @@ type ModalProps = {
     onUpdate: (id: string, values: LessonFormValues) => void;
     onDelete: (id: string) => void;
     pendingLessonIds: Set<string>;
-    onClose?: () => void; // NEW: fired when this modal closes, for any reason
+    onClose?: () => void;
   };
   delete: {
     onConfirm: () => void | Promise<void>;
@@ -71,7 +73,7 @@ type StackEntry = {
 
 interface ModalContextValue {
   open: <K extends ModalName>(name: K, props: ModalProps[K]) => void;
-  close: () => void; // closes the topmost modal
+  close: () => void;
   closeAll: () => void;
 }
 
@@ -83,6 +85,17 @@ export function useModal() {
   return context;
 }
 
+/**
+ * Every entry here is now CONTENT ONLY — no Dialog/Drawer wrapper.
+ * ModalProvider supplies the responsive shell (ResponsiveModal) around
+ * whatever these components return. Each component still receives
+ * `open` (always true while mounted) and `onOpenChange`, but should
+ * ignore/pass those through rather than rendering its own Dialog.
+ *
+ * Migration note: components not yet ported (still importing Dialog
+ * directly) will render a Dialog-inside-a-Dialog/Drawer nesting bug —
+ * port them to return plain content before relying on this behavior.
+ */
 const MODALS = {
   login: LoginModal,
   profile: ProfileModal,
@@ -96,6 +109,18 @@ const MODALS = {
   recipe_preview: RecipePreviewModal,
 } as const;
 
+/**
+ * Per-modal shell overrides — e.g. wider desktop dialogs for form-heavy
+ * modals. Anything not listed uses ResponsiveModal's defaults (max-w-sm).
+ */
+const SHELL_OVERRIDES: Partial<Record<ModalName, { desktopClassName?: string; hideHeader?: boolean }>> = {
+  lesson: { desktopClassName: "max-w-lg" },
+  lessons_list: { desktopClassName: "lg:max-w-[55dvw]", hideHeader: true },
+  recipe_form: { desktopClassName: "lg:min-w-[45dvw]", hideHeader: true },
+  recipe_preview: { desktopClassName: "lg:max-w-2xl", hideHeader: true },
+  progressTemplate: { desktopClassName: "sm:max-w-2xl lg:max-w-4xl", hideHeader: true },
+};
+
 let nextId = 0;
 
 export function ModalProvider({ children }: { children: ReactNode }) {
@@ -105,9 +130,7 @@ export function ModalProvider({ children }: { children: ReactNode }) {
     setStack((prev) => [...prev, { id: nextId++, name, props } as StackEntry]);
   };
 
-  // closes the topmost modal only
   const close = () => setStack((prev) => prev.slice(0, -1));
-
   const closeAll = () => setStack([]);
 
   const context = useMemo(() => ({ open, close, closeAll }), []);
@@ -116,22 +139,27 @@ export function ModalProvider({ children }: { children: ReactNode }) {
     <ModalContext.Provider value={context}>
       {children}
       {stack.map((entry, index) => {
-        const ActiveComponent = MODALS[entry.name];
+        const Content = MODALS[entry.name];
         const isTop = index === stack.length - 1;
+        const overrides = SHELL_OVERRIDES[entry.name];
+
+        function handleOpenChange(o: boolean) {
+          if (!o && isTop) {
+            (entry.props as { onClose?: () => void }).onClose?.();
+            setStack((prev) => prev.filter((e) => e.id !== entry.id));
+          }
+        }
 
         return (
-          <ActiveComponent
+          <ResponsiveModal
             key={entry.id}
             open={true}
-            onOpenChange={(o: boolean) => {
-              if (!o && isTop) {
-                // fire any per-modal onClose callback before removing it
-                (entry.props as { onClose?: () => void }).onClose?.();
-                setStack((prev) => prev.filter((e) => e.id !== entry.id));
-              }
-            }}
-            {...(entry.props as any)}
-          />
+            onOpenChange={handleOpenChange}
+            desktopClassName={overrides?.desktopClassName}
+            hideHeader={overrides?.hideHeader}
+          >
+            <Content open={true} onOpenChange={handleOpenChange} {...(entry.props as any)} />
+          </ResponsiveModal>
         );
       })}
     </ModalContext.Provider>
