@@ -136,6 +136,8 @@ export default function ProgressPage() {
             />
           </motion.div>
 
+
+
           {/* ── Mobile tab switcher (hidden on lg) ── */}
           <motion.div
             variants={fadeUp}

@@ -113,6 +113,8 @@ export function TaskCard({ task, onUpdate, onDelete }: Props) {
           )}
         </AnimatePresence>
       </div>
+
+
     </motion.div>
   );
 }

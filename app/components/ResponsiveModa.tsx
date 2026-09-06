@@ -97,7 +97,7 @@ export function ResponsiveModal({
             </DrawerHeader>
           )}
 
-          <div className={cn("px-4 pb-2 overflow-y-auto mt-4 mb-4", className)}>{children}</div>
+          <div className={cn("px-4 pb-2 overflow-y-auto mt-4 mb-9", className)}>{children}</div>
 
           {footer && (
             <DrawerFooter className="pt-2">{footer}</DrawerFooter>
