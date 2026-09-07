@@ -35,10 +35,15 @@ export function DeleteModal({
   const [loading, setLoading] = useState(false);
 
   async function handleConfirm() {
-    setLoading(true);
-    await onConfirm();
-    setLoading(false);
-    onOpenChange(false);
+    try {
+      setLoading(true);
+      await onConfirm();
+      
+      setLoading(false);
+      onOpenChange(false);
+    } catch (error) {
+      setLoading(false);
+    }
   }
 
   const resolvedDescription =

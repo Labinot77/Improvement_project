@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
+import { createContext, useContext, useMemo, useRef, useState, type ReactNode } from "react";
 
 
 import { LoginModal } from "@/app/components/dashboard/modal/login";
@@ -75,6 +75,14 @@ interface ModalContextValue {
   open: <K extends ModalName>(name: K, props: ModalProps[K]) => void;
   close: () => void;
   closeAll: () => void;
+  /**
+   * Lets the CURRENTLY OPEN (topmost) modal's content veto dismissal —
+   * e.g. while a form is mid-save. Call with `true` to block overlay
+   * clicks / swipe-to-dismiss / Esc, `false` to release the lock.
+   * Always reset this to `false` when the operation finishes (including
+   * on error), or the modal will become unclosable.
+   */
+  setDismissLocked: (locked: boolean) => void;
 }
 
 const ModalContext = createContext<ModalContextValue | null>(null);
@@ -118,22 +126,27 @@ const SHELL_OVERRIDES: Partial<Record<ModalName, { desktopClassName?: string; hi
   lessons_list: { desktopClassName: "lg:max-w-[55dvw]", hideHeader: true },
   recipe_form: { desktopClassName: "lg:min-w-[45dvw]", hideHeader: true },
   recipe_preview: { desktopClassName: "lg:max-w-2xl", hideHeader: true },
-  progressTemplate: { desktopClassName: "sm:max-w-2xl lg:max-w-4xl", hideHeader: true },
+  progressTemplate: { desktopClassName: "max-w-md", hideHeader: true },
 };
 
 let nextId = 0;
 
 export function ModalProvider({ children }: { children: ReactNode }) {
   const [stack, setStack] = useState<StackEntry[]>([]);
+  const dismissLockedRef = useRef(false);
 
   const open = <K extends ModalName>(name: K, props: ModalProps[K]) => {
+    dismissLockedRef.current = false; // fresh modal, never start locked
     setStack((prev) => [...prev, { id: nextId++, name, props } as StackEntry]);
   };
 
   const close = () => setStack((prev) => prev.slice(0, -1));
   const closeAll = () => setStack([]);
+  const setDismissLocked = (locked: boolean) => {
+    dismissLockedRef.current = locked;
+  };
 
-  const context = useMemo(() => ({ open, close, closeAll }), []);
+  const context = useMemo(() => ({ open, close, closeAll, setDismissLocked }), []);
 
   return (
     <ModalContext.Provider value={context}>
@@ -144,6 +157,7 @@ export function ModalProvider({ children }: { children: ReactNode }) {
         const overrides = SHELL_OVERRIDES[entry.name];
 
         function handleOpenChange(o: boolean) {
+          if (!o && dismissLockedRef.current) return; // top modal vetoed dismissal
           if (!o && isTop) {
             (entry.props as { onClose?: () => void }).onClose?.();
             setStack((prev) => prev.filter((e) => e.id !== entry.id));

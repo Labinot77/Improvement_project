@@ -5,8 +5,8 @@ import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { cards } from "@/constants/main";
 
-const SCROLL_THRESHOLD = 24; // px scrolled before collapsing
-const SCROLL_UP_TOLERANCE = 4; // ignore tiny jitter when deciding to re-expand
+const SCROLL_THRESHOLD = 84; // px scrolled before collapsing
+const SCROLL_UP_TOLERANCE = 6; // ignore tiny jitter when deciding to re-expand
 
 export default function MobileNav() {
   const pathname = usePathname();
@@ -62,7 +62,7 @@ export default function MobileNav() {
           transition={{ type: "spring", stiffness: 420, damping: 38, mass: 0.7 }}
           className={
             collapsed
-              ? "pointer-events-auto absolute bottom-4 left-4 flex items-center justify-center rounded-full overflow-hidden size-13 border border-white/[0.14] bg-white/[0.08] backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.45)] supports-backdrop-filter:bg-white/[0.06]"
+              ? "pointer-events-auto absolute bottom-4 left-4 flex items-center justify-center rounded-full overflow-hidden size-10 border border-white/[0.14] bg-white/[0.08] backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.45)] supports-backdrop-filter:bg-white/[0.06]"
               : "pointer-events-auto absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-0.5 rounded-full overflow-x-auto no-scrollbar border border-white/[0.14] bg-white/[0.08] backdrop-blur-2xl px-1.5 py-1.5 shadow-[0_8px_32px_rgba(0,0,0,0.45)] supports-backdrop-filter:bg-white/[0.06] max-w-[calc(100vw-1.5rem)]"
           }
         >
@@ -75,7 +75,7 @@ export default function MobileNav() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.15 }}
-                className="relative flex size-13 shrink-0 items-center justify-center"
+                className="relative flex size-10 shrink-0 items-center justify-center"
                 aria-label={`${activeCard.title} — expand navigation`}
               >
                 <span
@@ -84,7 +84,7 @@ export default function MobileNav() {
                     background: `radial-gradient(circle at 30% 20%, ${activeCard.accentGlow}, transparent 70%)`,
                   }}
                 />
-                <span className="relative text-xl leading-none">{activeCard.emoji}</span>
+                <span className="relative text-lg leading-none">{activeCard.emoji}</span>
               </motion.button>
             ) : (
               <motion.div
@@ -114,12 +114,6 @@ export default function MobileNav() {
                         />
                       )}
                       <span className="relative text-base leading-none">{card.emoji}</span>
-                      {/* <span
-                        className="relative text-[9px] font-medium leading-none whitespace-nowrap"
-                        style={{ color: isActive ? "#f4f4f5" : "#71717a" }}
-                      >
-                        {card.title}
-                      </span> */}
                     </button>
                   );
                 })}
