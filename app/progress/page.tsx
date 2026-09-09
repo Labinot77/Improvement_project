@@ -21,6 +21,12 @@ import { useModal } from "@/providers/Modalprovider";
 import DefaultButton from "../components/DefaultButton";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
+// TODO: Move all the logic for phone UI to a different file, so that this file is only for desktop UI. The mobile UI is a bit different, and it would be nice to have a separate file for it.
+// TODO: Transfer logic to server side, if possible, so that the page can be rendered on the server and the client only handles interactions. This will make the page load faster and be more SEO friendly.
+// TODO: Add a "clear all tasks" button, which will delete all tasks for the selected day. This should be a modal that asks for confirmation, and should be disabled if there are no tasks for the selected day.
+
+
+
 function computeGlobalStats(days: Days) {
   const allTasks = Object.values(days).flatMap((d) => d.tasks);
   const completed = allTasks.filter((t) => t.completed).length;
@@ -136,9 +142,6 @@ export default function ProgressPage() {
             />
           </motion.div>
 
-
-
-          {/* ── Mobile tab switcher (hidden on lg) ── */}
           <motion.div
             variants={fadeUp}
             className="flex lg:hidden rounded-xl border border-white/[0.06] bg-[#0f0f0f] p-1 gap-1"

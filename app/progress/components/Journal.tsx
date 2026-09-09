@@ -1,6 +1,8 @@
 "use client";
 
 import { TEMPLATE } from "@/constants/progress/template";
+import { useIsMobile } from "@/lib/is_mobile";
+import { useModal } from "@/providers/Modalprovider";
 import { motion } from "framer-motion";
 import { FileTextIcon } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
@@ -11,8 +13,10 @@ interface Props {
 };
 
 export function JournalSection({ value, onChange }: Props) {
+  const isMobile = useIsMobile();
   const [local, setLocal] = useState(value);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { open } = useModal();
 
   useEffect(() => {
     setLocal(value);
@@ -22,7 +26,8 @@ export function JournalSection({ value, onChange }: Props) {
     setLocal(next);
     if (timer.current) clearTimeout(timer.current);
     timer.current = setTimeout(() => onChange(next), 1500);
-    console.log(timer.current ,next)
+    
+    // console.log(timer.current ,next)
   }
 
   function applyTemplate() {
@@ -42,6 +47,13 @@ export function JournalSection({ value, onChange }: Props) {
           <p className="text-sm font-semibold text-zinc-100">Daily Journal</p>
           <p className="text-xs text-zinc-500 mt-0.5">Reflect on your day</p>
         </div>
+        {isMobile ? (
+          <button 
+          onClick={() => open("progress_journal", { value: local, onChange: handleChange })}
+          >
+            Edit
+          </button>
+        ) : (
         <button
           onClick={applyTemplate}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-white/[0.06] bg-white/[0.03] text-xs text-zinc-400 hover:text-zinc-200 hover:border-white/[0.12] transition-all duration-200"
@@ -49,13 +61,22 @@ export function JournalSection({ value, onChange }: Props) {
           <FileTextIcon className="size-3" />
           Template
         </button>
+        
+        )}
       </div>
-      <textarea
-        className="flex-1 min-h-65 resize-none rounded-xl border border-white/[0.06] bg-[#161616] px-4 py-3 text-sm text-zinc-300 font-mono leading-relaxed placeholder-zinc-600 focus:outline-none focus:border-indigo-500/40 focus:ring-1 focus:ring-indigo-500/20 transition-all"
-        placeholder="Reflect on your day here…"
-        value={local}
-        onChange={(e) => handleChange(e.target.value)}
-      />
+      
+      {isMobile ? (
+        <p>
+          {local || "No journal entry yet. Tap the template button to get started."}
+        </p>
+      ) : (
+        <textarea
+          className="flex-1 min-h-65 resize-none rounded-xl border border-white/[0.06] bg-[#161616] px-4 py-3 text-sm text-zinc-300 font-mono leading-relaxed placeholder-zinc-600 focus:outline-none focus:border-indigo-500/40 focus:ring-1 focus:ring-indigo-500/20 transition-all"
+          placeholder="Reflect on your day here…"
+          value={local}
+          onChange={(e) => handleChange(e.target.value)}
+        />
+      )}
     </motion.div>
   );
 }

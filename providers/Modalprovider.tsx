@@ -19,6 +19,7 @@ import { RecipeFilterModal } from "@/app/recipes/components/modal/Filter";
 import { RecipePreviewModal } from "@/app/recipes/components/modal/Preview";
 import { ProgressTemplate } from "@/types/Progress/templates";
 import { ResponsiveModal } from "@/app/components/ResponsiveModa";
+import Journal from "@/app/progress/components/Modal/Journal";
 
 type ModalProps = {
   login: Record<string, never>;
@@ -62,6 +63,10 @@ type ModalProps = {
   recipe_preview: {
     recipe: Recipe;
     onSave: (id: string, values: RecipeFormValues) => void;
+  };
+  progress_journal: {
+    value: string;
+    onChange: (value: string) => void;
   };
 };
 
@@ -115,6 +120,7 @@ const MODALS = {
   recipe_form: RecipeForm,
   recipe_filter: RecipeFilterModal,
   recipe_preview: RecipePreviewModal,
+  progress_journal: Journal,
 } as const;
 
 /**
