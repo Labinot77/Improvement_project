@@ -18,7 +18,7 @@ import {
   DrawerFooter,
 } from "@/components/ui/drawer";
 import { cn } from "@/lib/utils";
-import { useIsMobile } from "@/lib/is_mobile";
+import { useIsMobile } from "@/lib/Mobile";
 
 export interface ResponsiveModalProps {
   open: boolean;

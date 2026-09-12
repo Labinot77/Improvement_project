@@ -4,6 +4,8 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Trash2, AlertTriangle } from "lucide-react";
 
+// TODO: Make the component reusable, from Delete to just a confirmation modal, with customizable icon, title, description, and buttons.
+
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;

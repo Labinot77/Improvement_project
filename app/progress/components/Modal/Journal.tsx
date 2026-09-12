@@ -1,6 +1,6 @@
 "use client";
 
-import { useIsMobile } from "@/lib/is_mobile";
+import { useIsMobile } from "@/lib/Mobile";
 import { useModal } from "@/providers/Modalprovider";
 import React, { useEffect, useRef, useState } from "react";
 
@@ -37,7 +37,7 @@ const Journal = ({ value, onChange }: Props) => {
 
     setSaving(false);
 
-a    savingTimer.current = setTimeout(() => {
+    savingTimer.current = setTimeout(() => {
       setSaving(true);
 
       onChange(next);

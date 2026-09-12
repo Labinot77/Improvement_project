@@ -70,6 +70,7 @@ export function RecipeList({}) {
           variant="ghost"
           onClick={() =>
             open("recipe_filter", {
+              // onOpenChange,
               value: filters,
               onApply: setFilters,
               recipes,

@@ -1,7 +1,7 @@
 "use client";
 
 import { TEMPLATE } from "@/constants/progress/template";
-import { useIsMobile } from "@/lib/is_mobile";
+import { useIsMobile } from "@/lib/Mobile";
 import { useModal } from "@/providers/Modalprovider";
 import { motion } from "framer-motion";
 import { FileTextIcon } from "lucide-react";
@@ -30,11 +30,20 @@ export function JournalSection({ value, onChange }: Props) {
     // console.log(timer.current ,next)
   }
 
-  function applyTemplate() {
-    if (!local.trim()) handleChange(TEMPLATE);
-    else if (confirm("Replace your current journal entry with the template?")) handleChange(TEMPLATE);
+function applyTemplate() {
+  if (!local.trim()) {
+    handleChange(TEMPLATE);
+    return;
   }
-
+  
+  open("delete", {
+    title: "Replace journal entry",
+    description: "This will replace your current journal entry with the template. This action cannot be undone.",
+    confirmLabel: "Replace",
+    destructive: false,
+    onConfirm: () => handleChange(TEMPLATE),
+  });
+}
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
@@ -47,13 +56,6 @@ export function JournalSection({ value, onChange }: Props) {
           <p className="text-sm font-semibold text-zinc-100">Daily Journal</p>
           <p className="text-xs text-zinc-500 mt-0.5">Reflect on your day</p>
         </div>
-        {isMobile ? (
-          <button 
-          onClick={() => open("progress_journal", { value: local, onChange: handleChange })}
-          >
-            Edit
-          </button>
-        ) : (
         <button
           onClick={applyTemplate}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-white/[0.06] bg-white/[0.03] text-xs text-zinc-400 hover:text-zinc-200 hover:border-white/[0.12] transition-all duration-200"
@@ -61,22 +63,25 @@ export function JournalSection({ value, onChange }: Props) {
           <FileTextIcon className="size-3" />
           Template
         </button>
-        
-        )}
       </div>
       
-      {isMobile ? (
-        <p>
-          {local || "No journal entry yet. Tap the template button to get started."}
-        </p>
-      ) : (
-        <textarea
-          className="flex-1 min-h-65 resize-none rounded-xl border border-white/[0.06] bg-[#161616] px-4 py-3 text-sm text-zinc-300 font-mono leading-relaxed placeholder-zinc-600 focus:outline-none focus:border-indigo-500/40 focus:ring-1 focus:ring-indigo-500/20 transition-all"
-          placeholder="Reflect on your day here…"
-          value={local}
-          onChange={(e) => handleChange(e.target.value)}
-        />
-      )}
+    {isMobile ? (
+  <button
+    onClick={() => open("progress_journal", { value: local, onChange: handleChange })}
+    className="flex-1 min-h-65 flex items-start text-left rounded-xl border border-white/[0.06] bg-[#161616] px-4 py-3 text-sm font-mono leading-relaxed transition-all focus:outline-none focus:border-indigo-500/40 focus:ring-1 focus:ring-indigo-500/20"
+  >
+    <span className={local ? "text-zinc-300" : "text-zinc-600"}>
+      {local || "No journal entry yet. Tap Edit to get started."}
+    </span>
+  </button>
+) : (
+  <textarea
+    className="flex-1 min-h-65 resize-none rounded-xl border border-white/[0.06] bg-[#161616] px-4 py-3 text-sm text-zinc-300 font-mono leading-relaxed placeholder-zinc-600 focus:outline-none focus:border-indigo-500/40 focus:ring-1 focus:ring-indigo-500/20 transition-all"
+    placeholder="Reflect on your day here…"
+    value={local}
+    onChange={(e) => handleChange(e.target.value)}
+  />
+)}
     </motion.div>
   );
 }

@@ -18,7 +18,7 @@ import { MealType, Recipe, RecipeFilters } from "@/types/Recipies/main";
 import { RecipeFilterModal } from "@/app/recipes/components/modal/Filter";
 import { RecipePreviewModal } from "@/app/recipes/components/modal/Preview";
 import { ProgressTemplate } from "@/types/Progress/templates";
-import { ResponsiveModal } from "@/app/components/ResponsiveModa";
+import { ResponsiveModal } from "@/app/components/ResponsiveModal";
 import Journal from "@/app/progress/components/Modal/Journal";
 
 type ModalProps = {

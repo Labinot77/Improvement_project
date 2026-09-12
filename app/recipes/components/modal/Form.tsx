@@ -118,7 +118,7 @@ export function RecipeForm({ onOpenChange, recipe, onSave }: Props) {
   // (topmost) modal until we release it — always released in the finally
   // block below, including on error, so the modal never gets stuck.
   function requestClose(next: boolean) {
-    if (isSaving && !next) return; // extra guard for the explicit buttons too
+    if (isSaving && !next) return;
     onOpenChange(next);
   }
 
@@ -174,12 +174,12 @@ export function RecipeForm({ onOpenChange, recipe, onSave }: Props) {
         costCurrency,
       });
 
-      onOpenChange(false);
     } catch (err) {
       console.error("Failed to save recipe:", err);
     } finally {
       setIsSaving(false);
       setDismissLocked(false);
+      onOpenChange(false);
     }
   }
 
