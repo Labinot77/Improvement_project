@@ -76,7 +76,7 @@ export function TaskCard({ task, onUpdate, onDelete }: Props) {
             </DefaultButton>
               <DefaultButton
                   variant={'outline'}
-                  onClick={() => open('delete', {
+                  onClick={() => open('confirm', {
                       title: "Delete task",
                       description: `Are you sure you want to delete "${task.title}"? This action cannot be undone. `,
                       itemName: `"${task.title}"`,

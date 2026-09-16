@@ -2,9 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Trash2, AlertTriangle } from "lucide-react";
-
-// TODO: Make the component reusable, from Delete to just a confirmation modal, with customizable icon, title, description, and buttons.
+import { Trash2, AlertTriangle, type LucideIcon } from "lucide-react";
 
 interface Props {
   open: boolean;
@@ -16,31 +14,68 @@ interface Props {
   itemName?: string;
   confirmLabel?: string;
   cancelLabel?: string;
-  destructive?: boolean;
+
+  /**
+   * Controls the confirm button's color treatment and the default icon.
+   * "destructive" = red (delete/remove-style actions)
+   * "default" = indigo (replace/confirm/neutral actions)
+   */
+  variant?: "destructive" | "default";
+
+  /** Icon shown in the header badge. Defaults to AlertTriangle (destructive) or the same AlertTriangle (default) if not provided. */
+  icon?: LucideIcon;
+
+  /** Icon shown inside the confirm button, next to confirmLabel. Defaults to Trash2 for destructive, hidden for default unless provided. */
+  confirmIcon?: LucideIcon;
+
+  /** Loading label shown on the confirm button while onConfirm is pending. Defaults to `${confirmLabel}…`. */
+  loadingLabel?: string;
 }
 
 /**
  * CONTENT ONLY — no Dialog/Drawer wrapper here anymore.
  * ModalProvider wraps this in <ResponsiveModal>, which renders it inside
  * a Dialog on desktop and a Drawer on mobile automatically.
+ *
+ * Generic confirmation modal — use for delete, replace, discard, or any
+ * "are you sure?" action. Customize icon, copy, labels, and color via props
+ * rather than creating a new modal per action.
+ *
+ * Examples:
+ *   open("confirm", { title: "Delete item", itemName: "Recipe", onConfirm })
+ *   open("confirm", {
+ *     title: "Replace journal entry",
+ *     description: "This will overwrite your current entry.",
+ *     confirmLabel: "Replace",
+ *     variant: "default",
+ *     icon: FileTextIcon,
+ *     onConfirm,
+ *   })
  */
-export function DeleteModal({
+export function ConfirmModal({
   onOpenChange,
   onConfirm,
-  title = "Delete item",
+  title = "Are you sure?",
   description,
   itemName,
-  confirmLabel = "Delete",
+  confirmLabel = "Confirm",
   cancelLabel = "Cancel",
-  destructive = true,
+  variant = "destructive",
+  icon,
+  confirmIcon,
+  loadingLabel,
 }: Props) {
   const [loading, setLoading] = useState(false);
+  const destructive = variant === "destructive";
+
+  const HeaderIcon = icon ?? AlertTriangle;
+  const ConfirmIcon = confirmIcon ?? (destructive ? Trash2 : undefined);
 
   async function handleConfirm() {
     try {
       setLoading(true);
       await onConfirm();
-      
+
       setLoading(false);
       onOpenChange(false);
     } catch (error) {
@@ -57,8 +92,12 @@ export function DeleteModal({
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-2.5">
-        <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-red-500/10">
-          <AlertTriangle className="size-4 text-red-400" />
+        <span
+          className={`flex size-8 shrink-0 items-center justify-center rounded-lg ${
+            destructive ? "bg-red-500/10" : "bg-indigo-500/10"
+          }`}
+        >
+          <HeaderIcon className={`size-4 ${destructive ? "text-red-400" : "text-indigo-400"}`} />
         </span>
         <h2 className="text-base font-semibold text-zinc-100">{title}</h2>
       </div>
@@ -96,8 +135,8 @@ export function DeleteModal({
                 }
           }
         >
-          {!loading && <Trash2 className="size-4" />}
-          {loading ? "Deleting…" : confirmLabel}
+          {!loading && ConfirmIcon && <ConfirmIcon className="size-4" />}
+          {loading ? loadingLabel ?? `${confirmLabel}…` : confirmLabel}
         </motion.button>
       </div>
     </div>

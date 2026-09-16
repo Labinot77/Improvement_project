@@ -1,6 +1,6 @@
 import PageHeader from "@/app/components/header/Header";
 import SectionCard from "@/app/components/SectionCard";
-import { ACCENT } from "@/constants/mental";
+import { ACCENT } from "@/constants/lessons";
 import { RecipeList } from "./components/List";
 import ShoppingList from "./components/ShoppingList";
 import MealPlanSection from "./MealPlan";

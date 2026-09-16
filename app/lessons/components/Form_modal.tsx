@@ -5,7 +5,7 @@ import { Save } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import type { Lesson, LessonCategory, LessonImpact } from "@/types/lessons";
-import { ALL_CATEGORIES, ALL_IMPACTS, CATEGORY_META, IMPACT_META } from "@/constants/mental";
+import { ALL_CATEGORIES, ALL_IMPACTS, CATEGORY_META, IMPACT_META } from "@/constants/lessons";
 import { formatDate } from "@/lib/mics/date";
 import { useUser } from "@/lib/use_user";
 import No_access from "@/app/components/NoAccess";

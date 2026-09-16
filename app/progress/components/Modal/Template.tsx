@@ -171,7 +171,7 @@ export function TemplateModal({ onOpenChange, onApplyTemplate }: Props) {
                   <DefaultButton
                     variant="ghost"
                     onClick={() =>
-                      openModal("delete", {
+                      openModal("confirm", {
                         title: "Delete shortcut",
                         description: `Are you sure you want to delete "${template.title}"? This action cannot be undone.`,
                         itemName: `"${template.title}"`,

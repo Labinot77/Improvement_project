@@ -6,7 +6,7 @@ import { useState, useMemo } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Search, X, Maximize2 } from "lucide-react";
 import type { Lesson, LessonCategory } from "@/types/lessons";
-import { ALL_CATEGORIES, CATEGORY_META } from "@/constants/mental";
+import { ALL_CATEGORIES, CATEGORY_META } from "@/constants/lessons";
 import { Input } from "@/components/ui/input";
 import {
   Dialog,

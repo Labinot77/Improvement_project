@@ -100,7 +100,7 @@ export function ActivityCard({
 
               <button
                 onClick={() =>
-                  open("delete", {
+                  open("confirm", {
                     onConfirm: () => onDelete(activity.id),
                     title: "Delete session",
                   })

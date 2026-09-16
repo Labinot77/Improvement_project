@@ -98,7 +98,7 @@ const ShoppingList = () => {
                 <button
                   type="button"
                   onClick={() =>
-                    openModal("delete", {
+                    openModal("confirm", {
                       title: "Delete item",
                       description: `Remove "${item.name}" from your shopping list?`,
                       itemName: `"${item.name}"`,

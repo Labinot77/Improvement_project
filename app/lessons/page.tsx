@@ -7,7 +7,7 @@ import { LessonForm } from "./components/Form";
 import { LessonList } from "./components/List";
 import PageHeader from "@/app/components/header/Header";
 import SectionCard from "@/app/components/SectionCard";
-import { ACCENT } from "@/constants/mental";
+import { ACCENT } from "@/constants/lessons";
 import { formatDate } from "@/lib/mics/date";
 import { CalendarView } from "./components/Calendar";
 import { container, fadeIn, fadeUp } from "@/constants/animations";

@@ -6,7 +6,7 @@ import { createContext, useContext, useMemo, useRef, useState, type ReactNode } 
 import { LoginModal } from "@/app/components/dashboard/modal/login";
 import { ProfileModal } from "@/app/components/dashboard/modal/profile";
 import { LessonModal } from "@/app/lessons/components/Modal/Edit";
-import { DeleteModal } from "@/app/components/dashboard/modal/delete";
+import { ConfirmModal } from "@/app/components/dashboard/modal/Confirm";
 import type { LessonFormValues } from "@/app/lessons/components/Form";
 import type { Activity } from "@/types/fitness";
 import { DayActivityModal } from "@/app/fitness/components/modal/Day";
@@ -35,7 +35,7 @@ type ModalProps = {
     pendingLessonIds: Set<string>;
     onClose?: () => void;
   };
-  delete: {
+  confirm: {
     onConfirm: () => void | Promise<void>;
     title?: string;
     description?: string;
@@ -114,7 +114,7 @@ const MODALS = {
   profile: ProfileModal,
   lesson: LessonModal,
   lessons_list: LessonsExpandedModal,
-  delete: DeleteModal,
+  confirm: ConfirmModal,
   dayActivity: DayActivityModal,
   progressTemplate: TemplateModal,
   recipe_form: RecipeForm,

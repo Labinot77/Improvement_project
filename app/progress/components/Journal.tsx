@@ -36,7 +36,7 @@ function applyTemplate() {
     return;
   }
   
-  open("delete", {
+  open("confirm", {
     title: "Replace journal entry",
     description: "This will replace your current journal entry with the template. This action cannot be undone.",
     confirmLabel: "Replace",

@@ -2,14 +2,17 @@
 
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, X, Maximize2, Minimize2 } from "lucide-react";
+import { Search, X, Maximize2, Minimize2, ChevronDown } from "lucide-react";
 import type { Lesson, LessonCategory } from "@/types/lessons";
-import { ALL_CATEGORIES, CATEGORY_META, ACCENT } from "@/constants/mental";
+import { ALL_CATEGORIES, CATEGORY_META, ACCENT } from "@/constants/lessons";
 import { LessonCard } from "./Card";
 import type { LessonFormValues } from "@/app/lessons/components/Form";
 import { Input } from "@/components/ui/input";
-import DefaultButton from "@/app/components/DefaultButton";
 import LessonSkeleton from "./Card_skeleton";
+import {
+  Select, SelectContent, SelectItem,
+  SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 
 interface Props {
   lessons: Lesson[];
@@ -62,30 +65,30 @@ export function LessonList({
             </button>
           )}
         </div>
-        {/* <DefaultButton
-          variant="ghost"
-          size="icon"
-          // onClick={() => onExpandedChange(!expanded)}
-          title={expanded ? "Collapse list" : "Expand list"}
-          className="border border-white/[0.08] text-zinc-600 hover:text-amber-500
-    hover:border-amber-500/30 hover:bg-amber-500/10 transition-all"
-        >
-          {expanded ? <Minimize2 className="size-3.5" /> : <Maximize2 className="size-3.5" />}
-        </DefaultButton> */}
       </div>
 
-      {/* Category filter */}
-      <div className="flex gap-1.5 flex-wrap">
-        <button
-          onClick={() => setFilterCat("All")}
-          className={`rounded-full px-2.5 py-1 text-xs font-medium border transition-all ${
-            filterCat === "All"
-              ? "border-zinc-500 bg-zinc-500/20 text-zinc-200"
-              : "border-white/[0.06] text-zinc-600 hover:text-zinc-400"
-          }`}
-        >
-          All
-        </button>
+      {/* Category filter — dropdown on mobile, pills on sm+ */}
+      <div className="sm:hidden">
+        <Select value={filterCat} onValueChange={(v) => setFilterCat(v as LessonCategory | "All")}>
+          <SelectTrigger className="w-full rounded-xl border border-white/[0.08] bg-[#161616] text-sm text-zinc-100 focus:ring-yellow-500/20 focus:border-yellow-500/50">
+            <SelectValue placeholder="Filter by category" />
+          </SelectTrigger>
+          <SelectContent className="border-white/[0.08] bg-[#161616] text-zinc-100">
+            {ALL_CATEGORIES.map((cat) => (
+              <SelectItem key={cat} value={cat} className="focus:bg-white/[0.06]">
+                <span className="flex items-center gap-2">
+                  {cat !== "All" && <span>{CATEGORY_META[cat as LessonCategory].icon}</span>}
+                  <span style={{ color: cat !== "All" ? CATEGORY_META[cat as LessonCategory].color : "#52525b" }}>
+                    {cat}
+                  </span>
+                </span>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="hidden sm:flex gap-1.5 flex-wrap">
         {ALL_CATEGORIES.map((cat) => (
           <button
             key={cat}
@@ -108,12 +111,12 @@ export function LessonList({
         ))}
       </div>
 
-<motion.div
-  layoutScroll
-  layout
-  transition={{ duration: 0.35, ease: "easeInOut" }}
-  className="flex flex-col gap-2 overflow-y-auto pr-3 h-[65vh] max-h-[65vh]"
->
+      <motion.div
+        layoutScroll
+        layout
+        transition={{ duration: 0.35, ease: "easeInOut" }}
+        className="flex flex-col gap-2 pr-3 sm:overflow-y-auto sm:h-[65vh] sm:max-h-[65vh]"
+      >
         <AnimatePresence initial={false} mode="popLayout">
           {loading ? (
             <>

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, Pencil, Trash2 } from "lucide-react";
 import type { Lesson } from "@/types/lessons";
-import { CATEGORY_META, IMPACT_META } from "@/constants/mental";
+import { CATEGORY_META, IMPACT_META } from "@/constants/lessons";
 import DefaultButton from "@/app/components/DefaultButton";
 import { useModal } from "@/providers/Modalprovider";
 import { LessonFormValues } from "./Form";
@@ -119,7 +119,7 @@ export function LessonCard({ lesson, onUpdate, onDelete }: Props) {
                   variant={'outline'}
                   onClick={(e) => {
                     e.stopPropagation()
-                    open('delete', {
+                    open('confirm', {
                       title: "Delete lesson",
                       description: `Are you sure you want to delete "${lesson.title}"? This action cannot be undone. `,
                       itemName: `"${lesson.title}"`,

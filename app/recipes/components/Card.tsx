@@ -67,7 +67,7 @@ export function RecipeCard({ recipe, onClick, onDelete }: Props) {
             variant={"ghost"}
             onClick={(e) => {
               e.stopPropagation();
-              open("delete", {
+              open("confirm", {
                 onConfirm() {
                   onDelete();
                 },

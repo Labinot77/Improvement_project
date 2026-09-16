@@ -5,7 +5,7 @@ import { Save } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import type { Lesson, LessonCategory, LessonImpact } from "@/types/lessons";
-import { ALL_CATEGORIES, ALL_IMPACTS, CATEGORY_META, IMPACT_META } from "@/constants/mental";
+import { ALL_CATEGORIES, ALL_IMPACTS, CATEGORY_META, IMPACT_META } from "@/constants/lessons";
 import { formatDate } from "@/lib/mics/date";
 import { useUser } from "@/lib/use_user";
 import No_access from "@/app/components/NoAccess";
@@ -14,6 +14,8 @@ import {
   SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import DefaultButton from "@/app/components/DefaultButton";
+
+
 
 const inputClass =
   "w-full rounded-xl border border-white/[0.08] bg-[#161616] px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-yellow-500/50 focus:ring-1 focus:ring-yellow-500/20 transition-all";

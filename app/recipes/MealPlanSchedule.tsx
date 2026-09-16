@@ -86,7 +86,7 @@ export function MealPlanSchedule({ plan, recipesById, onDelete }: Props) {
             variant="ghost"
             onClick={(e) => {
               e.stopPropagation();
-              open("delete", {
+              open("confirm", {
                 title: "Delete meal plan",
                 description: "This will remove the whole week's schedule. This can't be undone.",
                 onConfirm: onDelete,
