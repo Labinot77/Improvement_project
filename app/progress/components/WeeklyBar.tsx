@@ -10,7 +10,6 @@ type Props = { days: Days };
 export function WeeklyBar({ days }: Props) {
   const week = getLast7Days();
 
-
   return (
     <div className="flex items-end gap-2 h-20">
       {week.map((date, i) => {

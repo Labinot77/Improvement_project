@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { formatDate } from "@/lib/mics/date";
 import { useSleep } from "@/lib/use_sleep";
 import StatCard from "../components/StatsCard";
-import PageHeader from "../components/header/Header";
 import { ACCENT, TARGET_HOURS } from "@/constants/sleep/main";
 import { formatDuration } from "@/lib/sleep/calc";
 import SectionCard from "../components/SectionCard";
@@ -76,9 +75,7 @@ export default function SleepClient() {
     <div className="min-h-screen px-4 py-6 sm:px-6 lg:px-10 lg:py-8">
       <div className="mx-auto max-w-7xl flex flex-col gap-5">
 
-        <motion.div initial="hidden" animate="show" variants={fadeIn}>
-          <PageHeader emoji="😴" title="Sleep" subtitle="Track your rest & recovery" backHref="/" />
-        </motion.div>
+    
 
         <motion.div className="flex flex-col gap-4" initial="hidden" animate="show" variants={container}>
 

@@ -5,9 +5,9 @@ import { Save } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import type { Lesson, LessonCategory, LessonImpact } from "@/types/lessons";
-import { ALL_CATEGORIES, ALL_IMPACTS, CATEGORY_META, IMPACT_META } from "@/constants/lessons";
+import { ALL_CATEGORIES, ALL_IMPACTS, CATEGORY_META, IMPACT_META } from "@/constants/lessons/lessons";
 import { formatDate } from "@/lib/mics/date";
-import { useUser } from "@/lib/use_user";
+import { getUser } from "@/lib/user/getUser_client";
 import No_access from "@/app/components/NoAccess";
 import {
   Select, SelectContent, SelectItem,
@@ -16,7 +16,7 @@ import {
 import DefaultButton from "@/app/components/DefaultButton";
 
 const inputClass =
-  "w-full rounded-xl border border-white/[0.08] bg-[#161616] px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-yellow-500/50 focus:ring-1 focus:ring-yellow-500/20 transition-all";
+  "w-full rounded-xl border border-white/[0.08] bg-[#161616] px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-[#55c487]/50 focus:ring-1 focus:ring-[#55c487]/20 transition-all";
 
 export type LessonFormValues = {
   title: string;
@@ -39,7 +39,7 @@ export function LessonFormModal({ initial, selectedDate, onSave, onCancel }: Pro
   const [category, setCategory] = useState<LessonCategory>(initial?.category ?? "Life");
   const [impact, setImpact]     = useState<LessonImpact>(initial?.impact ?? "medium");
   const [saved, setSaved]       = useState(false);
-  const { isLoggedIn } = useUser();
+  const { isLoggedIn } = getUser();
 
   useEffect(() => {
     if (!initial) return;
@@ -63,7 +63,7 @@ export function LessonFormModal({ initial, selectedDate, onSave, onCancel }: Pro
   }
 
   return (
-    <div className="flex flex-col gap-3 max-w-82">
+    <div className="flex flex-col gap-3">
       <div className={!isLoggedIn ? "blur-sm pointer-events-none select-none" : ""}>
 
         <Input
@@ -87,7 +87,7 @@ export function LessonFormModal({ initial, selectedDate, onSave, onCancel }: Pro
         <div className="flex flex-col gap-1.5 mt-3">
           <p className="text-xs font-medium text-zinc-500">Category</p>
           <Select value={category} onValueChange={(v) => setCategory(v as LessonCategory)}>
-            <SelectTrigger className="rounded-xl border border-white/[0.08] bg-[#161616] text-sm text-zinc-100 focus:ring-yellow-500/20 focus:border-yellow-500/50">
+            <SelectTrigger className="rounded-xl border border-white/[0.08] bg-[#161616] text-sm text-zinc-100 focus:ring-[#55c487]/20 focus:border-[#55c487]/50">
               <SelectValue>
                 <span className="flex items-center gap-2">
                   <span>{CATEGORY_META[category].icon}</span>
@@ -129,7 +129,7 @@ export function LessonFormModal({ initial, selectedDate, onSave, onCancel }: Pro
           </div>
         </div>
 
-        {/* Date label — read-only, driven by calendar */}
+        {/* Date label — read-only */}
         <p className="text-xs text-zinc-600 mt-2">
           Logging for{" "}
           <span className="text-zinc-400">
@@ -144,9 +144,9 @@ export function LessonFormModal({ initial, selectedDate, onSave, onCancel }: Pro
           disabled={!title.trim()}
           className="mt-3 flex w-full rounded-xl font-semibold transition-all disabled:opacity-30"
           style={{
-            background: saved ? "rgba(34,197,94,0.15)" : "rgba(234,179,8,0.15)",
-            border:     `1px solid ${saved ? "rgba(34,197,94,0.3)" : "rgba(234,179,8,0.3)"}`,
-            color:      saved ? "#86efac" : "#fbbf24",
+            background: saved ? "rgba(85,196,135,0.28)" : "rgba(85,196,135,0.15)",
+            border:     `1px solid ${saved ? "rgba(85,196,135,0.5)" : "rgba(85,196,135,0.3)"}`,
+            color:      saved ? "#a7f3c8" : "#72d9a0",
           }}
         >
           <Save className="size-4" />

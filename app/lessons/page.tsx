@@ -1,126 +1,52 @@
-"use client";
+"use server"
 
-import { useState } from "react";
-import { motion } from "framer-motion";
-import { useLessons } from "@/lib/use_lessons";
-import { LessonForm } from "./components/Form";
+import { createClient } from "@/lib/supabase/server";
+import { LessonsHeader } from "./components/LessonsHeader";
+import { ReflectionPrompt } from "./components/ReflectionPrompt";
 import { LessonList } from "./components/List";
-import PageHeader from "@/app/components/header/Header";
-import SectionCard from "@/app/components/SectionCard";
-import { ACCENT } from "@/constants/lessons";
-import { formatDate } from "@/lib/mics/date";
-import { CalendarView } from "./components/Calendar";
-import { container, fadeIn, fadeUp } from "@/constants/animations";
 
+import type { Lesson } from "@/types/lessons";
 
-// TODO: Move lib, types, constants, to their tile, instead of having them in the root of the app folder. This will make it easier to maintain and scale the codebase in the future.
+export default async function LessonsPage() {
+  const supabase = await createClient();
 
-export default function LessonsClient() {
   const {
-    lessons,
-    addLesson,
-    updateLesson,
-    deleteLesson,
-    pendingLessonIds,
-    loading,
-  } = useLessons();
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  if (!user) {
+    return <div>Please sign in to view your lessons.</div>;
+  }
 
-  const dateKey = formatDate(selectedDate);
+  const { data, error } = await supabase
+    .from("lessons")
+    .select("*")
+    .eq("user_id", user.id)
+    .order("date", { ascending: false });
 
-  const selectedLabel = selectedDate.toLocaleDateString("en-US", {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-  });
+  if (error) {
+    throw new Error("Failed to load lessons.");
+  }
+
+  const lessons: Lesson[] = (data ?? []).map((lesson) => ({
+    id: lesson.id,
+    title: lesson.title,
+    body: lesson.body ?? "",
+    category: lesson.category,
+    impact: lesson.impact,
+    date: lesson.date,
+    createdAt: lesson.created_at,
+  }));
+
+  const categoryCount = new Set(lessons.map((lesson) => lesson.category)).size;
 
   return (
-    <div className="min-h-screen px-4 py-6 sm:px-6 lg:px-10 lg:py-8">
-      <div className="mx-auto max-w-7xl flex flex-col gap-5">
-        <motion.div initial="hidden" animate="show" variants={fadeIn}>
-          <PageHeader
-            emoji="📖"
-            title="Lessons"
-            subtitle="Mistakes, insights & growth"
-            backHref="/"
-          />
-        </motion.div>
+    <main className="px-10 py-6 space-y-6">
+      <LessonsHeader />
 
-        <motion.div
-          className="flex flex-col gap-5"
-          initial="hidden"
-          animate="show"
-          variants={container}
-        >
-          <motion.div
-            layout
-            className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start"
-          >
-            {/* Calendar */}
-            <motion.div
-              layout
-              variants={fadeUp}
-              initial="hidden"
-              animate="show"
-              transition={{ duration: 0.35, ease: "easeInOut" }}
-              className="lg:col-span-3"
-            >
-              <CalendarView
-                selected={selectedDate}
-                onSelect={setSelectedDate}
-                lessons={lessons}
-              />
-            </motion.div>
+      <ReflectionPrompt totalLessons={lessons.length} categoryCount={categoryCount}/>
 
-            {/* Main content */}
-            <motion.div
-              layout
-              transition={{ duration: 0.35, ease: "easeInOut" }}
-              className="lg:col-span-9 flex flex-col gap-5"
-            >
-              {/* New lesson */}
-              <motion.div
-                layout
-                variants={fadeUp}
-                initial="hidden"
-                animate="show"
-                transition={{ duration: 0.35, ease: "easeInOut" }}
-              >
-                <SectionCard
-                  title="New lesson"
-                  subtitle={selectedLabel}
-                  accentGlow={ACCENT}
-                >
-                  <LessonForm
-                    selectedDate={dateKey}
-                    onSave={addLesson}
-                  />
-                </SectionCard>
-              </motion.div>
-
-              {/* Lesson list */}
-              <motion.div
-                layout
-                transition={{ duration: 0.35, ease: "easeInOut" }}
-              >
-                <SectionCard
-                  subtitle={`${lessons.length} recorded lessons`}
-                  accentGlow={ACCENT}
-                >
-                  <LessonList
-                    loading={loading}
-                    lessons={lessons}
-                    pendingLessonIds={pendingLessonIds}
-                    onUpdate={updateLesson}
-                    onDelete={deleteLesson}
-                  />
-                </SectionCard>
-              </motion.div>
-            </motion.div>
-          </motion.div>
-        </motion.div>
-      </div>
-    </div>
+      <LessonList initialLessons={lessons} />
+    </main>
   );
 }

@@ -42,3 +42,18 @@ export const EMPTY_RECIPE_FILTERS: RecipeFilters = {
   overnightOnly: false,
   ingredients: [],
 };
+
+// NEW: what the recipe form edits. Images, cost and createdAt are left untouched on edit.
+export type RecipeFormValues = Pick<
+  Recipe,
+  | "title"
+  | "notes"
+  | "mealType"
+  | "difficulty"
+  | "ingredients"
+  | "cookMinutes"
+  | "needsOvernightRest"
+  | "servings"
+  | "date"
+  | "estimatedCost"
+>;

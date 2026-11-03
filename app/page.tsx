@@ -3,9 +3,9 @@ import DashboardHeader from "./components/dashboard/Header";
 
 export default function Home() {
   return (
-    <div className="relative min-h-screen px-4 py-6 sm:px-8 sm:py-8">
-      <div className="relative mx-auto max-w-6xl">
-        <DashboardHeader/>
+    <div className="py-6">
+      <div className="mx-auto max-w-7xl">
+        <DashboardHeader />
         <DashboardGrid />
       </div>
     </div>

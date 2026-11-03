@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Moon, Sun, Save, Trash2 } from "lucide-react";
 import type { SleepEntry } from "@/types/sleep";
 import { calcDuration, formatDuration } from "@/lib/sleep/calc";
-import { useUser } from "@/lib/use_user";
+import { getUser } from "@/lib/user/getUser_client";
 import { Textarea } from "@/components/ui/textarea";
 import No_access from "@/app/components/NoAccess";
 import DefaultButton from "@/app/components/DefaultButton";
@@ -21,7 +21,7 @@ interface Props {
 }
 
 export function SleepLogForm({ date, existing, onSave, onDelete }: Props) {
-  const { isLoggedIn } = useUser();
+  const { isLoggedIn } = getUser();
   const [bedtime, setBedtime] = useState(existing?.bedtime ?? "23:00");
   const [wakeTime, setWakeTime] = useState(existing?.wakeTime ?? "07:00");
   const [notes, setNotes] = useState(existing?.notes ?? "");

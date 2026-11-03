@@ -1,187 +1,189 @@
-"use client";
+// ! Outdated
 
-import { useEffect, useState, useCallback } from "react";
-import { createClient } from "@/lib/supabase/client";
-import type { Recipe, Ingredient, MealType, Difficulty } from "../../types/Recipies/main";
+// "use client";
 
-const supabase = createClient();
+// import { useEffect, useState, useCallback } from "react";
+// import { createClient } from "@/lib/supabase/client";
+// import type { Recipe, Ingredient, MealType, Difficulty } from "../../types/Recipies/main";
 
-export type RecipeInput = {
-  title: string;
-  notes: string;
-  mealType: MealType;
-  difficulty: Difficulty;
-  ingredients: Ingredient[];
-  cookMinutes: number;
-  needsOvernightRest: boolean;
-  servings: number | null;
-  imageUrl?: string[];
-  date: string;
-  estimatedCost?: number | null;
-  costCurrency?: string | null;
-};
+// const supabase = createClient();
 
-function toRecipe(r: any): Recipe {
-  return {
-    id: r.id,
-    title: r.title,
-    notes: r.notes ?? "",
-    mealType: r.meal_type as MealType,
-    difficulty: r.difficulty as Difficulty,
-    ingredients: (r.ingredients ?? []) as Ingredient[],
-    cookMinutes: r.cook_minutes ?? 0,
-    needsOvernightRest: r.needs_overnight_rest ?? false,
-    servings: r.servings ?? null,
-    imageUrl: (r.image_url ?? []) as string[],
-    date: r.date,
-    createdAt: r.created_at,
-    estimatedCost: r.estimated_cost ?? null,
-    costCurrency: r.cost_currency ?? null,
-  } as Recipe;
-}
+// export type RecipeInput = {
+//   title: string;
+//   notes: string;
+//   mealType: MealType;
+//   difficulty: Difficulty;
+//   ingredients: Ingredient[];
+//   cookMinutes: number;
+//   needsOvernightRest: boolean;
+//   servings: number | null;
+//   imageUrl?: string[];
+//   date: string;
+//   estimatedCost?: number | null;
+//   costCurrency?: string | null;
+// };
 
-export function useRecipes() {
-  const [recipes, setRecipes] = useState<Recipe[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [pendingRecipeIds, setPendingRecipeIds] = useState<Set<string>>(new Set());
+// function toRecipe(r: any): Recipe {
+//   return {
+//     id: r.id,
+//     title: r.title,
+//     notes: r.notes ?? "",
+//     mealType: r.meal_type as MealType,
+//     difficulty: r.difficulty as Difficulty,
+//     ingredients: (r.ingredients ?? []) as Ingredient[],
+//     cookMinutes: r.cook_minutes ?? 0,
+//     needsOvernightRest: r.needs_overnight_rest ?? false,
+//     servings: r.servings ?? null,
+//     imageUrl: (r.image_url ?? []) as string[],
+//     date: r.date,
+//     createdAt: r.created_at,
+//     estimatedCost: r.estimated_cost ?? null,
+//     costCurrency: r.cost_currency ?? null,
+//   } as Recipe;
+// }
 
-  const setPending = (id: string, isPending: boolean) =>
-    setPendingRecipeIds((prev) => {
-      const next = new Set(prev);
-      isPending ? next.add(id) : next.delete(id);
-      return next;
-    });
+// export function useRecipes() {
+//   const [recipes, setRecipes] = useState<Recipe[]>([]);
+//   const [loading, setLoading] = useState(true);
+//   const [pendingRecipeIds, setPendingRecipeIds] = useState<Set<string>>(new Set());
 
-  const fetchAll = useCallback(async () => {
-    const { data, error } = await supabase
-      .from("recipes")
-      .select("*")
-      .order("date", { ascending: false });
+//   const setPending = (id: string, isPending: boolean) =>
+//     setPendingRecipeIds((prev) => {
+//       const next = new Set(prev);
+//       isPending ? next.add(id) : next.delete(id);
+//       return next;
+//     });
 
-    if (error) {
-      console.error("Failed to fetch recipes:", error);
-    }
-    if (!error && data) setRecipes(data.map(toRecipe));
-    setLoading(false);
-  }, []);
+//   const fetchAll = useCallback(async () => {
+//     const { data, error } = await supabase
+//       .from("recipes")
+//       .select("*")
+//       .order("date", { ascending: false });
 
-  useEffect(() => {
-    fetchAll();
-  }, [fetchAll]);
+//     if (error) {
+//       console.error("Failed to fetch recipes:", error);
+//     }
+//     if (!error && data) setRecipes(data.map(toRecipe));
+//     setLoading(false);
+//   }, []);
 
-  async function addRecipe(_draftId: string, input: RecipeInput): Promise<void> {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+//   useEffect(() => {
+//     fetchAll();
+//   }, [fetchAll]);
 
-    if (!user) {
-      console.error("Cannot add recipe: no authenticated user.");
-      return;
-    }
+//   async function addRecipe(_draftId: string, input: RecipeInput): Promise<void> {
+//     const {
+//       data: { user },
+//     } = await supabase.auth.getUser();
 
-    const tempId = _draftId || crypto.randomUUID();
-    const optimistic: Recipe = {
-      id: tempId,
-      ...input,
-      createdAt: new Date().toISOString(),
-    } as Recipe;
+//     if (!user) {
+//       console.error("Cannot add recipe: no authenticated user.");
+//       return;
+//     }
 
-    setPending(tempId, true);
-    setRecipes((prev) => [optimistic, ...prev]);
+//     const tempId = _draftId || crypto.randomUUID();
+//     const optimistic: Recipe = {
+//       id: tempId,
+//       ...input,
+//       createdAt: new Date().toISOString(),
+//     } as Recipe;
 
-    const { data, error } = await supabase
-      .from("recipes")
-      .insert({
-        user_id: user.id,
-        title: input.title,
-        notes: input.notes,
-        meal_type: input.mealType,
-        difficulty: input.difficulty,
-        ingredients: input.ingredients,
-        cook_minutes: input.cookMinutes,
-        needs_overnight_rest: input.needsOvernightRest,
-        servings: input.servings,
-        image_url: input.imageUrl ?? [],
-        date: input.date,
-        estimated_cost: input.estimatedCost ?? null,
-        cost_currency: input.costCurrency ?? null,
-      })
-      .select()
-      .single();
+//     setPending(tempId, true);
+//     setRecipes((prev) => [optimistic, ...prev]);
 
-    if (error || !data) {
-      console.error("Failed to add recipe:", error);
-      setRecipes((prev) => prev.filter((r) => r.id !== tempId));
-      setPending(tempId, false);
-      return;
-    }
+//     const { data, error } = await supabase
+//       .from("recipes")
+//       .insert({
+//         user_id: user.id,
+//         title: input.title,
+//         notes: input.notes,
+//         meal_type: input.mealType,
+//         difficulty: input.difficulty,
+//         ingredients: input.ingredients,
+//         cook_minutes: input.cookMinutes,
+//         needs_overnight_rest: input.needsOvernightRest,
+//         servings: input.servings,
+//         image_url: input.imageUrl ?? [],
+//         date: input.date,
+//         estimated_cost: input.estimatedCost ?? null,
+//         cost_currency: input.costCurrency ?? null,
+//       })
+//       .select()
+//       .single();
 
-    setRecipes((prev) =>
-      prev.map((r) => (r.id === tempId ? { ...r, id: data.id, createdAt: data.created_at } : r))
-    );
-    setPending(tempId, false);
-  }
+//     if (error || !data) {
+//       console.error("Failed to add recipe:", error);
+//       setRecipes((prev) => prev.filter((r) => r.id !== tempId));
+//       setPending(tempId, false);
+//       return;
+//     }
 
-  async function updateRecipe(id: string, input: RecipeInput) {
-    setRecipes((prev) => prev.map((r) => (r.id === id ? { ...r, ...input } : r)));
+//     setRecipes((prev) =>
+//       prev.map((r) => (r.id === tempId ? { ...r, id: data.id, createdAt: data.created_at } : r))
+//     );
+//     setPending(tempId, false);
+//   }
 
-    const { error } = await supabase
-      .from("recipes")
-      .update({
-        title: input.title,
-        notes: input.notes,
-        meal_type: input.mealType,
-        difficulty: input.difficulty,
-        ingredients: input.ingredients,
-        cook_minutes: input.cookMinutes,
-        needs_overnight_rest: input.needsOvernightRest,
-        servings: input.servings,
-        image_url: input.imageUrl ?? [],
-        date: input.date,
-        estimated_cost: input.estimatedCost ?? null,
-        cost_currency: input.costCurrency ?? null,
-      })
-      .eq("id", id);
+//   async function updateRecipe(id: string, input: RecipeInput) {
+//     setRecipes((prev) => prev.map((r) => (r.id === id ? { ...r, ...input } : r)));
 
-    if (error) {
-      console.error("Failed to update recipe:", error);
-    }
-  }
+//     const { error } = await supabase
+//       .from("recipes")
+//       .update({
+//         title: input.title,
+//         notes: input.notes,
+//         meal_type: input.mealType,
+//         difficulty: input.difficulty,
+//         ingredients: input.ingredients,
+//         cook_minutes: input.cookMinutes,
+//         needs_overnight_rest: input.needsOvernightRest,
+//         servings: input.servings,
+//         image_url: input.imageUrl ?? [],
+//         date: input.date,
+//         estimated_cost: input.estimatedCost ?? null,
+//         cost_currency: input.costCurrency ?? null,
+//       })
+//       .eq("id", id);
 
-  async function deleteRecipe(id: string) {
-    const recipeToDelete = recipes.find((r) => r.id === id);
-    if (!recipeToDelete) return;
+//     if (error) {
+//       console.error("Failed to update recipe:", error);
+//     }
+//   }
 
-    const originalIndex = recipes.findIndex((r) => r.id === id);
-    setRecipes((prev) => prev.filter((r) => r.id !== id));
+//   async function deleteRecipe(id: string) {
+//     const recipeToDelete = recipes.find((r) => r.id === id);
+//     if (!recipeToDelete) return;
 
-    const { error } = await supabase.from("recipes").delete().eq("id", id);
+//     const originalIndex = recipes.findIndex((r) => r.id === id);
+//     setRecipes((prev) => prev.filter((r) => r.id !== id));
 
-    if (error) {
-      setRecipes((prev) => {
-        const restored = [...prev];
-        restored.splice(originalIndex, 0, recipeToDelete);
-        return restored;
-      });
-      console.error("Failed to delete recipe:", error);
-    }
-  }
+//     const { error } = await supabase.from("recipes").delete().eq("id", id);
 
-  function saveRecipe(id: string, input: RecipeInput) {
-    const exists = recipes.some((r) => r.id === id);
-    if (exists) {
-      return updateRecipe(id, input);
-    }
-    return addRecipe(id, input);
-  }
+//     if (error) {
+//       setRecipes((prev) => {
+//         const restored = [...prev];
+//         restored.splice(originalIndex, 0, recipeToDelete);
+//         return restored;
+//       });
+//       console.error("Failed to delete recipe:", error);
+//     }
+//   }
 
-  return {
-    recipes,
-    loading,
-    pendingRecipeIds,
-    addRecipe,
-    updateRecipe,
-    deleteRecipe,
-    saveRecipe,
-  };
-}
+//   function saveRecipe(id: string, input: RecipeInput) {
+//     const exists = recipes.some((r) => r.id === id);
+//     if (exists) {
+//       return updateRecipe(id, input);
+//     }
+//     return addRecipe(id, input);
+//   }
+
+//   return {
+//     recipes,
+//     loading,
+//     pendingRecipeIds,
+//     addRecipe,
+//     updateRecipe,
+//     deleteRecipe,
+//     saveRecipe,
+//   };
+// }

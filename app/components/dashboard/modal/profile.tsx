@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { LogOut, User, BarChart2, Eye, EyeOff, Key } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { useUser } from "@/lib/use_user";
+import { getUser } from "@/lib/user/getUser_client";
 import {
   Dialog,
   DialogContent,
@@ -25,7 +25,7 @@ interface Props {
 }
 
 export function ProfileModal({ open, onOpenChange }: Props) {
-  const { user } = useUser();
+  const { user } = getUser();
   const [signingOut, setSigningOut] = useState(false);
   const [apiKey, setApiKey] = useState("");
   const [showApiKey, setShowApiKey] = useState(false);

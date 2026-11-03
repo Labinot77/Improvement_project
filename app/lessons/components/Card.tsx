@@ -1,142 +1,77 @@
 "use client";
 
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import type { Lesson } from "@/types/lessons";
-import { CATEGORY_META, IMPACT_META } from "@/constants/lessons";
-import DefaultButton from "@/app/components/DefaultButton";
 import { useModal } from "@/providers/Modalprovider";
-import { LessonFormValues } from "./Form";
+import { Button } from "@/components/ui/button";
+import { LessonFormValues } from "./Form_modal";
 
 interface Props {
   lesson: Lesson;
-  onUpdate: (id: string, values: LessonFormValues) => void; 
+  onUpdate: (id: string, values: LessonFormValues) => void;
   onDelete: () => void;
 }
 
+const iconButton =
+  "grid size-10 place-items-center rounded-full text-zinc-500 transition-colors hover:bg-white/[0.06] hover:text-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/60";
+
 export function LessonCard({ lesson, onUpdate, onDelete }: Props) {
-  const { open } = useModal(); 
-  const [expanded, setExpanded] = useState(false);
-  const catMeta    = CATEGORY_META[lesson.category];
-  const impactMeta = IMPACT_META[lesson.impact];
+  const { open } = useModal();
 
   return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, y: -4 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, x: -8 }}
-     className="
-    shrink-0
-    rounded-xl
-    border
-    border-white/[0.06]
-    bg-[#0f0f0f]/75
-    overflow-hidden
-    hover:border-white/[0.10]
-    transition-colors"
+    <article
+      className="flex h-full flex-col rounded-3xl border border-white/[0.06] bg-[#16181b] p-6"
+      onClick={() => open("lesson_preview", { lesson })}
     >
-      <button
-        onClick={() => setExpanded((p) => !p)}
-        className="flex w-full items-start gap-3 px-4 py-3 text-left group transition-colors duration-150"
-      >
-        <span className="text-base shrink-0 mt-0.5">{catMeta.icon}</span>
+      <div className="flex items-start justify-between gap-4">
+        <span className="rounded-full bg-emerald-400/10 px-3.5 py-1.5 text-sm text-emerald-400">
+          {lesson.category}
+        </span>
 
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-zinc-100 truncate">{lesson.title}</p>
-          <div className="flex items-center gap-2 mt-1 flex-wrap">
-            <span
-              className="text-xs px-2 py-0.5 rounded-full border"
-              style={{
-                color: catMeta.color,
-                borderColor: `${catMeta.color}40`,
-                background: `${catMeta.color}12`,
-              }}
-            >
-              {lesson.category}
-            </span>
-
-            <span className="flex items-center gap-1 text-xs text-zinc-600">
-              <span
-                className="size-1.5 rounded-full"
-                style={{ backgroundColor: impactMeta.color }}
-              />
-              {impactMeta.label} impact
-            </span>
-
-            <span className="text-xs text-zinc-600">
-              {new Date(lesson.date + "T12:00:00").toLocaleDateString("en-US", {
-                month: "short", day: "numeric", year: "numeric",
-              })}
-            </span>
-          </div>
-        </div>
-
-        {/* Chevron */}
-        <motion.span
-          animate={{ rotate: expanded ? 180 : 0 }}
-            transition={{ duration: 0.2 }}
-            className="text-zinc-600 shrink-0 mt-1 group-hover:opacity-100 opacity-0 transition-opacity duration-150"
-        >
-          <ChevronDown className="size-4" />
-        </motion.span>
-      </button>
-
-      {/* Expanded body */}
-      <AnimatePresence initial={false}>
-        {expanded && (
-          <motion.div
-            key="body"
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2, ease: "easeInOut" }}
-            className="overflow-hidden"
+        <div className="-mr-2 -mt-1 flex items-center">
+          <Button
+            type="button"
+            aria-label={`Edit "${lesson.title}"`}
+            className={iconButton}
+            variant={"ghost"}
+            onClick={() =>
+              open("lesson", {
+                lesson,
+                onSave: (id: string | undefined, values: LessonFormValues) =>
+                  onUpdate(id ?? lesson.id, values),
+              })
+            }
           >
-            <div className="px-4 pb-4 flex flex-col gap-3 border-t border-white/[0.04] pt-3 ">
-              {lesson.body ? (
-                <p className="text-sm text-zinc-400 leading-relaxed whitespace-pre-wrap">
-                  {lesson.body}
-                </p>
-              ) : (
-                <p className="text-sm text-zinc-600 italic">No description added.</p>
-              )}
+            <Pencil className="size-[18px]" />
+          </Button>
+          <Button
+            type="button"
+            variant={"outline"}
+            aria-label={`Delete "${lesson.title}"`}
+            className={`${iconButton} hover:text-red-400`}
+            onClick={() =>
+              open("confirm", {
+                title: "Delete lesson",
+                description: `Are you sure you want to delete "${lesson.title}"? This action cannot be undone.`,
+                itemName: `"${lesson.title}"`,
+                onConfirm: onDelete,
+              })
+            }
+          >
+            <Trash2 className="size-[18px]" />
+          </Button>
+        </div>
+      </div>
 
-              <div className="flex gap-2">
-                <DefaultButton
-                  variant={'outline'}
-                  onClick={() => open('lesson', {
-                  lesson: lesson,
-                  onSave: (id: string, values: LessonFormValues) => onUpdate(id, values),
-                })}
-                  className="flex items-center gap-1.5 rounded-lg border border-white/[0.06] px-3 py-1.5
-                    text-xs font-medium text-zinc-400 hover:text-zinc-100 hover:border-white/[0.12] transition-all"
-                >
-                  <Pencil className="size-3" /> Edit
-                </DefaultButton>
-                <DefaultButton
-                  variant={'outline'}
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    open('confirm', {
-                      title: "Delete lesson",
-                      description: `Are you sure you want to delete "${lesson.title}"? This action cannot be undone. `,
-                      itemName: `"${lesson.title}"`,
-                      onConfirm: onDelete,
-                      
-                  })}}
-                  className="flex items-center gap-1.5 rounded-lg border border-red-500/20 px-3 py-1.5
-                    text-xs font-medium text-red-400 hover:bg-red-500/10 transition-all"
-                >
-                  <Trash2 className="size-3" /> Delete
-                </DefaultButton>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <h3 className="mt-5 text-xl font-medium leading-snug">{lesson.title}</h3>
 
-    </motion.div>
+      <p className="mt-3 line-clamp-3 whitespace-pre-wrap leading-relaxed text-zinc-500">
+        {lesson.body || "No description added."}
+      </p>
+
+      <p className="mt-auto pt-6 text-sm tabular-nums text-zinc-600">
+        {lesson.date}
+      </p>
+    </article>
   );
 }

@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import type { Lesson, LessonCategory, LessonImpact } from "../types/lessons";
-import { wait } from "./mics/helpers";
-
-const supabase = createClient();
+import type {
+  Lesson,
+  LessonCategory,
+  LessonImpact,
+} from "@/types/lessons";
 
 export type LessonInput = {
   title: string;
@@ -15,109 +16,242 @@ export type LessonInput = {
   date: string;
 };
 
-function toLesson(r: any): Lesson {
+type LessonEvent =
+  | { type: "add"; lesson: Lesson }
+  | { type: "replace"; oldId: string; lesson: Lesson }
+  | { type: "update"; id: string; input: LessonInput }
+  | { type: "delete"; id: string }
+  | { type: "restore"; lesson: Lesson };
+
+const EVENT_NAME = "lessons:changed";
+
+function publish(event: LessonEvent) {
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent<LessonEvent>(EVENT_NAME, {
+      detail: event,
+    }));
+  }
+}
+
+function toLesson(row: any): Lesson {
   return {
-    id: r.id,
-    title: r.title,
-    body: r.body ?? "",
-    category: r.category as LessonCategory,
-    impact: r.impact as LessonImpact,
-    date: r.date,
-    createdAt: r.created_at,
+    id: row.id,
+    title: row.title,
+    body: row.body ?? "",
+    category: row.category as LessonCategory,
+    impact: row.impact as LessonImpact,
+    date: row.date,
+    createdAt: row.created_at,
   };
 }
 
-export function useLessons() {
-  const [lessons, setLessons] = useState<Lesson[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [pendingLessonIds, setPendingLessonIds] = useState<Set<string>>(new Set());
+export function useLessons(initialLessons: Lesson[] = []) {
+  const [lessons, setLessons] = useState<Lesson[]>(initialLessons);
+  const [loading] = useState(false);
+  const [pendingLessonIds, setPendingLessonIds] = useState<Set<string>>(
+    new Set(),
+  );
 
-  const setPending = (id: string, isPending: boolean) =>
-    setPendingLessonIds((prev) => {
-      const next = new Set(prev);
-      isPending ? next.add(id) : next.delete(id);
+  const setPending = useCallback((id: string, pending: boolean) => {
+    setPendingLessonIds((previous) => {
+      const next = new Set(previous);
+
+      if (pending) next.add(id);
+      else next.delete(id);
+
       return next;
     });
-
-  const fetchAll = useCallback(async () => {
-    const { data, error } = await supabase
-      .from("lessons")
-      .select("*")
-      .order("date", { ascending: false });
-    if (!error && data) setLessons(data.map(toLesson));
-    setLoading(false);
   }, []);
 
+  // Keep separate hook instances synchronized.
   useEffect(() => {
-    fetchAll();
-  }, [fetchAll]);
+    function handleLessonEvent(event: Event) {
+      const { detail } = event as CustomEvent<LessonEvent>;
 
-  async function addLesson(input: LessonInput): Promise<void> {
+      switch (detail.type) {
+        case "add":
+          setLessons((previous) =>
+            previous.some((lesson) => lesson.id === detail.lesson.id)
+              ? previous
+              : [detail.lesson, ...previous],
+          );
+          break;
+
+        case "replace":
+          setLessons((previous) =>
+            previous.map((lesson) =>
+              lesson.id === detail.oldId ? detail.lesson : lesson,
+            ),
+          );
+          break;
+
+        case "update":
+          setLessons((previous) =>
+            previous.map((lesson) =>
+              lesson.id === detail.id
+                ? { ...lesson, ...detail.input }
+                : lesson,
+            ),
+          );
+          break;
+
+        case "delete":
+          setLessons((previous) =>
+            previous.filter((lesson) => lesson.id !== detail.id),
+          );
+          break;
+
+        case "restore":
+          setLessons((previous) =>
+            previous.some((lesson) => lesson.id === detail.lesson.id)
+              ? previous
+              : [...previous, detail.lesson].sort((a, b) =>
+                  b.date.localeCompare(a.date),
+                ),
+          );
+          break;
+      }
+    }
+
+    window.addEventListener(EVENT_NAME, handleLessonEvent);
+
+    return () => {
+      window.removeEventListener(EVENT_NAME, handleLessonEvent);
+    };
+  }, []);
+
+
+  const addLesson = useCallback(async (input: LessonInput): Promise<void> => {
+    const supabase = createClient();
+
     const {
       data: { user },
+      error: authError,
     } = await supabase.auth.getUser();
-    if (!user) return;
+
+    if (authError || !user) {
+      throw new Error("You must be signed in to add a lesson.");
+    }
 
     const tempId = crypto.randomUUID();
-    const optimistic: Lesson = { id: tempId, ...input, createdAt: new Date().toISOString() };
+
+    const optimistic: Lesson = {
+      id: tempId,
+      ...input,
+      createdAt: new Date().toISOString(),
+    };
 
     setPending(tempId, true);
-    setLessons((prev) => [optimistic, ...prev]);
+    publish({ type: "add", lesson: optimistic });
 
-    const { data, error } = await supabase
-      .from("lessons")
-      .insert({ user_id: user.id, ...input })
-      .select()
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from("lessons")
+        .insert({
+          user_id: user.id,
+          title: input.title,
+          body: input.body,
+          category: input.category,
+          impact: input.impact,
+          date: input.date,
+        })
+        .select()
+        .single();
 
-    if (error || !data) {
-      setLessons((prev) => prev.filter((l) => l.id !== tempId));
-      setPending(tempId, false);
-      return;
-    }
+      if (error || !data) {
+        throw error ?? new Error("Failed to create lesson.");
+      }
 
-    setLessons((prev) =>
-      prev.map((l) => (l.id === tempId ? { ...l, id: data.id, createdAt: data.created_at } : l))
-    );
-    setPending(tempId, false);
-  }
-
-  async function updateLesson(id: string, input: LessonInput) {
-    setLessons((prev) => prev.map((l) => (l.id === id ? { ...l, ...input } : l)));
-
-    await supabase
-      .from("lessons")
-      .update({
-        title: input.title,
-        body: input.body,
-        category: input.category,
-        impact: input.impact,
-        date: input.date,
-      })
-      .eq("id", id);
-  }
-
-  async function deleteLesson(id: string) {
-    const lessonToDelete = lessons.find((l) => l.id === id);
-    if (!lessonToDelete) return;
-
-    const originalIndex = lessons.findIndex((l) => l.id === id);
-    setLessons((prev) => prev.filter((l) => l.id !== id));
-
-    const { error } = await supabase.from("lessons").delete().eq("id", id);
-    // NOTE: preserved as-is from original — this branch runs when there is NO error,
-    // meaning a successful delete gets reverted (the lesson reappears) and the
-    // console.error fires on success rather than failure. Likely an inverted
-    // condition bug (should probably be `if (error)`), but left unchanged per request.
-    if (error) {
-      setLessons((prev) => {
-        const restored = [...prev];
-        restored.splice(originalIndex, 0, lessonToDelete);
-        return restored;
+      publish({
+        type: "replace",
+        oldId: tempId,
+        lesson: toLesson(data),
       });
-      console.error("Failed to delete lesson:", error);
+    } catch (error) {
+      publish({ type: "delete", id: tempId });
+      throw error;
+    } finally {
+      setPending(tempId, false);
     }
-  }
+  }, [setPending]);
 
-  return { lessons, loading, pendingLessonIds, addLesson, updateLesson, deleteLesson };
+  const updateLesson = useCallback(async (
+    id: string,
+    input: LessonInput,
+  ): Promise<void> => {
+    const supabase = createClient();
+
+    let previousLesson: Lesson | undefined;
+
+    setLessons((previous) => {
+      previousLesson = previous.find((lesson) => lesson.id === id);
+      return previous.map((lesson) =>
+        lesson.id === id ? { ...lesson, ...input } : lesson,
+      );
+    });
+
+    publish({ type: "update", id, input });
+
+    try {
+      const { error } = await supabase
+        .from("lessons")
+        .update({
+          title: input.title,
+          body: input.body,
+          category: input.category,
+          impact: input.impact,
+          date: input.date,
+        })
+        .eq("id", id);
+
+      if (error) throw error;
+    } catch (error) {
+      if (previousLesson) {
+        publish({ type: "restore", lesson: previousLesson });
+        publish({
+          type: "update",
+          id,
+          input: {
+            title: previousLesson.title,
+            body: previousLesson.body,
+            category: previousLesson.category,
+            impact: previousLesson.impact,
+            date: previousLesson.date,
+          },
+        });
+      }
+
+      throw error;
+    }
+  }, []);
+
+  const deleteLesson = useCallback(async (id: string): Promise<void> => {
+    const supabase = createClient();
+
+    const previousLesson = lessons.find((lesson) => lesson.id === id);
+    if (!previousLesson) return;
+
+    publish({ type: "delete", id });
+
+    try {
+      const { error } = await supabase
+        .from("lessons")
+        .delete()
+        .eq("id", id);
+
+      if (error) throw error;
+    } catch (error) {
+      publish({ type: "restore", lesson: previousLesson });
+      throw error;
+    }
+  }, [lessons]);
+
+  return {
+    lessons,
+    loading,
+    pendingLessonIds,
+    addLesson,
+    updateLesson,
+    deleteLesson,
+  };
 }
