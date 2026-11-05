@@ -59,16 +59,10 @@ export function TaskList({
   }
 
   function edit(t: TodoTask) {
-     open("confirm", {
-      title: "Delete task",
-      description: `Are you sure you want to delete "${t.title}"? This action cannot be undone.`,
-      itemName: `"${t.title}"`,
-      onConfirm: () =>
-        startTransition(async () => {
-          apply({ type: "remove", id: t.id });
-          await removeTask(t.id);
-        }),
-    });
+    // ? Edit task modal to be implemented. For now, we can open the progress_create modal with the task data.
+    //  open("progress_create", {
+    //    task: t
+    //  });
   }
 
   return (
@@ -131,7 +125,7 @@ export function TaskList({
                 Delete
               </DropdownMenuItem>
               <DropdownMenuItem
-                onSelect={() => confirmDelete(t)}
+                onSelect={() => edit(t)}
                 className="gap-2 "
               >
                 <Pencil className="size-4" />

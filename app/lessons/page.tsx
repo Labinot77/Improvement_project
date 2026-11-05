@@ -41,7 +41,7 @@ export default async function LessonsPage() {
   const categoryCount = new Set(lessons.map((lesson) => lesson.category)).size;
 
   return (
-    <main className="px-10 py-6 space-y-6">
+    <main className="lg:px-32 px-10 py-6 space-y-6">
       <LessonsHeader />
 
       <ReflectionPrompt totalLessons={lessons.length} categoryCount={categoryCount}/>

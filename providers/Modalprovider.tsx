@@ -11,7 +11,8 @@ import { RecipeForm } from "@/app/recipes/components/Form"; // NEW
 import { RecipeFilterModal } from "@/app/recipes/components/Filter";
 import { RecipePreviewModal } from "@/app/recipes/components/modal/Preview";
 import { ResponsiveModal } from "@/app/components/ResponsiveModal";
-import Journal from "@/app/journal/components/Modal/Journal";
+import { JournalForm } from "@/app/journal/components/Modal/Form";
+import { JournalPreviewModal } from "@/app/journal/components/Modal/Preview";
 import { TaskModal } from "@/app/progress/components/Create";
 import type { Activity } from "@/types/fitness";
 import type { Lesson } from "@/types/lessons";
@@ -19,6 +20,7 @@ import type { Recipe, RecipeFilters, RecipeFormValues } from "@/types/Recipies/m
 import type { ProgressTemplate } from "@/types/Progress/templates";
 import { LessonFormValues } from "@/app/lessons/components/Form_modal";
 import Preview from "@/app/lessons/components/Modal/Preview";
+import type { JournalEntry, JournalFormValues } from "@/types/journal";
 
 /* -------------------------------------------------------------------------- */
 /*  Modal names and the props each one takes                                  */
@@ -47,7 +49,6 @@ export type ModalProps = {
   };
   dayActivity: { date: string; sessions: Activity[] };
   progress_create: { date?: string };
-  progress_journal: { value: string; onChange: (value: string) => void };
   // CHANGED: onSave may be async so the form can show "Saving…" and errors
   recipe_form: { recipe?: Recipe; onSave: (id: string, values: RecipeFormValues) => void | Promise<void> };
   recipe_filter: {
@@ -56,6 +57,16 @@ export type ModalProps = {
     recipes: Recipe[];
   };
   recipe_preview: { recipe: Recipe; onSave: (id: string, values: RecipeFormValues) => void | Promise<void>; onDelete: (id:string) => void | Promise<void>};
+  journal_form: {
+    entry?: JournalEntry;
+    defaultDate?: string;
+    onSave: (values: JournalFormValues) => Promise<void>;
+  };
+  journal_preview: {
+    entry: JournalEntry;
+    onSave: (values: JournalFormValues) => Promise<void>;
+    onDelete: () => Promise<void>;
+  };
 };
 
 export type ModalName = keyof ModalProps;
@@ -85,14 +96,17 @@ function renderModal(entry: Entry, base: any) {
       return <DayActivityModal {...base} {...entry.props} />;
     case "progress_create":
       return <TaskModal {...base} {...entry.props} />;
-    case "progress_journal":
-      return <Journal {...base} {...entry.props} />;
     case "recipe_form":
       return <RecipeForm {...base} {...entry.props} />;
     case "recipe_filter":
       return <RecipeFilterModal {...base} {...entry.props} />;
     case "recipe_preview":
       return <RecipePreviewModal {...base} {...entry.props} />;
+    case "journal_form":
+      return <JournalForm {...base} {...entry.props} />;
+    case "journal_preview":
+      return <JournalPreviewModal {...base} {...entry.props} />;
+      
     default: {
       // Compile error here means a name in ModalProps has no case above
       const unhandled: never = entry;
@@ -109,11 +123,15 @@ function renderModal(entry: Entry, base: any) {
 const TASK_SHELL =
   "max-w-lg gap-0 overflow-hidden rounded-[24px] border-white/[0.11] bg-[#191a1f] p-0 shadow-[0_32px_100px_rgba(0,0,0,.7)] [&>button]:right-5 [&>button]:top-[22px] [&>button]:grid [&>button]:size-8 [&>button]:place-items-center [&>button]:rounded-full [&>button]:bg-white/[0.06] [&>button]:text-white/50 [&>button]:opacity-100 [&>button]:transition [&>button]:hover:rotate-90 [&>button]:hover:bg-white/[0.1] [&>button]:hover:text-white";
 
+const PREVIEW_SHELL = TASK_SHELL.replace("max-w-lg", "max-w-2xl");
+
 const SHELL: Partial<Record<ModalName, { desktopClassName?: string; hideHeader?: boolean }>> = {
   lesson: { desktopClassName: "max-w-lg" },
   recipe_form: { desktopClassName: "lg:min-w-[45dvw]", hideHeader: true },
   recipe_preview: { desktopClassName: "lg:max-w-2xl", hideHeader: true },
   progress_create: { desktopClassName: TASK_SHELL, hideHeader: true },
+  journal_form: { desktopClassName: TASK_SHELL, hideHeader: true },
+  journal_preview: { desktopClassName: PREVIEW_SHELL, hideHeader: true },
 };
 
 /* -------------------------------------------------------------------------- */

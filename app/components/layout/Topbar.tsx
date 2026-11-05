@@ -21,7 +21,7 @@ export default function AppTopbar() {
   const { updateLesson, addLesson } = useLessons();
   const pathname = usePathname();
   const { open } = useModal();
-    const { openForm } = useRecipeModals();
+  const { openForm } = useRecipeModals();
   const [now, setNow] = useState<Date | null>(null);
 
   useEffect(() => setNow(new Date()), []);

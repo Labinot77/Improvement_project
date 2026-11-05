@@ -43,7 +43,6 @@ function dueOptions(base: string) {
 }
 
 export function TaskModal({ onOpenChange, date }: Props) {
-  // Only trust a YYYY-MM-DD string; anything else falls back to today
   const base = date && /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : today();
 
   const [title, setTitle] = useState("");
