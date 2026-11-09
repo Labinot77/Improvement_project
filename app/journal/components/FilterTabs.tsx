@@ -7,11 +7,11 @@ import type { JournalFilter } from "@/types/journal";
 
 export function FilterTabs({ active }: { active: JournalFilter }) {
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-2 mb-4">
       {FILTERS.map((f) => (
         <Link
           key={f.key}
-          href={f.key === "all" ? "/journal" : `/journal?filter=${f.key}`}
+          href={f.key === "all" ? "/journal" : `/journal?filter=${encodeURIComponent(f.key)}`}
           scroll={false}
           className={`relative rounded-full px-4 py-2 text-sm transition-colors ${
             active === f.key ? "text-emerald-300" : "text-zinc-400 hover:text-zinc-200"

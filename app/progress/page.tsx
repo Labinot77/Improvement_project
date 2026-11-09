@@ -95,7 +95,6 @@ export default async function TodosPage() {
           {/* Sidebar cards */}
           <aside className="space-y-6">
           <ProgressTracker total={total} done={done} />
-            
           <FocusTip/>
           </aside>
         </div>

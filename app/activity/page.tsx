@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { WeeklyRing } from "./components/WeeklyRing";
 import { ActivityForm } from "./components/ActivityForm";
 import { ActivityHistory } from "./components/ActivityHistory";
 import StatCard from "@/app/components/StatsCard";

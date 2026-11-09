@@ -71,14 +71,7 @@ export function LessonList({ initialLessons }: Props) {
 
       <div className="grid gap-5 sm:grid-cols-2">
         <AnimatePresence initial={false} mode="popLayout">
-          {loading ? (
-            <>
-              <LessonSkeleton key="s1" />
-              <LessonSkeleton key="s2" />
-              <LessonSkeleton key="s3" />
-              <LessonSkeleton key="s4" />
-            </>
-          ) : filtered.length === 0 ? (
+          {filtered.length === 0 ? (
             <motion.p
               key="empty"
               initial={{ opacity: 0 }}

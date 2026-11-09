@@ -8,7 +8,6 @@ import { LessonModal } from "@/app/lessons/components/Modal/Edit";
 import { ConfirmModal } from "@/app/components/dashboard/modal/Confirm";
 import { DayActivityModal } from "@/app/activity/components/modal/Day";
 import { RecipeForm } from "@/app/recipes/components/Form"; // NEW
-import { RecipeFilterModal } from "@/app/recipes/components/Filter";
 import { RecipePreviewModal } from "@/app/recipes/components/modal/Preview";
 import { ResponsiveModal } from "@/app/components/ResponsiveModal";
 import { JournalForm } from "@/app/journal/components/Modal/Form";
@@ -51,11 +50,6 @@ export type ModalProps = {
   progress_create: { date?: string };
   // CHANGED: onSave may be async so the form can show "Saving…" and errors
   recipe_form: { recipe?: Recipe; onSave: (id: string, values: RecipeFormValues) => void | Promise<void> };
-  recipe_filter: {
-    value: RecipeFilters;
-    onApply: (value: RecipeFilters) => void;
-    recipes: Recipe[];
-  };
   recipe_preview: { recipe: Recipe; onSave: (id: string, values: RecipeFormValues) => void | Promise<void>; onDelete: (id:string) => void | Promise<void>};
   journal_form: {
     entry?: JournalEntry;
@@ -98,8 +92,6 @@ function renderModal(entry: Entry, base: any) {
       return <TaskModal {...base} {...entry.props} />;
     case "recipe_form":
       return <RecipeForm {...base} {...entry.props} />;
-    case "recipe_filter":
-      return <RecipeFilterModal {...base} {...entry.props} />;
     case "recipe_preview":
       return <RecipePreviewModal {...base} {...entry.props} />;
     case "journal_form":

@@ -12,15 +12,19 @@ export default async function RecipesPage({
 }: {
   searchParams: Promise<{ filter?: string }>;
 }) {
-  const sp = await searchParams;
-  const filter: Filter = FILTERS.includes(sp.filter as Filter) ? (sp.filter as Filter) : "All recipes";
+const { filter } = await searchParams;
+const active: Filter = FILTERS.includes(filter as Filter)
+  ? (filter as Filter)
+  : "All recipes";
 
   const recipes = await getRecipes();
   const today = dayKey();
 
   const dinners = recipes.filter((r) => r.mealType === "Dinner");
   const featured = dinners.find((r) => r.date === today) ?? dinners[0];
-  const visible = recipes.filter((r) => r.id !== featured?.id && matchesFilter(r, filter));
+  const visible = recipes.filter(
+    (r) => r.id !== featured?.id && matchesFilter(r, active)
+  );
 
   // Weekly plan = recipes planned for the next 7 days
   const plan = recipes
@@ -33,7 +37,7 @@ export default async function RecipesPage({
         <h1 className="mt-3 text-5xl font-semibold tracking-tight sm:text-6xl">Recipes</h1>
         <p className="mt-4 text-lg text-zinc-500">Save favorites, plan meals, and make healthy choices easier.</p>
 
-        <FilterTabs filter={filter} />
+        <FilterTabs active={active} />
 
         <div className="mt-12 grid grid-cols-1 gap-6 lg:grid-cols-12">
           {featured && (
