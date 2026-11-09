@@ -1,4 +1,3 @@
-import type { LessonCategory, LessonImpact } from "../types/lessons";
 
 export const ACCENT = "rgba(234,179,8,0.2)"; // amber
 
@@ -25,3 +24,8 @@ export const ALL_CATEGORIES: LessonCategory[] = [
 ];
 
 export const ALL_IMPACTS: LessonImpact[] = ["low", "medium", "high"];
+
+
+type LessonCategory = "All" | "Trading" | "Life" | "Mindset" | "Health" | "Relationships" | "Finance" | "Mistake" | "Other";
+
+type LessonImpact = "low" | "medium" | "high";

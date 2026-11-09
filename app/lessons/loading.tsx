@@ -1,4 +1,4 @@
-import { ALL_CATEGORIES } from "@/constants/lessons/lessons";
+import { ALL_CATEGORIES } from "@/app/lessons/constants/Main";
 import LessonSkeleton from "./components/Skeleton";
 
 const bar = "animate-pulse rounded-lg bg-white/[0.06]";

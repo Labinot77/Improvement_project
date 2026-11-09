@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Lesson, LessonCategory } from "@/types/lessons";
-import { ALL_CATEGORIES } from "@/constants/lessons/lessons";
+import { ALL_CATEGORIES } from "@/app/lessons/constants/Main";
 import { LessonCard } from "./Card";
 import LessonSkeleton from "./Skeleton";
 import { useLessons } from "@/lib/use_lessons";

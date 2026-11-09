@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { today } from "@/lib/mics/date";
-import { REFLECTION_PROMPTS } from "@/constants/lessons/reflection_prompts";
+import { REFLECTION_PROMPTS } from "@/app/lessons/constants/Reflection_promps";
 import { fadeUp } from "@/constants/animations";
 import { LessonStats } from "./LessonStats";
 
