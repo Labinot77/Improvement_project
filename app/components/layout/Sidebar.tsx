@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { getUser } from "@/lib/user/getUser_client";
+import { useModal } from "@/providers/Modalprovider";
 
 // const WORKSPACES = [
 //   { name: "Momentum", description: "Personal space", initial: "M" },
@@ -30,6 +31,7 @@ import { getUser } from "@/lib/user/getUser_client";
 export default function AppSidebar() {
   const pathname = usePathname();
   const { user, loading, isLoggedIn } = getUser();
+  const { open } = useModal();
 
   const name = user?.user_metadata?.user_name ?? "Unknown";
 const initials = name.slice(0, 2).toUpperCase();
@@ -115,16 +117,17 @@ const verified = user?.user_metadata?.email_verified;
             asChild
             tooltip="Settings"
             className="h-8 w-8 flex-none justify-center p-0 group-data-[collapsible=icon]:hidden"
+            onClick={() => open("profile", {})}
           >
-            <Link href="/settings" aria-label="Settings">
               <Settings className="size-4" />
-            </Link>
           </SidebarMenuButton>
         </div>
       ) : (
-        <Button className="w-full group-data-[collapsible=icon]:hidden">
+        
+        <SidebarMenuButton className="w-full group-data-[collapsible=icon]:hidden" onClick={() => open("login", {})}             tooltip="Sign in" asChild
+>
           Sign in
-        </Button>
+        </SidebarMenuButton>
       )}
     </SidebarMenuItem>
   </SidebarMenu>
