@@ -2,9 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  Settings,
-} from "lucide-react";
+import { Settings } from "lucide-react";
 import { NAV } from "@/constants/Sidebar";
 
 import {
@@ -34,29 +32,29 @@ export default function AppSidebar() {
   const { open } = useModal();
 
   const name = user?.user_metadata?.user_name ?? "Unknown";
-const initials = name.slice(0, 2).toUpperCase();
-const verified = user?.user_metadata?.email_verified;
+  const initials = name.slice(0, 2).toUpperCase();
+  const verified = user?.user_metadata?.email_verified;
 
   return (
-    <Sidebar collapsible="icon" side="left" >
+    <Sidebar collapsible="icon" side="left">
       <SidebarHeader className="p-3 pt-5">
         <SidebarMenu>
-<SidebarMenuItem>
-  <div className="flex w-full items-center gap-3">
-    <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-emerald-300 to-emerald-600 text-base font-semibold text-emerald-950 shadow-lg shadow-emerald-500/20">
-      {user?.user_metadata.user_name?.slice(0, 2).toUpperCase()}
-    </div>
+          <SidebarMenuItem>
+            <div className="flex w-full items-center gap-3">
+              <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-emerald-300 to-emerald-600 text-base font-semibold text-emerald-950 shadow-lg shadow-emerald-500/20">
+                {user?.user_metadata.user_name?.slice(0, 2).toUpperCase()}
+              </div>
 
-    <div className="grid min-w-0 text-left leading-tight">
-      <span className="truncate text-lg font-semibold">
-        {user?.user_metadata.user_name}
-      </span>
-      <span className="truncate text-sm text-muted-foreground">
-        Personal Space
-      </span>
-    </div>
-  </div>
-</SidebarMenuItem>
+              <div className="grid min-w-0 text-left leading-tight">
+                <span className="truncate text-lg font-semibold">
+                  {user?.user_metadata.user_name}
+                </span>
+                <span className="truncate text-sm text-muted-foreground">
+                  Personal Space
+                </span>
+              </div>
+            </div>
+          </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
 
@@ -88,50 +86,58 @@ const verified = user?.user_metadata?.email_verified;
         </SidebarGroup>
       </SidebarContent>
 
-    <SidebarFooter className="p-3">
-  <SidebarMenu>
-    <SidebarMenuItem>
-      {isLoggedIn ? (
-        <div
-          className="flex items-center gap-3 rounded-2xl border bg-sidebar-accent/40 p-2
+      <SidebarFooter className="p-3">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            {isLoggedIn ? (
+              <div
+                className="flex items-center gap-3 rounded-2xl border bg-sidebar-accent/40 p-2
                      group-data-[collapsible=icon]:justify-center
                      group-data-[collapsible=icon]:border-transparent
                      group-data-[collapsible=icon]:bg-transparent
                      group-data-[collapsible=icon]:p-0"
-        >
-          {/* Avatar */}
-          <div className="grid size-10 shrink-0 place-items-center rounded-full bg-muted text-sm font-semibold">
-            {initials}
-          </div>
+              >
+                {/* Avatar */}
+                <div className="grid size-10 shrink-0 place-items-center rounded-full bg-muted text-sm font-semibold">
+                  {initials}
+                </div>
 
-          {/* User info (hidden when sidebar is collapsed) */}
-          <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
-            <p className="truncate text-sm font-medium leading-tight">{name}</p>
-            <p className="truncate text-xs text-muted-foreground">
-              {verified ? "Verified" : "Not verified"}
-            </p>
-          </div>
+                {/* User info (hidden when sidebar is collapsed) */}
+                <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
+                  <p className="truncate text-sm font-medium leading-tight">
+                    {name}
+                  </p>
+                  <p className="truncate text-xs text-muted-foreground">
+                    {verified ? "Verified" : "Not verified"}
+                  </p>
+                </div>
 
-          {/* Settings (hidden when sidebar is collapsed) */}
-          <SidebarMenuButton
-            asChild
-            tooltip="Settings"
-            className="h-8 w-8 flex-none justify-center p-0 group-data-[collapsible=icon]:hidden"
-            onClick={() => open("profile", {})}
-          >
-              <Settings className="size-4" />
-          </SidebarMenuButton>
-        </div>
-      ) : (
-        
-        <SidebarMenuButton className="w-full group-data-[collapsible=icon]:hidden" onClick={() => open("login", {})}             tooltip="Sign in" asChild
->
-          Sign in
-        </SidebarMenuButton>
-      )}
-    </SidebarMenuItem>
-  </SidebarMenu>
-</SidebarFooter>
+                {/* Settings (hidden when sidebar is collapsed) */}
+                <SidebarMenuButton
+                  asChild
+                  tooltip="Settings"
+                  className="h-8 w-8 flex-none justify-center p-0 group-data-[collapsible=icon]:hidden"
+                  onClick={() => open('profile', {})}
+                >
+                    <Settings className="size-4" />
+                </SidebarMenuButton>
+              </div>
+            ) : (
+              <SidebarMenuButton
+                variant={"default"}
+                className="w-full group-data-[collapsible=icon]:hidden"
+                onClick={() => open("login", {})}
+                asChild
+                tooltip="Signin"
+              >
+                <p>
+                Sign in
+                </p>
+              </SidebarMenuButton>
+            )}
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
 
       <SidebarRail />
     </Sidebar>
