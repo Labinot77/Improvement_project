@@ -1,4 +1,4 @@
-import { Clock, Flame, Plus, Timer, Trophy } from "lucide-react";
+import { Clock, Flame, Timer, Trophy } from "lucide-react";
 import { ACTIVITY_META, WEEKLY_GOAL } from "@/constants/fitness";
 import { FILTERS, byDate, dateLabel, dayKey, formatMinutes, getStats, lastDays, type Filter } from "@/app/activity/data/main";
 import { getActivities } from "@/app/activity/store/main";
@@ -35,17 +35,9 @@ export default async function ActivityPage({ searchParams }: { searchParams: Pro
 
   return (
     <main className="px-10 py-6">
-      <div className="flex flex-wrap items-end justify-between gap-6">
-        <div>
-          <p className="text-sm font-medium tracking-[0.3em] text-rose-300">TRAINING LOG</p>
-          <h1 className="mt-3 text-5xl font-semibold tracking-tight sm:text-6xl">Activity</h1>
-          <p className="mt-4 text-lg text-zinc-500">Log sessions, keep the streak alive, and watch consistency build.</p>
-        </div>
-        <ActivityButton mode="form"
-          className={`flex items-center gap-2 rounded-full bg-white px-6 py-3 text-base font-medium text-zinc-900 transition hover:bg-zinc-200 ${focus}`}>
-          <Plus className="size-5" aria-hidden /> Log session
-        </ActivityButton>
-      </div>
+      <p className="text-sm font-medium tracking-[0.3em] text-rose-300">TRAINING LOG</p>
+      <h1 className="mt-3 text-5xl font-semibold tracking-tight sm:text-6xl">Activity</h1>
+      <p className="mt-4 text-lg text-zinc-500">Log sessions, keep the streak alive, and watch consistency build.</p>
 
       <FilterTabs active={active} filters={filters} />
 
@@ -107,7 +99,7 @@ export default async function ActivityPage({ searchParams }: { searchParams: Pro
       {/* Sessions */}
       <h2 className="mt-12 text-xl font-semibold">Recent sessions</h2>
       {activities.length === 0 && (
-        <p className={`${card} mt-6 text-center text-zinc-500`}>No sessions logged yet. Log your first one.</p>
+        <p className={`${card} mt-6 text-center text-zinc-500`}>No sessions logged yet. Use “Add Activity” above to log your first one.</p>
       )}
       <MotionList className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {activities.slice(0, 24).map((a) => (

@@ -8,6 +8,8 @@ import { today } from "@/lib/mics/date";
 import { useModal } from "@/providers/Modalprovider";
 import { useLessons } from "@/lib/use_lessons"
 import { useRecipeModals } from "@/app/recipes/components/UseRecipeModal";
+import { useActivityModals } from "@/app/activity/components/UseActivityModal";
+import { useSleepModals } from "@/app/sleep/components/UseSleepModal";
 
 function getWeekNumber(d: Date) {
   const start = new Date(d.getFullYear(), 0, 1);
@@ -22,6 +24,8 @@ export default function AppTopbar() {
   const pathname = usePathname();
   const { open } = useModal();
   const { openForm } = useRecipeModals();
+  const activity = useActivityModals();
+  const sleep = useSleepModals();
   const [now, setNow] = useState<Date | null>(null);
 
   useEffect(() => setNow(new Date()), []);
@@ -57,10 +61,7 @@ export default function AppTopbar() {
     },
     "/activity": {
       label: "Add Activity",
-      action: () => {
-        // Open the Add Activity dialog
-        console.log("Add activity");
-      },
+      action: () => activity.openForm(),
     },
     "/recipes": {
       label: "Add Recipe",
@@ -68,10 +69,7 @@ export default function AppTopbar() {
     },
     "/sleep": {
       label: "Add Sleep",
-      action: () => {
-        // Open the Add Sleep dialog
-        console.log("Add sleep");
-      },
+      action: () => sleep.openForm(),
     },
   };
 

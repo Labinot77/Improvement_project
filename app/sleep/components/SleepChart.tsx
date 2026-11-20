@@ -2,15 +2,12 @@
 
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, ReferenceLine } from "recharts";
-import type { SleepDays } from "@/types/sleep";
+import type { SleepEntry } from "@/types/sleep";
 import { TARGET_HOURS } from "@/constants/sleep/main";
 
-interface Props {
-  days: SleepDays;
-}
-
-export function SleepChart({ days }: Props) {
-  const data = Object.values(days)
+// Area chart of the last 14 nights vs target
+export function SleepChart({ entries }: { entries: SleepEntry[] }) {
+  const data = [...entries]
     .sort((a, b) => a.date.localeCompare(b.date))
     .slice(-14)
     .map((entry) => ({
@@ -20,7 +17,7 @@ export function SleepChart({ days }: Props) {
 
   if (data.length === 0) {
     return (
-      <p className="text-xs text-zinc-600 py-8 text-center">
+      <p className="rounded-2xl bg-white/[0.04] p-5 text-zinc-500">
         Log sleep entries to see your trend.
       </p>
     );
@@ -28,14 +25,14 @@ export function SleepChart({ days }: Props) {
 
   return (
     <ChartContainer
-      config={{ hours: { label: "Hours slept", color: "#6366f1" } }}
-      className="h-44 w-full"
+      config={{ hours: { label: "Hours slept", color: "#a5b4fc" } }}
+      className="h-64 w-full"
     >
       <AreaChart data={data} margin={{ top: 8, right: 4, left: -20, bottom: 0 }}>
         <defs>
           <linearGradient id="sleepGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%"  stopColor="#6366f1" stopOpacity={0.3} />
-            <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+            <stop offset="5%"  stopColor="#a5b4fc" stopOpacity={0.3} />
+            <stop offset="95%" stopColor="#a5b4fc" stopOpacity={0} />
           </linearGradient>
         </defs>
         <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
@@ -49,7 +46,7 @@ export function SleepChart({ days }: Props) {
         />
         <ReferenceLine
           y={TARGET_HOURS}
-          stroke="#6366f1"
+          stroke="#a5b4fc"
           strokeDasharray="4 4"
           strokeOpacity={0.4}
         />
@@ -57,10 +54,10 @@ export function SleepChart({ days }: Props) {
         <Area
           type="monotone"
           dataKey="hours"
-          stroke="#6366f1"
+          stroke="#a5b4fc"
           fill="url(#sleepGrad)"
           strokeWidth={2}
-          dot={{ fill: "#6366f1", r: 3 }}
+          dot={{ fill: "#a5b4fc", r: 3 }}
         />
       </AreaChart>
     </ChartContainer>

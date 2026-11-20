@@ -9,3 +9,5 @@ export interface SleepEntry {
 }
 
 export type SleepDays = Record<string, SleepEntry>;
+// Fields the sleep form sends to the server
+export type SleepFormValues = Pick<SleepEntry, "date" | "bedtime" | "wakeTime" | "notes">;
