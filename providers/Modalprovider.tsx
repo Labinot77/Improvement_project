@@ -7,13 +7,14 @@ import { ProfileModal } from "@/app/components/dashboard/modal/profile";
 import { LessonModal } from "@/app/lessons/components/Modal/Edit";
 import { ConfirmModal } from "@/app/components/dashboard/modal/Confirm";
 import { DayActivityModal } from "@/app/activity/components/modal/Day";
+import { ActivityForm } from "@/app/activity/components/Form";
 import { RecipeForm } from "@/app/recipes/components/Form"; // NEW
 import { RecipePreviewModal } from "@/app/recipes/components/modal/Preview";
 import { ResponsiveModal } from "@/app/components/ResponsiveModal";
 import { JournalForm } from "@/app/journal/components/Modal/Form";
 import { JournalPreviewModal } from "@/app/journal/components/Modal/Preview";
 import { TaskModal } from "@/app/progress/components/Create";
-import type { Activity } from "@/types/fitness";
+import type { Activity, ActivityFormValues } from "@/types/fitness";
 import type { Lesson } from "@/types/lessons";
 import type { Recipe, RecipeFilters, RecipeFormValues } from "@/types/Recipies/main"; // CHANGED: + RecipeFormValues
 import type { ProgressTemplate } from "@/types/Progress/templates";
@@ -46,7 +47,8 @@ export type ModalProps = {
     cancelLabel?: string;
     destructive?: boolean;
   };
-  dayActivity: { date: string; sessions: Activity[] };
+  dayActivity: { date: string; sessions: Activity[]; onDelete: (id: string) => Promise<void> };
+  activity_form: { date?: string; onSave: (values: ActivityFormValues) => Promise<void> };
   progress_create: { date?: string };
   // CHANGED: onSave may be async so the form can show "Saving…" and errors
   recipe_form: { recipe?: Recipe; onSave: (id: string, values: RecipeFormValues) => void | Promise<void> };
@@ -88,6 +90,8 @@ function renderModal(entry: Entry, base: any) {
       return <ConfirmModal {...base} {...entry.props} />;
     case "dayActivity":
       return <DayActivityModal {...base} {...entry.props} />;
+    case "activity_form":
+      return <ActivityForm {...base} {...entry.props} />;
     case "progress_create":
       return <TaskModal {...base} {...entry.props} />;
     case "recipe_form":
@@ -119,6 +123,8 @@ const PREVIEW_SHELL = TASK_SHELL.replace("max-w-lg", "max-w-2xl");
 
 const SHELL: Partial<Record<ModalName, { desktopClassName?: string; hideHeader?: boolean }>> = {
   lesson: { desktopClassName: "max-w-lg" },
+  dayActivity: { desktopClassName: "lg:max-w-xl", hideHeader: true },
+  activity_form: { desktopClassName: "lg:max-w-xl", hideHeader: true },
   recipe_form: { desktopClassName: "lg:min-w-[45dvw]", hideHeader: true },
   recipe_preview: { desktopClassName: "lg:max-w-2xl", hideHeader: true },
   progress_create: { desktopClassName: TASK_SHELL, hideHeader: true },
