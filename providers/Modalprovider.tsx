@@ -19,7 +19,7 @@ import { TaskModal } from "@/app/progress/components/Create";
 import type { Activity, ActivityFormValues } from "@/types/fitness";
 import type { SleepEntry, SleepFormValues } from "@/types/sleep";
 import type { Lesson } from "@/types/lessons";
-import type { Recipe, RecipeFilters, RecipeFormValues } from "@/types/Recipies/main"; // CHANGED: + RecipeFormValues
+import type { Recipe, RecipeFilters, RecipeFormValues, RecipeImageChange } from "@/types/Recipies/main"; // CHANGED: + RecipeFormValues
 import type { ProgressTemplate } from "@/types/Progress/templates";
 import { LessonFormValues } from "@/app/lessons/components/Form_modal";
 import Preview from "@/app/lessons/components/Modal/Preview";
@@ -56,8 +56,8 @@ export type ModalProps = {
   sleep_form: { entry?: SleepEntry; onSave: (values: SleepFormValues) => Promise<void> };
   sleep_preview: { entry: SleepEntry; onSave: (values: SleepFormValues) => Promise<void>; onDelete: (id: string) => Promise<void> };
   // CHANGED: onSave may be async so the form can show "Saving…" and errors
-  recipe_form: { recipe?: Recipe; onSave: (id: string, values: RecipeFormValues) => void | Promise<void> };
-  recipe_preview: { recipe: Recipe; onSave: (id: string, values: RecipeFormValues) => void | Promise<void>; onDelete: (id:string) => void | Promise<void>};
+  recipe_form: { recipe?: Recipe; onSave: (id: string, values: RecipeFormValues, image?: RecipeImageChange) => void | Promise<void> };
+  recipe_preview: { recipe: Recipe; onSave: (id: string, values: RecipeFormValues, image?: RecipeImageChange) => void | Promise<void>; onDelete: (id:string) => void | Promise<void>};
   journal_form: {
     entry?: JournalEntry;
     defaultDate?: string;

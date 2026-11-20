@@ -2,10 +2,24 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import type { RecipeFormValues } from "@/types/Recipies/main";
-import { removeRecipe, upsertRecipe } from "@/app/recipes/store/main";
+import type { RecipeFormValues, RecipeImageChange } from "@/types/Recipies/main";
+import { clearRecipeImage, removeRecipe, setRecipeImage, upsertRecipe } from "@/app/recipes/store/main";
 
-export async function saveRecipe(id: string, v: RecipeFormValues) {
+const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+
+// Validate and save a recipe, then apply the photo change (if any)
+export async function saveRecipe(id: string, v: RecipeFormValues, image: RecipeImageChange = null) {
+  if (!/^[\w-]{1,64}$/.test(String(id))) return { error: "Invalid recipe id." };
+
+  // Check the photo before writing anything
+  const file = image instanceof FormData ? image.get("file") : null;
+  if (image instanceof FormData) {
+    if (!(file instanceof File) || !file.size) return { error: "Choose an image file." };
+    if (!IMAGE_TYPES.includes(file.type)) return { error: "Use a JPG, PNG or WebP image." };
+    if (file.size > MAX_IMAGE_BYTES) return { error: "Image must be 5 MB or smaller." };
+  }
+
   if (!v.title.trim()) {
     return { error: "Enter a recipe name." };
   }
@@ -23,8 +37,16 @@ export async function saveRecipe(id: string, v: RecipeFormValues) {
     estimatedCost: v.estimatedCost ? Number(v.estimatedCost) : null,
   });
 
-  revalidatePath("/recipes");
+  // Recipe is saved; a failed upload is reported but doesn't undo it
+  try {
+    if (file instanceof File) await setRecipeImage(id, file);
+    if (image === "remove") await clearRecipeImage(id);
+  } catch (e) {
+    revalidatePath("/recipes");
+    return { error: `Recipe saved, but the photo failed: ${e instanceof Error ? e.message : "unknown error"}` };
+  }
 
+  revalidatePath("/recipes");
   return {};
 }
 
