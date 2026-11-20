@@ -37,11 +37,11 @@ export default function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon" side="left">
-      <SidebarHeader className="p-3 pt-5 group-data-[collapsible=icon]:px-2">
+      <SidebarHeader className="p-3 pt-5">
         <SidebarMenu>
           <SidebarMenuItem>
             <div className="flex w-full items-center gap-3 group-data-[collapsible=icon]:justify-center">
-              <div className="grid size-10 shrink-0 place-items-center rounded-xl text-base group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:text-xs bg-gradient-to-br from-emerald-300 to-emerald-600 font-semibold text-emerald-950 shadow-lg shadow-emerald-500/20">
+              <div className="grid size-10 shrink-0 place-items-center rounded-xl text-base bg-gradient-to-br from-emerald-300 to-emerald-600 font-semibold text-emerald-950 shadow-lg shadow-emerald-500/20">
                 {initials}
               </div>
 
@@ -71,7 +71,7 @@ export default function AppSidebar() {
                       asChild
                       isActive={active}
                       tooltip={title}
-                      className="h-12 gap-4 rounded-xl px-4 text-base text-muted-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-foreground [&>svg]:size-5 group-data-[collapsible=icon]:[&>svg]:size-4"
+                      className="h-12 gap-4 rounded-xl px-4 text-base text-muted-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-foreground [&>svg]:size-5 group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:size-12! group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0!"
                     >
                       <Link href={href}>
                         <Icon />
@@ -86,7 +86,7 @@ export default function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-3 group-data-[collapsible=icon]:p-2">
+      <SidebarFooter className="p-3">
         <SidebarMenu>
           <SidebarMenuItem>
             {isLoggedIn ? (
@@ -102,7 +102,7 @@ export default function AppSidebar() {
                   type="button"
                   aria-label="Open profile"
                   onClick={() => open("profile", {})}
-                  className="grid size-10 shrink-0 place-items-center rounded-full bg-muted text-sm font-semibold transition hover:ring-2 hover:ring-ring group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:text-xs"
+                  className="grid size-10 shrink-0 place-items-center rounded-full bg-muted text-sm font-semibold transition hover:ring-2 hover:ring-ring"
                 >
                   {initials}
                 </button>
@@ -129,7 +129,7 @@ export default function AppSidebar() {
               </div>
             ) : (
               <SidebarMenuButton
-                className="w-full justify-center"
+                className="h-12 w-full justify-center text-base [&>svg]:size-5 group-data-[collapsible=icon]:size-12! group-data-[collapsible=icon]:p-0!"
                 onClick={() => open("login", {})}
                 tooltip="Sign in"
               >

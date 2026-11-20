@@ -1,221 +1,187 @@
-// The layout of the main is going to be a server, with all of its small components the client
-
 import Link from "next/link";
-import { Check, ChevronRight } from "lucide-react";
+import { ArrowUpRight, Check, Dumbbell, BookOpen, Moon, ListChecks } from "lucide-react";
 import { getUser } from "@/lib/user/getUser_server";
-import { getDashboardData } from "@/constants/temp/logic";
-import { toggleTask } from "@/constants/temp/toggleTask";
-import { formatDate, today } from "@/lib/mics/date";
-import {
-CARD,
-GOALS,
-HIGHLIGHT_DAY,
-MAX_FOCUS_TASKS,
-RING,
-STAT_META,
-WEEK,
-} from "@/constants/temp/temp";
-import DailyProgress from "./components/dailyProgress";
+import { getDashboard } from "@/app/main/store/main";
+import { toggleTask } from "@/app/main/actions/main";
+import { AREA, summarize } from "@/app/main/data/main";
+import { dateLabel, formatMinutes } from "@/app/activity/data/main";
+import { formatDuration } from "@/lib/sleep/calc";
+import { moodOf, MOODS } from "@/constants/journal";
+import { BalanceRings, BodyRestChart, LearningBars, TaskBars, TrainingMix } from "@/app/main/components/Charts";
 
+const panel = "rounded-3xl border border-white/[0.07] bg-[#101216] p-6";
 
-const pctOf = (value: number, goal: number) =>
-  Math.min(100, Math.round((value / goal) * 100));
+// Greeting by hour
+const greeting = (h: number) => (h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening");
 
-const fmtMins = (m: number) => {
-  const h = Math.floor(m / 60);
-  const r = m % 60;
-  return h ? `${h}h ${r}m` : `${r}m`;
-};
-
-const sleepQuality = (hrs: number) =>
-  hrs >= 7 ? "Well rested" : hrs >= 6 ? "Fair rest" : "Short night";
-
-function greetingFor(hour: number) {
-  return hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+// Panel header with optional link to the area page
+function Head({ title, sub, href, color }: { title: string; sub: string; href?: string; color?: string }) {
+  return (
+    <div className="mb-5 flex items-start justify-between gap-3">
+      <div>
+        <h2 className="flex items-center gap-2 text-lg font-medium">
+          {color && <span className="size-2 rounded-full" style={{ background: color }} />}
+          {title}
+        </h2>
+        <p className="text-sm text-zinc-500">{sub}</p>
+      </div>
+      {href && (
+        <Link href={href} aria-label={`Open ${title}`} className="grid size-9 place-items-center rounded-full bg-white/[0.05] text-zinc-400 transition hover:bg-white/10 hover:text-zinc-100">
+          <ArrowUpRight className="size-4" />
+        </Link>
+      )}
+    </div>
+  );
 }
 
+// Server-rendered dashboard: one summary of every area
 export default async function Dashboard() {
-  const [user, { tasks, stats, error }] = await Promise.all([
-    getUser(),
-    getDashboardData(),
-  ]);
-  const { lessons, activity, recipes, sleep } = stats;
-  const meta = user?.user_metadata ?? {};
-  const firstName: string = (
-    meta.full_name ??
-    meta.name ??
-    user?.email?.split("@")[0] ??
-    "there"
-  ).split(" ")[0];
+  const [user, raw] = await Promise.all([getUser(), getDashboard()]);
+  const s = summarize(raw);
+  const name: string = (user?.user_metadata?.name ?? user?.user_metadata?.user_name ?? "").split(" ")[0];
+  const done = s.todayTasks.filter((t) => t.completed).length;
 
-  // Today's tasks
-  const completed = tasks.filter((t) => t.completed).length;
-  const visible = tasks.slice(0, MAX_FOCUS_TASKS);
-  const hiddenCount = tasks.length - visible.length;
-
-  // Stat cards
-  const yesterday = formatDate(new Date(Date.now() - 24 * 60 * 60 * 1000));
-  const sleepWhen =
-    sleep.date === today() || sleep.date === yesterday
-      ? "Last night"
-      : `Logged ${sleep.date}`;
-  const failed = "Couldn't load";
-
-  const cards = [
-    {
-      ...STAT_META.lessons,
-      value: `${lessons.count}`,
-      note: error
-        ? failed
-        : `Learned this week${lessons.topCategory ? ` · ${lessons.topCategory}` : ""}`,
-      pct: pctOf(lessons.count, GOALS.lessons),
-    },
-    {
-      ...STAT_META.activity,
-      value: `${activity.workouts}`,
-      note: error ? failed : `Workouts · ${fmtMins(activity.totalMins)} total`,
-      pct: pctOf(activity.workouts, GOALS.workouts),
-    },
-    {
-      ...STAT_META.recipes,
-      value: `${recipes.saved}`,
-      note: error ? failed : `Saved recipes · ${recipes.plannedToday} planned today`,
-      pct: pctOf(recipes.cookedThisWeek, GOALS.cooks),
-    },
-    {
-      ...STAT_META.sleep,
-      value: sleep.hours === null ? "—" : fmtMins(Math.round(sleep.hours * 60)),
-      note: error
-        ? failed
-        : sleep.hours === null
-          ? "No sleep logged yet"
-          : `${sleepWhen} · ${sleepQuality(sleep.hours)}`,
-      pct: sleep.hours === null ? 0 : pctOf(sleep.hours, GOALS.sleepHours),
-    },
+  const kpis = [
+    { label: "Active this week", value: formatMinutes(s.kpis.weekMinutes), Icon: Dumbbell, color: AREA.activity },
+    { label: "Avg sleep (7d)", value: s.kpis.sleepAvg ? formatDuration(Math.round(s.kpis.sleepAvg * 10) / 10) : "—", Icon: Moon, color: AREA.sleep },
+    { label: "Lessons (7d)", value: s.kpis.lessons, Icon: BookOpen, color: AREA.lessons },
+    { label: "To-dos done (7d)", value: s.kpis.tasksDone, Icon: ListChecks, color: AREA.tasks },
   ];
 
   return (
-    <div className="px-10 py-6">
-      <header className="mb-8 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="mb-4 text-sm font-medium uppercase tracking-[0.3em] text-emerald-400">
-            Daily overview
-          </p>
-          <h1 className="text-5xl font-semibold tracking-tight sm:text-6xl">
-            {greetingFor(new Date().getHours())}, {user?.user_metadata.name}.
-          </h1>
-          <p className="mt-4 text-lg text-muted-foreground">
-            A little progress every day adds up to big results.
-          </p>
-        </div>
+    <main className="px-10 py-6">
+      {/* Header + KPI ribbon */}
+      <p className="text-sm font-medium uppercase tracking-[0.3em] text-zinc-500">Command center</p>
+      <h1 className="mt-3 text-5xl font-semibold tracking-tight sm:text-6xl">
+        {greeting(new Date().getHours())}{name && <>, <span className="bg-gradient-to-r from-sky-300 via-emerald-300 to-amber-200 bg-clip-text text-transparent">{name}</span></>}.
+      </h1>
+      {raw.error && <p role="alert" className="mt-4 text-red-400">Some data couldn&apos;t load: {raw.error}</p>}
 
-          <DailyProgress tasks={tasks} />
-      </header>
-
-      <div className="space-y-5">
-        <div className="grid gap-5 lg:grid-cols-[minmax(0,1.45fr)_minmax(0,1fr)]">
-          {/* Weekly rhythm */}
-          <section className={`${CARD} flex flex-col p-6`}>
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <h2 className="text-lg font-medium">Weekly rhythm</h2>
-                <p className="text-zinc-500">Your consistency across all areas</p>
-              </div>
-              <span className="rounded-full bg-emerald-400/10 px-3 py-1.5 text-sm font-medium text-emerald-400">
-                +12% this week
-              </span>
+      <div className="mt-8 grid grid-cols-2 overflow-hidden rounded-3xl border border-white/[0.07] lg:grid-cols-4">
+        {kpis.map(({ label, value, Icon, color }) => (
+          <div key={label} className="flex items-center gap-4 border-white/[0.07] bg-[#101216] p-5 [&:not(:last-child)]:border-r">
+            <span className="grid size-11 place-items-center rounded-2xl" style={{ background: `${color}1f`, color }}>
+              <Icon className="size-5" aria-hidden />
+            </span>
+            <div>
+              <p className="text-2xl font-semibold tabular-nums">{value}</p>
+              <p className="text-sm text-zinc-500">{label}</p>
             </div>
-
-            <div className="mt-8 flex h-56 items-end gap-3 border-b border-white/10 sm:h-64 sm:gap-4">
-              {WEEK.map(({ day, value }) => (
-                <div
-                  key={day}
-                  role="img"
-                  aria-label={`${day}: ${value}%`}
-                  style={{ height: `${value}%` }}
-                  className={`flex-1 rounded-t-lg ${
-                    day === HIGHLIGHT_DAY
-                      ? "bg-gradient-to-b from-emerald-300 to-emerald-700"
-                      : "bg-white/[0.08]"
-                  }`}
-                />
-              ))}
-            </div>
-            <div className="mt-3 flex gap-3 sm:gap-4">
-              {WEEK.map(({ day }) => (
-                <span key={day} className="flex-1 text-center text-sm text-zinc-500">
-                  {day}
-                </span>
-              ))}
-            </div>
-          </section>
-
-          {/* Today's focus */}
-          <section className={`${CARD} min-w-0 p-6`}>
-            <h2 className="text-lg font-medium">Today&apos;s focus</h2>
-            <p className="text-zinc-500">
-              {completed} of {tasks.length} complete
-            </p>
-
-            {tasks.length === 0 ? (
-              <p className="mt-6 rounded-2xl bg-white/[0.04] px-4 py-8 text-center text-zinc-500">
-                No tasks for today yet.
-              </p>
-            ) : (
-              <ul className="mt-6 max-h-[22rem] space-y-3 overflow-y-auto overscroll-contain pr-1 [scrollbar-width:thin]">
-                {visible.map((t) => (
-                  <li key={t.id}>
-                    <form action={toggleTask}>
-                      <input type="hidden" name="id" value={t.id} />
-                      <input type="hidden" name="completed" value={String(!t.completed)} />
-                      <button
-                        type="submit"
-                        aria-pressed={t.completed}
-                        className="flex w-full items-center gap-4 rounded-2xl bg-white/[0.04] px-4 py-4 text-left transition-colors hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/60"
-                      >
-                        <span
-                          className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border ${
-                            t.completed
-                              ? "border-emerald-500 bg-emerald-500 text-emerald-950"
-                              : "border-white/20"
-                          }`}
-                        >
-                          {t.completed && <Check className="h-4 w-4" strokeWidth={3} />}
-                        </span>
-                        <span className="min-w-0 leading-tight">
-                          <span
-                            className={`block truncate ${
-                              t.completed ? "text-zinc-500 line-through" : "text-zinc-100"
-                            }`}
-                          >
-                            {t.title}
-                          </span>
-                          {t.description && (
-                            <span className="block truncate text-sm text-zinc-600">
-                              {t.description}
-                            </span>
-                          )}
-                        </span>
-                      </button>
-                    </form>
-                  </li>
-                ))}
-              </ul>
-            )}
-
-            {hiddenCount > 0 && (
-              <Link
-                href="/todos"
-                className="mt-4 flex items-center justify-center gap-1 text-sm text-zinc-500 transition-colors hover:text-zinc-200"
-              >
-                Show more (+{hiddenCount})
-                <ChevronRight className="h-4 w-4" />
-              </Link>
-            )}
-          </section>
-        </div>
-
+          </div>
+        ))}
       </div>
-    </div>
+
+      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-12">
+        {/* Weekly balance */}
+        <section className={`${panel} lg:col-span-4`}>
+          <Head title="Weekly balance" sub="Progress toward each goal, last 7 days" />
+          <BalanceRings data={s.balance} score={s.score} />
+          <ul className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+            {s.balance.map((b) => (
+              <li key={b.key} className="flex items-center gap-2">
+                <span className="size-2.5 rounded-full" style={{ background: b.fill }} />
+                <span className="text-zinc-400">{b.name}</span>
+                <span className="ml-auto tabular-nums text-zinc-200">{b.value}%</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        {/* Body & rest */}
+        <section className={`${panel} lg:col-span-8`}>
+          <Head title="Body & rest" sub="Active minutes vs hours slept, last 14 days" href="/activity" />
+          <BodyRestChart data={s.bodyRest} />
+          <div className="mt-3 flex gap-5 text-sm text-zinc-500">
+            <span className="flex items-center gap-2"><span className="size-2.5 rounded-sm" style={{ background: AREA.activity }} /> Active minutes</span>
+            <span className="flex items-center gap-2"><span className="h-0.5 w-4 rounded" style={{ background: AREA.sleep }} /> Sleep hours</span>
+          </div>
+        </section>
+
+        {/* Today's focus */}
+        <section className={`${panel} lg:col-span-5`}>
+          <Head title="Today's focus" sub={`${done} of ${s.todayTasks.length} complete`} href="/progress" color={AREA.tasks} />
+          <div className="mb-5 h-1.5 overflow-hidden rounded-full bg-white/[0.06]">
+            <div className="h-full rounded-full" style={{ width: `${s.todayTasks.length ? (done / s.todayTasks.length) * 100 : 0}%`, background: AREA.tasks }} />
+          </div>
+          {s.todayTasks.length === 0 ? (
+            <p className="rounded-2xl bg-white/[0.03] p-6 text-center text-zinc-500">No to-dos for today. Use Quick add above.</p>
+          ) : (
+            <ul className="max-h-72 space-y-2 overflow-y-auto pr-1 [scrollbar-width:thin]">
+              {s.todayTasks.map((t) => (
+                <li key={t.id}>
+                  <form action={toggleTask}>
+                    <input type="hidden" name="id" value={t.id} />
+                    <input type="hidden" name="completed" value={String(!t.completed)} />
+                    <button type="submit" aria-pressed={t.completed}
+                      className="flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left transition hover:bg-white/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300/50">
+                      <span className={`grid size-6 shrink-0 place-items-center rounded-lg border ${t.completed ? "border-sky-300 bg-sky-300 text-sky-950" : "border-white/20"}`}>
+                        {t.completed && <Check className="size-3.5" strokeWidth={3} />}
+                      </span>
+                      <span className="min-w-0">
+                        <span className={`block truncate ${t.completed ? "text-zinc-500 line-through" : "text-zinc-100"}`}>{t.title}</span>
+                        {t.description && <span className="block truncate text-sm text-zinc-600">{t.description}</span>}
+                      </span>
+                    </button>
+                  </form>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+
+        {/* Task completion */}
+        <section className={`${panel} lg:col-span-4`}>
+          <Head title="Follow-through" sub="Done vs open to-dos, last 7 days" color={AREA.tasks} />
+          <TaskBars data={s.taskDays} />
+        </section>
+
+        {/* Mood */}
+        <section className={`${panel} lg:col-span-3`}>
+          <Head title="Mood" sub="Journal, last 14 days" href="/journal" color={AREA.journal} />
+          <p className="text-4xl">{s.moodAvg ? MOODS[5 - Math.round(s.moodAvg)]?.emoji : "—"}</p>
+          <p className="mt-1 text-sm text-zinc-500">
+            {s.moodAvg ? `Avg ${s.moodAvg.toFixed(1)} / 5 this week` : "No entries this week"}
+          </p>
+          <div className="mt-6 grid grid-cols-7 gap-1.5">
+            {s.moods.map(({ date, mood }) => (
+              <span key={date} title={`${dateLabel(date)}${mood ? ` · ${moodOf(mood).label}` : ""}`}
+                className="grid aspect-square place-items-center rounded-lg bg-white/[0.04] text-sm">
+                {mood ? moodOf(mood).emoji : ""}
+              </span>
+            ))}
+          </div>
+        </section>
+
+        {/* Training mix */}
+        <section className={`${panel} lg:col-span-4`}>
+          <Head title="Training mix" sub="Minutes by type, last 30 days" href="/activity" color={AREA.activity} />
+          <TrainingMix data={s.training} />
+        </section>
+
+        {/* Learning */}
+        <section className={`${panel} lg:col-span-4`}>
+          <Head title="What you're learning" sub="Lessons by category, last 30 days" href="/lessons" color={AREA.lessons} />
+          <LearningBars data={s.learning} />
+        </section>
+
+        {/* Meals */}
+        <section className={`${panel} lg:col-span-4`}>
+          <Head title="On the menu" sub="Planned meals, next 7 days" href="/recipes" color="#bef264" />
+          {s.meals.length === 0 ? (
+            <p className="rounded-2xl bg-white/[0.03] p-6 text-center text-zinc-500">Nothing planned yet.</p>
+          ) : (
+            <ol className="relative space-y-4 border-l border-white/10 pl-5">
+              {s.meals.slice(0, 5).map((m) => (
+                <li key={m.id} className="relative">
+                  <span className="absolute -left-[25px] top-1.5 size-2.5 rounded-full bg-lime-300" />
+                  <p className="text-xs uppercase tracking-wider text-zinc-500">{dateLabel(m.date)} · {m.mealType}</p>
+                  <p className="truncate text-zinc-200">{m.title}</p>
+                </li>
+              ))}
+            </ol>
+          )}
+        </section>
+      </div>
+    </main>
   );
 }
