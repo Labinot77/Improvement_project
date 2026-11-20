@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { Shuffle } from "lucide-react";
+import { useState, type KeyboardEvent } from "react";
+import { CalendarDays, Shuffle } from "lucide-react";
 import { useModal } from "@/providers/Modalprovider";
-import { MOODS, formatDay, promptForDate, todayISO, wordCount } from "@/constants/journal";
+import { MOODS, formatDay, moodOf, promptForDate, todayISO, wordCount } from "@/constants/journal";
 import type { JournalEntry, JournalFormValues, Mood } from "@/types/journal";
 
 type Props = {
@@ -13,9 +13,9 @@ type Props = {
   onSave: (values: JournalFormValues) => Promise<void>;
 };
 
+// Distraction-free writing sheet: date, mood, prompt, text
 export function JournalForm({ onOpenChange, entry, defaultDate, onSave }: Props) {
   const { setDismissLocked } = useModal();
-
   const [date, setDate] = useState(entry?.date ?? defaultDate ?? todayISO());
   const [mood, setMood] = useState<Mood>(entry?.mood ?? "okay");
   const [shift, setShift] = useState(0);
@@ -23,20 +23,22 @@ export function JournalForm({ onOpenChange, entry, defaultDate, onSave }: Props)
   const [content, setContent] = useState(entry?.content ?? "");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const words = wordCount(content);
+  const accent = moodOf(mood).color;
 
+  // New entries get the prompt for the chosen date
   function changeDate(value: string) {
     setDate(value);
-    if (!entry) {
-      setShift(0);
-      setPrompt(promptForDate(value));
-    }
+    if (!entry) { setShift(0); setPrompt(promptForDate(value)); }
   }
 
+  // Next prompt in the rotation
   function shuffle() {
     setShift(shift + 1);
     setPrompt(promptForDate(date, shift + 1));
   }
 
+  // Validate, save, close on success
   async function save() {
     if (!content.trim()) return setError("Write something first.");
     setSaving(true);
@@ -53,77 +55,68 @@ export function JournalForm({ onOpenChange, entry, defaultDate, onSave }: Props)
     }
   }
 
+  // Cmd/Ctrl + Enter saves
+  const onKey = (e: KeyboardEvent) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === "Enter") { e.preventDefault(); save(); }
+  };
+
   return (
-    <div className="space-y-5 p-6">
-      <div className="pr-10">
-        <p className="text-xs tracking-[0.2em] text-emerald-300/80">
-          {entry ? "EDIT ENTRY" : "NEW ENTRY"}
-        </p>
-        <h2 className="mt-1 text-2xl font-semibold text-zinc-100">{formatDay(date, true)}</h2>
-      </div>
+    <div onKeyDown={onKey} className="flex max-h-[90dvh] flex-col">
+      {/* Header: date + mood */}
+      <div className="border-b border-white/[0.06] p-6 pr-16" style={{ background: `linear-gradient(180deg, ${accent}14, transparent)` }}>
+        <p className="text-xs tracking-[0.25em] text-amber-200/70">{entry ? "EDITING ENTRY" : "NEW ENTRY"}</p>
+        <label className="mt-2 flex w-fit cursor-pointer items-center gap-2">
+          <span className="font-serif text-2xl text-zinc-100">{formatDay(date, true)}</span>
+          <CalendarDays className="size-4 text-zinc-500" aria-hidden />
+          <input type="date" value={date} max={todayISO()} aria-label="Entry date"
+            onChange={(e) => e.target.value && changeDate(e.target.value)}
+            className="w-0 opacity-0 [color-scheme:dark]" onClick={(e) => (e.currentTarget as HTMLInputElement).showPicker?.()} />
+        </label>
 
-      <div className="space-y-2">
-        <label className="text-xs text-zinc-500">Date</label>
-        <input
-          type="date"
-          value={date}
-          max={todayISO()}
-          onChange={(e) => e.target.value && changeDate(e.target.value)}
-          className="w-full rounded-full bg-[#16181b] px-4 py-2.5 text-sm text-zinc-100 outline-none ring-1 ring-white/5 focus:ring-emerald-300/40 [color-scheme:dark]"
-        />
-      </div>
-
-      <div className="space-y-2">
-        <label className="text-xs text-zinc-500">How was the day?</label>
-        <div className="flex flex-wrap gap-2">
-          {MOODS.map((m) => (
-            <button
-              key={m.value}
-              type="button"
-              onClick={() => setMood(m.value)}
-              className={`rounded-full px-4 py-2 text-sm transition ${
-                mood === m.value
-                  ? "bg-emerald-400/15 text-emerald-300 ring-1 ring-emerald-300/40"
-                  : "bg-[#16181b] text-zinc-400 hover:text-zinc-200"
-              }`}
-            >
-              {m.emoji} {m.label}
-            </button>
-          ))}
+        <div role="radiogroup" aria-label="Mood" className="mt-5 flex gap-2">
+          {MOODS.map((m) => {
+            const on = mood === m.value;
+            return (
+              <button key={m.value} type="button" role="radio" aria-checked={on} onClick={() => setMood(m.value)}
+                className="flex flex-1 flex-col items-center gap-1 rounded-2xl border py-2.5 transition"
+                style={{ borderColor: on ? `${m.color}80` : "rgba(255,255,255,0.06)", background: on ? `${m.color}1a` : "transparent" }}>
+                <span className={`text-2xl transition ${on ? "scale-110" : "opacity-50 grayscale"}`}>{m.emoji}</span>
+                <span className="text-xs" style={{ color: on ? m.color : "#71717a" }}>{m.label}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      <div className="flex items-start justify-between gap-3 rounded-2xl bg-[#16181b] p-4">
-        <p className="text-sm italic leading-relaxed text-zinc-300">{prompt}</p>
-        <button
-          type="button"
-          onClick={shuffle}
-          aria-label="Another prompt"
-          className="shrink-0 rounded-full p-2 text-zinc-400 transition hover:bg-white/5 hover:text-emerald-300"
-        >
-          <Shuffle className="size-4" />
-        </button>
+      {/* Prompt + writing area */}
+      <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex items-start gap-3">
+          <p className="flex-1 font-serif text-lg italic leading-snug text-amber-100/80">{prompt || "Free write"}</p>
+          <button type="button" onClick={shuffle} aria-label="Another prompt" title="Another prompt"
+            className="grid size-9 shrink-0 place-items-center rounded-full bg-white/[0.04] text-zinc-400 transition hover:bg-white/10 hover:text-amber-100">
+            <Shuffle className="size-4" />
+          </button>
+        </div>
+        <textarea autoFocus value={content} onChange={(e) => setContent(e.target.value)} placeholder="Start writing…" aria-label="Entry"
+          className="mt-5 min-h-[18rem] w-full resize-none bg-transparent font-serif text-lg leading-8 text-zinc-100 outline-none placeholder:text-zinc-700
+            [background-image:repeating-linear-gradient(transparent,transparent_31px,rgba(255,255,255,0.04)_31px,rgba(255,255,255,0.04)_32px)]" />
       </div>
 
-      <textarea
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
-        placeholder="Write freely…"
-        className="h-56 w-full resize-none rounded-2xl bg-[#16181b] p-4 text-sm leading-relaxed text-zinc-100 outline-none ring-1 ring-white/5 placeholder:text-zinc-600 focus:ring-emerald-300/40"
-      />
-
-      <div className="flex items-center justify-between gap-3">
-        <p className={`text-sm ${error ? "text-rose-300" : "text-zinc-500"}`}>
-          {error ?? `${wordCount(content)} words`}
+      {/* Footer */}
+      <div className="flex items-center justify-between gap-3 border-t border-white/[0.06] px-6 py-4">
+        <p className={`text-sm ${error ? "text-rose-300" : "text-zinc-500"}`} role={error ? "alert" : undefined}>
+          {error ?? <>{words} {words === 1 ? "word" : "words"} · <kbd className="text-zinc-400">⌘↵</kbd> to save</>}
         </p>
-        <button
-          type="button"
-          onClick={save}
-          disabled={saving}
-          className="rounded-full bg-emerald-400 px-6 py-2.5 text-sm font-medium text-black transition hover:bg-emerald-300 disabled:opacity-50"
-        >
-          {saving ? "Saving…" : "Save entry"}
-        </button>
+        <div className="flex gap-2">
+          <button type="button" onClick={() => onOpenChange(false)} disabled={saving}
+            className="rounded-full px-5 py-2.5 text-sm text-zinc-400 transition hover:bg-white/5 hover:text-zinc-200 disabled:opacity-50">
+            Cancel
+          </button>
+          <button type="button" onClick={save} disabled={saving}
+            className="rounded-full bg-amber-100 px-6 py-2.5 text-sm font-medium text-[#1a1510] transition hover:bg-amber-50 disabled:opacity-50">
+            {saving ? "Saving…" : entry ? "Save changes" : "Save entry"}
+          </button>
+        </div>
       </div>
     </div>
   );

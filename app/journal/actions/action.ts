@@ -23,6 +23,7 @@ export async function saveEntry(id: string | null, values: JournalFormValues): P
 }
 
 export async function deleteEntry(id: string): Promise<Result> {
+  if (!/^[\w-]{1,64}$/.test(String(id))) return { error: "Invalid entry id." };
   try {
     await removeEntry(id);
   } catch (e) {

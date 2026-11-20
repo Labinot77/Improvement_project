@@ -1,33 +1,24 @@
+import { Feather } from "lucide-react";
+
+const pulse = "animate-pulse bg-white/[0.05]";
+
+// Mirrors the journal layout while data loads
 export default function Loading() {
   return (
-    <main className="mx-auto max-w-6xl space-y-8 p-6 md:p-10">
-      <header>
-        <p className="text-xs tracking-[0.2em] text-emerald-300/80">DAILY JOURNAL</p>
-        <h1 className="mt-1 text-4xl font-semibold text-zinc-100">Journal</h1>
-      </header>
-
-      <section className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
-        <div className="h-52 animate-pulse rounded-[2rem] bg-[#11131a] ring-1 ring-white/5" />
-        <div className="rounded-[2rem] bg-[#11131a] p-6 ring-1 ring-white/5">
-          <p className="text-sm font-medium text-zinc-100">This week</p>
-          <div className="mt-5 grid grid-cols-7 gap-2">
-            {Array.from({ length: 7 }).map((_, i) => (
-              <div key={i} className="h-16 animate-pulse rounded-2xl bg-[#16181b]" />
-            ))}
-          </div>
-        </div>
+    <main className="px-10 py-6" aria-busy="true">
+      <span className="sr-only" role="status">Loading journal…</span>
+      <p className="flex items-center gap-2 text-sm font-medium tracking-[0.3em] text-amber-200/80"><Feather className="size-4" aria-hidden /> DAILY JOURNAL</p>
+      <h1 className="mt-3 font-serif text-5xl tracking-tight sm:text-6xl">Journal</h1>
+      <section className="mt-10 grid gap-6 lg:grid-cols-[1.5fr_1fr]" aria-hidden>
+        <div className="h-72 rounded-[2rem] border border-amber-100/10 bg-gradient-to-br from-[#2a2216] via-[#17140f] to-[#0f0e0c]" />
+        <div className={`${pulse} h-72 rounded-[2rem]`} />
       </section>
-
-      <div className="flex gap-2">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <div key={i} className="h-9 w-24 animate-pulse rounded-full bg-[#11131a]" />
-        ))}
+      <div className="mt-12 flex justify-between gap-4" aria-hidden>
+        <div className={`${pulse} h-12 w-full max-w-sm rounded-full`} />
+        <div className={`${pulse} h-10 w-96 rounded-full`} />
       </div>
-
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="h-48 animate-pulse rounded-[2rem] bg-[#11131a] ring-1 ring-white/5" />
-        ))}
+      <div className="mt-10 space-y-4 border-l border-amber-100/10 pl-8" aria-hidden>
+        {[0, 1, 2, 3].map((i) => <div key={i} className={`${pulse} h-28 rounded-3xl`} />)}
       </div>
     </main>
   );

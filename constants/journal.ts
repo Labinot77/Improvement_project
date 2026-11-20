@@ -1,11 +1,11 @@
 import type { JournalEntry, JournalFilter, Mood } from "@/types/journal";
 
-export const MOODS: { value: Mood; label: string; emoji: string; chip: string }[] = [
-  { value: "great", label: "Great", emoji: "😄", chip: "bg-emerald-400/15 text-emerald-300" },
-  { value: "good", label: "Good", emoji: "🙂", chip: "bg-lime-400/15 text-lime-300" },
-  { value: "okay", label: "Okay", emoji: "😐", chip: "bg-zinc-400/15 text-zinc-300" },
-  { value: "low", label: "Low", emoji: "😕", chip: "bg-amber-400/15 text-amber-300" },
-  { value: "rough", label: "Rough", emoji: "😣", chip: "bg-rose-400/15 text-rose-300" },
+export const MOODS: { value: Mood; label: string; emoji: string; chip: string; color: string }[] = [
+  { value: "great", label: "Great", emoji: "😄", chip: "bg-emerald-400/15 text-emerald-300", color: "#6ee7b7" },
+  { value: "good", label: "Good", emoji: "🙂", chip: "bg-lime-400/15 text-lime-300", color: "#bef264" },
+  { value: "okay", label: "Okay", emoji: "😐", chip: "bg-zinc-400/15 text-zinc-300", color: "#a1a1aa" },
+  { value: "low", label: "Low", emoji: "😕", chip: "bg-amber-400/15 text-amber-300", color: "#fcd34d" },
+  { value: "rough", label: "Rough", emoji: "😣", chip: "bg-rose-400/15 text-rose-300", color: "#fda4af" },
 ];
 
 export const moodOf = (m: Mood) => MOODS.find((x) => x.value === m) ?? MOODS[2];
@@ -97,21 +97,4 @@ export function streak(dates: string[]) {
   return n;
 }
 
-export function filterEntries(entries: JournalEntry[], filter: JournalFilter) {
-  switch (filter) {
-    case "week": {
-      const days = new Set(weekDays());
-      return entries.filter((e) => days.has(e.date));
-    }
-    case "month": {
-      const month = todayISO().slice(0, 7);
-      return entries.filter((e) => e.date.startsWith(month));
-    }
-    case "good":
-      return entries.filter((e) => e.mood === "great" || e.mood === "good");
-    case "tough":
-      return entries.filter((e) => e.mood === "low" || e.mood === "rough");
-    default:
-      return entries;
-  }
-}
+export const PAGE_SIZE = 8; // entries per page

@@ -139,7 +139,7 @@ const SHELL: Partial<Record<ModalName, { desktopClassName?: string; hideHeader?:
   recipe_form: { desktopClassName: "lg:min-w-[45dvw]", hideHeader: true },
   recipe_preview: { desktopClassName: "lg:max-w-2xl", hideHeader: true },
   progress_create: { desktopClassName: TASK_SHELL, hideHeader: true },
-  journal_form: { desktopClassName: TASK_SHELL, hideHeader: true },
+  journal_form: { desktopClassName: PREVIEW_SHELL, hideHeader: true },
   journal_preview: { desktopClassName: PREVIEW_SHELL, hideHeader: true },
 };
 
