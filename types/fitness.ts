@@ -18,3 +18,5 @@ export interface Activity {
   notes: string;
   createdAt: string;
 }
+// Fields the log form sends to the server
+export type ActivityFormValues = Omit<Activity, "id" | "createdAt">;
