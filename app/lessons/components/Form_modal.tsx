@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Save } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -40,14 +40,6 @@ export function LessonFormModal({ initial, selectedDate, onSave, onCancel }: Pro
   const [impact, setImpact]     = useState<LessonImpact>(initial?.impact ?? "medium");
   const [saved, setSaved]       = useState(false);
   const { isLoggedIn } = getUser();
-
-  useEffect(() => {
-    if (!initial) return;
-    setTitle(initial.title);
-    setBody(initial.body);
-    setCategory(initial.category);
-    setImpact(initial.impact);
-  }, [initial?.id]);
 
   // Use selectedDate from calendar, fall back to initial date or today
   const date = initial?.date ?? selectedDate ?? formatDate(new Date());

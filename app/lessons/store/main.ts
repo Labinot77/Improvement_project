@@ -29,19 +29,42 @@ function toLesson(r: Row): Lesson {
   };
 }
 
-// All of the user's lessons, newest first
-export async function getLessons(): Promise<{ lessons: Lesson[]; error: string | null }> {
+export const PAGE_SIZE = 8;
+
+// Strip characters that would break a PostgREST `or` filter
+const cleanQuery = (q: string) => q.replace(/[,()%*\\]/g, " ").trim().slice(0, 80);
+
+// One page of lessons for a category + search, with the total count
+export async function getLessonsPage(opts: { category: string; q: string; page: number }) {
   const user = await getUser();
-  if (!user) return { lessons: [], error: "Not signed in" };
+  if (!user) return { lessons: [] as Lesson[], total: 0, error: "Not signed in" };
+
   const supabase = await createClient();
-  const { data, error } = await supabase
+  const from = (opts.page - 1) * PAGE_SIZE;
+  let query = supabase
     .from("lessons")
-    .select("id, title, body, category, impact, date, created_at")
+    .select("id, title, body, category, impact, date, created_at", { count: "exact" })
     .eq("user_id", user.id)
     .order("date", { ascending: false })
-    .order("created_at", { ascending: false });
-  if (error) return { lessons: [], error: error.message };
-  return { lessons: (data as Row[]).map(toLesson), error: null };
+    .order("created_at", { ascending: false })
+    .range(from, from + PAGE_SIZE - 1);
+  if (opts.category !== "All") query = query.eq("category", opts.category);
+  const q = cleanQuery(opts.q);
+  if (q) query = query.or(`title.ilike.%${q}%,body.ilike.%${q}%`);
+
+  const { data, count, error } = await query;
+  if (error) return { lessons: [] as Lesson[], total: 0, error: error.message };
+  return { lessons: (data as Row[]).map(toLesson), total: count ?? 0, error: null };
+}
+
+// Totals for the header: lesson count and distinct categories
+export async function getLessonStats() {
+  const user = await getUser();
+  if (!user) return { total: 0, categoryCount: 0 };
+  const supabase = await createClient();
+  const { data } = await supabase.from("lessons").select("category").eq("user_id", user.id);
+  const rows = data ?? [];
+  return { total: rows.length, categoryCount: new Set(rows.map((r) => r.category)).size };
 }
 
 // Insert, or update when an id is given

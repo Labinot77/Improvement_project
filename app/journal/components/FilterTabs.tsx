@@ -3,12 +3,14 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { FILTERS } from "@/constants/journal";
+import { FILTERS, isFilter } from "@/constants/journal";
 import type { JournalFilter } from "@/types/journal";
 
 // Filter pills that keep the current search and reset the page
-export function FilterTabs({ active }: { active: JournalFilter }) {
+export function FilterTabs() {
   const params = useSearchParams();
+  const raw = params.get("filter") ?? undefined;
+  const active: JournalFilter = isFilter(raw) ? raw : "all";
 
   // URL for a filter, preserving ?q
   function href(key: JournalFilter) {
