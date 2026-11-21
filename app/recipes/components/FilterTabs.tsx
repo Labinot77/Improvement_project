@@ -6,14 +6,14 @@ import { FILTERS, type Filter } from "@/app/recipes/data/main";
 
 export function FilterTabs({ active }: { active: Filter }) {
   return (
-    <nav aria-label="Filter recipes" className="mt-9 flex flex-wrap gap-3">
+    <nav aria-label="Filter recipes" className="-mx-4 mt-6 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:mt-9 sm:flex-wrap sm:gap-3 sm:px-0">
       {FILTERS.map((f) => (
         <Link
           key={f}
           href={f === "All recipes" ? "/recipes" : `/recipes?filter=${encodeURIComponent(f)}`}
           scroll={false}
           aria-current={active === f ? "page" : undefined}
-          className={`relative rounded-full px-6 py-3 text-base transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300/50 ${
+          className={`relative shrink-0 rounded-full px-4 py-2 text-sm sm:px-6 sm:py-3 sm:text-base transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300/50 ${
             active === f
               ? "font-medium text-emerald-300"
               : "text-zinc-400 hover:text-zinc-200"

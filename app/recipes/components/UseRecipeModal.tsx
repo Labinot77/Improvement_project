@@ -1,10 +1,10 @@
 import { deleteRecipe, saveRecipe } from "@/app/recipes/actions/main";
 import { useModal } from "@/providers/Modalprovider";
-import type { Recipe, RecipeFormValues } from "@/types/Recipies/main";
+import type { Recipe, RecipeFormValues, RecipeImageChange } from "@/types/Recipies/main";
 
 // Same handlers for the form and the preview. Thrown errors are shown by the modals.
-async function onSave(id: string, values: RecipeFormValues) {
-  const res = await saveRecipe(id, values);
+async function onSave(id: string, values: RecipeFormValues, image?: RecipeImageChange) {
+  const res = await saveRecipe(id, values, image ?? null);
   if (res.error) throw new Error(res.error);
 }
 

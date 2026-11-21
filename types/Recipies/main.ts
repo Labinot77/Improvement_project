@@ -57,3 +57,6 @@ export type RecipeFormValues = Pick<
   | "date"
   | "estimatedCost"
 >;
+
+// Image change sent with a save: FormData with "file", "remove", or nothing
+export type RecipeImageChange = FormData | "remove" | null;

@@ -7,12 +7,12 @@ const bar = "animate-pulse rounded-lg bg-white/[0.06]";
 // so nothing jumps when the real page replaces this.
 export default function Loading() {
   return (
-    <main className="space-y-6 lg:px-32 px-10 py-6" aria-busy="true">
+    <main className="space-y-6 px-4 py-6 sm:px-8 sm:py-10 lg:px-16" aria-busy="true">
       <span className="sr-only" role="status">Loading lessons…</span>
 
       <header>
         <p className="mb-4 text-sm font-medium uppercase tracking-[0.3em] text-emerald-400">Wisdom archive</p>
-        <h1 className="text-5xl font-semibold tracking-tight sm:text-6xl">Lessons learned</h1>
+        <h1 className="text-4xl font-semibold tracking-tight sm:text-6xl">Lessons learned</h1>
         <p className="mt-4 text-lg text-muted-foreground">
           Capture the ideas life teaches you, while they are still fresh.
         </p>

@@ -32,9 +32,9 @@ const active: Filter = FILTERS.includes(filter as Filter)
     .sort((a, b) => a.date.localeCompare(b.date));
 
   return (
-      <main className="px-10 py-6">
+      <main className="px-4 py-6 sm:px-8 sm:py-10">
         <p className="text-sm font-medium tracking-[0.3em] text-emerald-300">KITCHEN COLLECTION</p>
-        <h1 className="mt-3 text-5xl font-semibold tracking-tight sm:text-6xl">Recipes</h1>
+        <h1 className="mt-3 text-4xl font-semibold tracking-tight sm:text-6xl">Recipes</h1>
         <p className="mt-4 text-lg text-zinc-500">Save favorites, plan meals, and make healthy choices easier.</p>
 
         <FilterTabs active={active} />

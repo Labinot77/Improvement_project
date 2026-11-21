@@ -1,7 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Recipe photos go through server actions (default limit is 1 MB)
+  experimental: {
+    serverActions: { bodySizeLimit: "6mb" },
+  },
 };
 
 export default nextConfig;

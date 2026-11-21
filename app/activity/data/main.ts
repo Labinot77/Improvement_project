@@ -80,3 +80,41 @@ export function formatMins(m: number) {
   if (m < 60) return `${m}m`;
   return `${Math.floor(m / 60)}h ${String(m % 60).padStart(2, "0")}m`;
 }
+
+// Sessions for each day of the current week (Mon..Sun)
+export function weekPlan(list: Activity[], now = new Date()) {
+  const start = weekStart(now);
+  return Array.from({ length: 7 }, (_, i) => {
+    const day = addDays(start, i);
+    const date = formatDate(day);
+    const sessions = list.filter((a) => a.date === date);
+    return {
+      date,
+      label: day.toLocaleDateString("en-US", { weekday: "short" }),
+      dayNum: day.getDate(),
+      sessions,
+      mins: sessions.reduce((s, a) => s + a.durationMins, 0),
+      isToday: date === formatDate(now),
+      isFuture: date > formatDate(now),
+    };
+  });
+}
+
+// Records over the loaded history
+export function personalBests(list: Activity[]) {
+  if (!list.length) return null;
+  const longest = list.reduce((a, b) => (b.durationMins > a.durationMins ? b : a));
+
+  const weeks = new Map<string, number>();
+  for (const a of list) {
+    const k = formatDate(weekStart(new Date(`${a.date}T12:00:00`)));
+    weeks.set(k, (weeks.get(k) ?? 0) + a.durationMins);
+  }
+  const [bestWeek, bestWeekMins] = [...weeks.entries()].reduce((a, b) => (b[1] > a[1] ? b : a));
+
+  const counts = new Map<ActivityType, number>();
+  for (const a of list) counts.set(a.type, (counts.get(a.type) ?? 0) + 1);
+  const [favorite, favoriteCount] = [...counts.entries()].reduce((a, b) => (b[1] > a[1] ? b : a));
+
+  return { longest, bestWeek, bestWeekMins, favorite, favoriteCount, total: list.length };
+}

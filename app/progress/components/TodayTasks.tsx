@@ -25,7 +25,7 @@ export function TodayTasks() {
 
   return (
     <section>
-      <div className="mb-4 flex items-center justify-between gap-4">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <h2 className="flex items-baseline gap-2 text-lg font-medium">
           Today
           <span className="text-zinc-600">{items.length}</span>

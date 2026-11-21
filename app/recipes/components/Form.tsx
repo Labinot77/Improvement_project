@@ -1,15 +1,32 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { Plus, X } from "lucide-react";
+import { useEffect, useRef, useState, useTransition } from "react";
+import { ImagePlus, Plus, Trash2, X } from "lucide-react";
 import { useModal } from "@/providers/Modalprovider";
 import { DIFFICULTIES, MEAL_TYPES, dayKey } from "@/app/recipes/data/main";
-import type { Difficulty, Ingredient, MealType, Recipe, RecipeFormValues } from "@/types/Recipies/main";
+import type { Difficulty, Ingredient, MealType, Recipe, RecipeFormValues, RecipeImageChange } from "@/types/Recipies/main";
+
+const MAX_SIDE = 1600; // px, longest edge after resize
+const ACCEPT = "image/jpeg,image/png,image/webp";
+
+// Downscale to MAX_SIDE and re-encode as WebP so uploads stay small
+async function shrink(file: File): Promise<File> {
+  const bitmap = await createImageBitmap(file);
+  const scale = Math.min(1, MAX_SIDE / Math.max(bitmap.width, bitmap.height));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.round(bitmap.width * scale);
+  canvas.height = Math.round(bitmap.height * scale);
+  canvas.getContext("2d")!.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  bitmap.close();
+  const blob = await new Promise<Blob | null>((r) => canvas.toBlob(r, "image/webp", 0.85));
+  if (!blob) return file;
+  return new File([blob], file.name.replace(/\.\w+$/, "") + ".webp", { type: "image/webp" });
+}
 
 // Content only: ResponsiveModal (from your provider) is the shell.
 interface RecipeFormProps {
   recipe?: Recipe; // present = edit, absent = create
-  onSave: (id: string, values: RecipeFormValues) => void | Promise<void>;
+  onSave: (id: string, values: RecipeFormValues, image?: RecipeImageChange) => void | Promise<void>;
   onOpenChange: (open: boolean) => void;
 }
 
@@ -32,6 +49,38 @@ export function RecipeForm({ recipe, onSave, onOpenChange }: RecipeFormProps) {
   const [ingredients, setIngredients] = useState<Ingredient[]>(recipe?.ingredients ?? []);
   const [notes, setNotes] = useState(recipe?.notes ?? "");
   const [error, setError] = useState<string | null>(null);
+  const [photo, setPhoto] = useState<File | null>(null); // new file to upload
+  const [removed, setRemoved] = useState(false); // existing photo cleared
+  const [preview, setPreview] = useState<string | null>(recipe?.imageUrl?.[0] ?? null);
+  const [dragging, setDragging] = useState(false);
+  const fileInput = useRef<HTMLInputElement>(null);
+
+  // Free the object URL when it changes or the form closes
+  useEffect(() => () => { if (preview?.startsWith("blob:")) URL.revokeObjectURL(preview); }, [preview]);
+
+  // Validate, shrink and preview a chosen file
+  async function pick(file?: File | null) {
+    if (!file) return;
+    if (!ACCEPT.split(",").includes(file.type)) return setError("Use a JPG, PNG or WebP image.");
+    if (file.size > 20 * 1024 * 1024) return setError("That image is too large (max 20 MB before resizing).");
+    setError(null);
+    try {
+      const small = await shrink(file);
+      setPhoto(small);
+      setRemoved(false);
+      setPreview(URL.createObjectURL(small));
+    } catch {
+      setError("Couldn't read that image.");
+    }
+  }
+
+  // Clear the new or existing photo
+  function clearPhoto() {
+    setPhoto(null);
+    setRemoved(Boolean(recipe?.imageUrl?.[0]));
+    setPreview(null);
+    if (fileInput.current) fileInput.current.value = "";
+  }
   const [pending, startTransition] = useTransition();
 
   const updateIngredient = (id: string, patch: Partial<Ingredient>) =>
@@ -60,7 +109,12 @@ export function RecipeForm({ recipe, onSave, onOpenChange }: RecipeFormProps) {
       let saved = false;
       setDismissLocked(true); // block overlay click / Esc while saving
       try {
-        await onSave(recipe?.id ?? crypto.randomUUID(), values);
+        let image: RecipeImageChange = null;
+        if (photo) {
+          image = new FormData();
+          image.append("file", photo);
+        } else if (removed) image = "remove";
+        await onSave(recipe?.id ?? crypto.randomUUID(), values, image);
         saved = true;
       } catch (e) {
         setError(e instanceof Error ? e.message : "Couldn't save the recipe.");
@@ -72,10 +126,43 @@ export function RecipeForm({ recipe, onSave, onOpenChange }: RecipeFormProps) {
   }
 
   return (
-    <div>
+    <div className="px-4 lg:px-0">
       <h2 className="text-xl font-semibold text-zinc-100">{editing ? "Edit recipe" : "Add recipe"}</h2>
 
       <div className="mt-5 max-h-[60dvh] space-y-5 overflow-y-auto px-0.5 pb-1">
+        {/* Photo: click or drop to upload */}
+        <div>
+          <span className={label}>Photo</span>
+          <input ref={fileInput} type="file" accept={ACCEPT} className="sr-only" id="r-photo"
+            onChange={(e) => pick(e.target.files?.[0])} />
+          {preview ? (
+            <div className="group relative h-48 overflow-hidden rounded-2xl border border-white/10">
+              <img src={preview} alt="Recipe photo preview" className="h-full w-full object-cover" />
+              <div className="absolute inset-x-0 bottom-0 flex justify-end gap-2 bg-gradient-to-t from-black/70 to-transparent p-3">
+                <label htmlFor="r-photo" className="cursor-pointer rounded-full bg-white/15 px-4 py-2 text-sm text-white backdrop-blur transition hover:bg-white/25">
+                  Replace
+                </label>
+                <button type="button" onClick={clearPhoto} aria-label="Remove photo"
+                  className="grid size-9 place-items-center rounded-full bg-white/15 text-white backdrop-blur transition hover:bg-red-500/60">
+                  <Trash2 className="size-4" />
+                </button>
+              </div>
+            </div>
+          ) : (
+            <label htmlFor="r-photo"
+              onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+              onDragLeave={() => setDragging(false)}
+              onDrop={(e) => { e.preventDefault(); setDragging(false); pick(e.dataTransfer.files?.[0]); }}
+              className={`flex h-36 cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed text-sm transition ${
+                dragging ? "border-emerald-300/60 bg-emerald-300/10 text-emerald-200" : "border-white/15 text-zinc-500 hover:border-white/30 hover:text-zinc-300"
+              }`}>
+              <ImagePlus className="size-6" aria-hidden />
+              <span>Click or drop a photo</span>
+              <span className="text-xs text-zinc-600">JPG, PNG or WebP · resized automatically</span>
+            </label>
+          )}
+        </div>
+
         <div>
           <label htmlFor="r-title" className={label}>Recipe name</label>
           <input id="r-title" value={title} onChange={(e) => setTitle(e.target.value)}
@@ -97,7 +184,7 @@ export function RecipeForm({ recipe, onSave, onOpenChange }: RecipeFormProps) {
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
           <div>
             <label htmlFor="r-time" className={label}>Cook (min)</label>
             <input id="r-time" type="number" min={1} value={cookMinutes} onChange={(e) => setCookMinutes(e.target.value)} className={field} />

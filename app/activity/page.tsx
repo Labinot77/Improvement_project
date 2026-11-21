@@ -1,16 +1,17 @@
+import { Plus } from "lucide-react";
 import PageHeader from "@/app/components/PageHeader";
+import OpenModalButton from "@/app/components/OpenModalButton";
 import { getActivities } from "@/app/activity/store/main";
-import { activityKpis, formatMins, loadRatio, typeMix } from "@/app/activity/data/main";
-import { WEEKLY_GOAL } from "@/constants/fitness";
-import { StatStrip } from "./components/StatStrip";
-import { WeekGoal } from "./components/WeekGoal";
+import { activityKpis, formatMins, loadRatio, personalBests, typeMix, weekPlan } from "@/app/activity/data/main";
+import { ACTIVITY_COLOR, WEEKLY_GOAL } from "@/constants/fitness";
+import { WeekPlanner } from "./components/WeekPlanner";
 import { SessionList } from "./components/SessionList";
-import { LogForm } from "./components/LogForm";
 import { LoadGauge } from "./components/LoadGauge";
 import { VolumeChart } from "./components/VolumeChart";
 import { TypeMix } from "./components/TypeMix";
+import { PersonalBests } from "./components/PersonalBests";
 
-// Activity page: log sessions, training load and volume
+// Activity page: week planner, load, records, volume and the training log
 export default async function ActivityPage() {
   const { activities, error } = await getActivities();
   const k = activityKpis(activities);
@@ -18,13 +19,22 @@ export default async function ActivityPage() {
   const minsDelta = k.minsThisWeek - k.minsLastWeek;
 
   return (
-    <div className="space-y-12 px-4 py-6 sm:px-8 sm:py-10">
+    <div className="space-y-8 px-4 py-6 sm:space-y-12 sm:px-8 sm:py-10">
       <PageHeader
         eyebrow="Training"
         eyebrowClass="text-[#f97362]"
         title="Activity"
         subtitle="Every session counts. Keep the load steady and the streak alive."
-        aside={<WeekGoal done={k.sessionsThisWeek} />}
+        aside={
+          <OpenModalButton
+            modal="activity_form"
+            props={{}}
+            className="inline-flex h-12 items-center gap-2 self-start rounded-full px-6 font-medium text-white transition hover:opacity-90 sm:self-auto"
+            style={{ background: ACTIVITY_COLOR }}
+          >
+            <Plus className="size-5" /> Log session
+          </OpenModalButton>
+        }
       />
 
       {error && (
@@ -33,26 +43,26 @@ export default async function ActivityPage() {
         </p>
       )}
 
-      <StatStrip
+      <WeekPlanner
+        days={weekPlan(activities)}
         stats={[
-          { label: "This week", value: formatMins(k.minsThisWeek), foot: `${minsDelta >= 0 ? "+" : "−"}${formatMins(Math.abs(minsDelta))} vs last week`, accent: true },
+          { label: "Minutes", value: formatMins(k.minsThisWeek), foot: `${minsDelta >= 0 ? "+" : "−"}${formatMins(Math.abs(minsDelta))} vs last week` },
           { label: "Goal streak", value: `${k.goalStreak}w`, foot: `weeks with ${WEEKLY_GOAL}+ sessions` },
           { label: "Avg session", value: formatMins(k.avgSession), foot: "last 30 days" },
           { label: "Load ratio", value: load.ratio?.toFixed(2) ?? "—", foot: load.zone?.label ?? "needs more data" },
         ]}
       />
 
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,2.15fr)_minmax(0,1fr)]">
-        <div className="space-y-8">
-          <VolumeChart activities={activities} />
-          <SessionList activities={activities} />
+      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+        <LoadGauge {...load} />
+        <TypeMix mix={typeMix(activities)} />
+        <div className="md:col-span-2 xl:col-span-1">
+          <PersonalBests bests={personalBests(activities)} />
         </div>
-        <aside className="space-y-6">
-          <LogForm />
-          <LoadGauge {...load} />
-          <TypeMix mix={typeMix(activities)} />
-        </aside>
       </div>
+
+      <VolumeChart activities={activities} />
+      <SessionList activities={activities} />
     </div>
   );
 }

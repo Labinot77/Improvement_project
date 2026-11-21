@@ -1,6 +1,6 @@
 "use client";
 
-import { useJournalModals } from "../actions/main";
+import { useJournalModals } from "./useJournalModals";
 import type { JournalEntry } from "@/types/journal";
 
 // entry given → opens the preview, otherwise opens the form (optionally prefilled with `date`)

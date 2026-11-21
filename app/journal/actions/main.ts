@@ -1,39 +1,33 @@
-"use client";
+"use server";
 
-import { useModal } from "@/providers/Modalprovider";
-import { deleteEntry, saveEntry } from "./action";
-import type { JournalEntry, JournalFormValues } from "@/types/journal";
+import { revalidatePath } from "next/cache";
+import { MOODS } from "@/constants/journal";
+import { removeEntry, upsertEntry } from "../store/main";
+import type { JournalFormValues } from "@/types/journal";
 
-export function useJournalModals() {
-  const { open, closeAll } = useModal();
+type Result = { error?: string };
 
-  const save = (id: string | null) => async (values: JournalFormValues) => {
-    const res = await saveEntry(id, values);
-    if (res.error) throw new Error(res.error);
-  };
+export async function saveEntry(id: string | null, values: JournalFormValues): Promise<Result> {
+  const content = values.content.trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(values.date)) return { error: "Pick a valid date." };
+  if (!MOODS.some((m) => m.value === values.mood)) return { error: "Pick a mood." };
+  if (!content) return { error: "Write something first." };
 
-  const remove = async (id: string) => {
-    const res = await deleteEntry(id);
-    if (res.error) throw new Error(res.error);
-  };
+  try {
+    await upsertEntry(id, { ...values, content, prompt: values.prompt.trim() });
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Couldn't save the entry." };
+  }
+  revalidatePath("/journal");
+  return {};
+}
 
-  const openForm = (opts?: { entry?: JournalEntry; date?: string }) =>
-    open("journal_form", {
-      entry: opts?.entry,
-      defaultDate: opts?.date,
-      onSave: save(opts?.entry?.id ?? null),
-    });
-
-  const openPreview = (entry: JournalEntry) =>
-    open("journal_preview", {
-      entry,
-      // editing from the preview: close everything after saving so no stale preview stays open
-      onSave: async (values: JournalFormValues) => {
-        await save(entry.id)(values);
-        closeAll();
-      },
-      onDelete: () => remove(entry.id),
-    });
-
-  return { openForm, openPreview };
+export async function deleteEntry(id: string): Promise<Result> {
+  try {
+    await removeEntry(id);
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Couldn't delete the entry." };
+  }
+  revalidatePath("/journal");
+  return {};
 }

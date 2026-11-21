@@ -16,7 +16,7 @@ export default async function TodosPage() {
   const streak = stats?.streak ?? 0;
 
   return (
-    <div className="space-y-12 px-4 py-6 sm:px-8 sm:py-10">
+    <div className="space-y-8 px-4 py-6 sm:space-y-12 sm:px-8 sm:py-10">
       <PageHeader
         eyebrow="Daily focus"
         eyebrowClass={EYEBROW_COLOR}

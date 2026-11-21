@@ -96,22 +96,3 @@ export function streak(dates: string[]) {
   }
   return n;
 }
-
-export function filterEntries(entries: JournalEntry[], filter: JournalFilter) {
-  switch (filter) {
-    case "week": {
-      const days = new Set(weekDays());
-      return entries.filter((e) => days.has(e.date));
-    }
-    case "month": {
-      const month = todayISO().slice(0, 7);
-      return entries.filter((e) => e.date.startsWith(month));
-    }
-    case "good":
-      return entries.filter((e) => e.mood === "great" || e.mood === "good");
-    case "tough":
-      return entries.filter((e) => e.mood === "low" || e.mood === "rough");
-    default:
-      return entries;
-  }
-}

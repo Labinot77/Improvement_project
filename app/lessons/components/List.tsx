@@ -1,12 +1,11 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useMemo, useOptimistic, useTransition } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Lesson, LessonCategory } from "@/types/lessons";
 import { ALL_CATEGORIES } from "@/app/lessons/constants/Main";
 import { LessonCard } from "./Card";
-import LessonSkeleton from "./Skeleton";
-import { useLessons } from "@/lib/use_lessons";
+import { removeLesson, saveLesson } from "@/app/lessons/actions/main";
 import { useSearchParams } from "next/navigation";
 
 interface Props {
@@ -14,8 +13,18 @@ interface Props {
 }
 
 export function LessonList({ initialLessons }: Props) {
-  const { lessons, updateLesson, deleteLesson, pendingLessonIds, loading } =
-    useLessons(initialLessons);
+  const [, startTransition] = useTransition();
+  const [lessons, removeLocal] = useOptimistic(initialLessons, (state: Lesson[], id: string) =>
+    state.filter((l) => l.id !== id),
+  );
+
+  // Optimistic delete, then server
+  function deleteLesson(id: string) {
+    startTransition(async () => {
+      removeLocal(id);
+      await removeLesson(id);
+    });
+  }
 
   const searchParams = useSearchParams();
 
@@ -47,7 +56,7 @@ export function LessonList({ initialLessons }: Props) {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap gap-2.5">
+      <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:gap-2.5 sm:px-0">
         {ALL_CATEGORIES.map((cat) => {
           const active = filterCat === cat;
 
@@ -57,7 +66,7 @@ export function LessonList({ initialLessons }: Props) {
               type="button"
               aria-pressed={active}
               onClick={() => setFilterCat(cat)}
-              className={`h-12 rounded-full border px-6 text-base transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/60 ${
+              className={`h-10 shrink-0 rounded-full border px-4 text-sm sm:h-12 sm:px-6 sm:text-base transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/60 ${
                 active
                   ? "border-white bg-white font-medium text-zinc-900"
                   : "border-white/[0.1] text-zinc-400 hover:border-white/20 hover:text-zinc-100"
@@ -83,10 +92,7 @@ export function LessonList({ initialLessons }: Props) {
                 : "No lessons yet — add your first one."}
             </motion.p>
           ) : (
-            filtered.map((lesson) =>
-              pendingLessonIds.has(lesson.id) ? (
-                <LessonSkeleton key={lesson.id} />
-              ) : (
+            filtered.map((lesson) => (
                 <motion.div
                   key={lesson.id}
                   layout
@@ -97,12 +103,11 @@ export function LessonList({ initialLessons }: Props) {
                 >
                   <LessonCard
                     lesson={lesson}
-                    onUpdate={updateLesson}
+                    onUpdate={saveLesson}
                     onDelete={() => deleteLesson(lesson.id)}
                   />
                 </motion.div>
-              ),
-            )
+              ))
           )}
         </AnimatePresence>
       </div>

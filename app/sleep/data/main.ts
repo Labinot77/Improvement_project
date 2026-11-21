@@ -103,3 +103,27 @@ export function sleepStats(entries: SleepEntry[], now = new Date()) {
     recentCount: recent.length,
   };
 }
+
+// Average hours per weekday (Mon first), for spotting weekend drift
+export function weekdayAverages(entries: SleepEntry[]) {
+  const names = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  const buckets = names.map(() => [] as number[]);
+  for (const e of entries) buckets[(new Date(`${e.date}T12:00:00`).getDay() + 6) % 7].push(e.durationHours);
+  return names.map((label, i) => ({
+    label,
+    hours: buckets[i].length ? Math.round(avg(buckets[i]) * 10) / 10 : 0,
+    nights: buckets[i].length,
+  }));
+}
+
+// Last `weeks` weeks of nights as a Monday-first calendar grid
+export function nightCalendar(entries: SleepEntry[], weeks = 5, now = new Date()) {
+  const byDate = new Map(entries.map((e) => [e.date, e]));
+  const start = subDays(now, ((now.getDay() + 6) % 7) + (weeks - 1) * 7);
+  return Array.from({ length: weeks * 7 }, (_, i) => {
+    const d = new Date(start);
+    d.setDate(start.getDate() + i);
+    const date = formatDate(d);
+    return { date, day: d.getDate(), entry: byDate.get(date), future: date > formatDate(now) };
+  });
+}

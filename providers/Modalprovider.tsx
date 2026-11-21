@@ -12,8 +12,11 @@ import { ResponsiveModal } from "@/app/components/ResponsiveModal";
 import { JournalForm } from "@/app/journal/components/Modal/Form";
 import { JournalPreviewModal } from "@/app/journal/components/Modal/Preview";
 import { TaskModal } from "@/app/progress/components/Create";
+import { ActivityModal } from "@/app/activity/components/ActivityModal";
+import { SleepModal } from "@/app/sleep/components/SleepModal";
+import type { SleepEntry } from "@/types/sleep";
 import type { Lesson } from "@/types/lessons";
-import type { Recipe, RecipeFormValues } from "@/types/Recipies/main";
+import type { Recipe, RecipeFormValues, RecipeImageChange } from "@/types/Recipies/main";
 import { LessonFormValues } from "@/app/lessons/components/Form_modal";
 import Preview from "@/app/lessons/components/Modal/Preview";
 import type { JournalEntry, JournalFormValues } from "@/types/journal";
@@ -44,9 +47,11 @@ export type ModalProps = {
     destructive?: boolean;
   };
   progress_create: { date?: string };
+  activity_form: { date?: string };
+  sleep_form: { date?: string; entry?: SleepEntry };
   // CHANGED: onSave may be async so the form can show "Saving…" and errors
-  recipe_form: { recipe?: Recipe; onSave: (id: string, values: RecipeFormValues) => void | Promise<void> };
-  recipe_preview: { recipe: Recipe; onSave: (id: string, values: RecipeFormValues) => void | Promise<void>; onDelete: (id:string) => void | Promise<void>};
+  recipe_form: { recipe?: Recipe; onSave: (id: string, values: RecipeFormValues, image?: RecipeImageChange) => void | Promise<void> };
+  recipe_preview: { recipe: Recipe; onSave: (id: string, values: RecipeFormValues, image?: RecipeImageChange) => void | Promise<void>; onDelete: (id:string) => void | Promise<void>};
   journal_form: {
     entry?: JournalEntry;
     defaultDate?: string;
@@ -84,6 +89,10 @@ function renderModal(entry: Entry, base: any) {
       return <ConfirmModal {...base} {...entry.props} />;
     case "progress_create":
       return <TaskModal {...base} {...entry.props} />;
+    case "activity_form":
+      return <ActivityModal {...base} {...entry.props} />;
+    case "sleep_form":
+      return <SleepModal {...base} {...entry.props} />;
     case "recipe_form":
       return <RecipeForm {...base} {...entry.props} />;
     case "recipe_preview":
@@ -107,16 +116,19 @@ function renderModal(entry: Entry, base: any) {
 /* -------------------------------------------------------------------------- */
 
 const TASK_SHELL =
-  "max-w-lg gap-0 overflow-hidden rounded-[24px] border-white/[0.11] bg-[#191a1f] p-0 shadow-[0_32px_100px_rgba(0,0,0,.7)] [&>button]:right-5 [&>button]:top-[22px] [&>button]:grid [&>button]:size-8 [&>button]:place-items-center [&>button]:rounded-full [&>button]:bg-white/[0.06] [&>button]:text-white/50 [&>button]:opacity-100 [&>button]:transition [&>button]:hover:rotate-90 [&>button]:hover:bg-white/[0.1] [&>button]:hover:text-white";
+  "sm:max-w-lg max-h-[90dvh] overflow-y-auto gap-0 overflow-hidden rounded-[24px] border-white/[0.11] bg-[#191a1f] p-0 shadow-[0_32px_100px_rgba(0,0,0,.7)] [&>button]:right-5 [&>button]:top-[22px] [&>button]:grid [&>button]:size-8 [&>button]:place-items-center [&>button]:rounded-full [&>button]:bg-white/[0.06] [&>button]:text-white/50 [&>button]:opacity-100 [&>button]:transition [&>button]:hover:rotate-90 [&>button]:hover:bg-white/[0.1] [&>button]:hover:text-white";
 
-const PREVIEW_SHELL = TASK_SHELL.replace("max-w-lg", "max-w-2xl");
+const PREVIEW_SHELL = TASK_SHELL.replace("sm:max-w-lg", "sm:max-w-2xl");
+const WIDE_SHELL = TASK_SHELL.replace("sm:max-w-lg", "sm:max-w-4xl");
 
 const SHELL: Partial<Record<ModalName, { desktopClassName?: string; hideHeader?: boolean }>> = {
-  lesson: { desktopClassName: "max-w-lg" },
-  recipe_form: { desktopClassName: "lg:min-w-[45dvw]", hideHeader: true },
-  recipe_preview: { desktopClassName: "lg:max-w-2xl", hideHeader: true },
+  lesson: { desktopClassName: "sm:max-w-lg" },
+  recipe_form: { desktopClassName: "sm:max-w-3xl max-h-[90dvh] overflow-y-auto", hideHeader: true },
+  recipe_preview: { desktopClassName: "sm:max-w-2xl max-h-[90dvh] overflow-y-auto", hideHeader: true },
   progress_create: { desktopClassName: TASK_SHELL, hideHeader: true },
-  journal_form: { desktopClassName: TASK_SHELL, hideHeader: true },
+  activity_form: { desktopClassName: TASK_SHELL.replace("sm:max-w-lg", "sm:max-w-xl"), hideHeader: true },
+  sleep_form: { desktopClassName: TASK_SHELL, hideHeader: true },
+  journal_form: { desktopClassName: WIDE_SHELL, hideHeader: true },
   journal_preview: { desktopClassName: PREVIEW_SHELL, hideHeader: true },
 };
 

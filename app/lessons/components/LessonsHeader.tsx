@@ -10,7 +10,7 @@ export async function LessonsHeader() {
           Wisdom archive
         </p>
 
-        <h1 className="text-5xl font-semibold tracking-tight sm:text-6xl">
+        <h1 className="text-4xl font-semibold tracking-tight sm:text-6xl">
           Lessons learned
         </h1>
 

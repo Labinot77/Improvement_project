@@ -212,3 +212,99 @@ export function pillarCards(days: DayFacts[]) {
     },
   } satisfies Record<PillarKey, { value: string; foot: string; spark: number[] }>;
 }
+
+// Average of each area (0-100) over a slice of days, null when nothing logged
+export function pillarAverages(days: DayFacts[]) {
+  return Object.fromEntries(
+    (Object.keys(PILLARS) as PillarKey[]).map((k) => {
+      const vals = days.map((d) => d.parts[k]).filter((v): v is number => v !== null);
+      return [k, vals.length ? Math.round(avg(vals) * 100) : null];
+    }),
+  ) as Record<PillarKey, number | null>;
+}
+
+// This week vs last week per area, for the radar chart
+export function weeklyBalance(days: DayFacts[]) {
+  const now = pillarAverages(days.slice(-7));
+  const prev = pillarAverages(days.slice(-14, -7));
+  return (Object.keys(PILLARS) as PillarKey[]).map((k) => ({
+    area: PILLARS[k].label,
+    key: k,
+    thisWeek: now[k] ?? 0,
+    lastWeek: prev[k] ?? 0,
+  }));
+}
+
+// 7-day rolling average of each area per day (0-100)
+export function pillarTrend(days: DayFacts[]) {
+  return days.map((d, i) => {
+    const window = days.slice(Math.max(0, i - 6), i + 1);
+    const a = pillarAverages(window);
+    return {
+      date: d.date,
+      label: new Date(`${d.date}T12:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+      ...a,
+    };
+  });
+}
+
+// Average day score per weekday (Mon first)
+export function weekdayScores(days: DayFacts[]) {
+  const names = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  const buckets = names.map(() => [] as number[]);
+  for (const d of days) {
+    if (d.score === null) continue;
+    buckets[(new Date(`${d.date}T12:00:00`).getDay() + 6) % 7].push(d.score);
+  }
+  return names.map((label, i) => ({ label, score: buckets[i].length ? Math.round(avg(buckets[i])) : 0, days: buckets[i].length }));
+}
+
+export type CoachNote = { tone: "good" | "warn" | "info"; text: string };
+
+// Plain-language feedback built from the numbers
+export function coachNotes(src: Sources, now = new Date()): CoachNote[] {
+  const days = buildDays(src, CONNECTION_DAYS, now);
+  const notes: CoachNote[] = [];
+  const week = pillarAverages(days.slice(-7));
+  const prev = pillarAverages(days.slice(-14, -7));
+
+  // Score trend
+  const scores = (xs: DayFacts[]) => xs.filter((d) => d.score !== null).map((d) => d.score as number);
+  const w = scores(days.slice(-7));
+  const p = scores(days.slice(-14, -7));
+  if (w.length && p.length) {
+    const diff = Math.round(avg(w) - avg(p));
+    if (diff >= 5) notes.push({ tone: "good", text: `Your days are ${diff} points better than last week.` });
+    else if (diff <= -5) notes.push({ tone: "warn", text: `Your day score slipped ${-diff} points from last week.` });
+    else notes.push({ tone: "info", text: "Holding steady compared with last week." });
+  }
+
+  // Weakest and most improved area this week
+  const keys = (Object.keys(PILLARS) as PillarKey[]).filter((k) => week[k] !== null);
+  if (keys.length) {
+    const weakest = keys.reduce((a, b) => ((week[b] as number) < (week[a] as number) ? b : a));
+    if ((week[weakest] as number) < 60)
+      notes.push({ tone: "warn", text: `${PILLARS[weakest].label} is pulling your days down most (${week[weakest]}/100 this week).` });
+    const improved = keys
+      .filter((k) => prev[k] !== null)
+      .map((k) => ({ k, d: (week[k] as number) - (prev[k] as number) }))
+      .sort((a, b) => b.d - a.d)[0];
+    if (improved && improved.d >= 10)
+      notes.push({ tone: "good", text: `${PILLARS[improved.k].label} improved the most: up ${improved.d} points.` });
+  }
+
+  // Best weekday
+  const wd = weekdayScores(days).filter((x) => x.days >= 2);
+  if (wd.length >= 3) {
+    const best = wd.reduce((a, b) => (b.score > a.score ? b : a));
+    const worst = wd.reduce((a, b) => (b.score < a.score ? b : a));
+    if (best.score - worst.score >= 10)
+      notes.push({ tone: "info", text: `${best.label} is your strongest day (${best.score}); ${worst.label} is your weakest (${worst.score}).` });
+  }
+
+  // Logging gaps
+  const unlogged = days.slice(-7).filter((d) => d.score === null).length;
+  if (unlogged >= 3) notes.push({ tone: "warn", text: `${unlogged} of the last 7 days have nothing logged. Small entries still count.` });
+
+  return notes.length ? notes : [{ tone: "info", text: "Log a few days across areas and feedback will appear here." }];
+}

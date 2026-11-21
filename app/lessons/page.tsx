@@ -1,51 +1,22 @@
-"use server"
-
-import { createClient } from "@/lib/supabase/server";
 import { LessonsHeader } from "./components/LessonsHeader";
 import { ReflectionPrompt } from "./components/ReflectionPrompt";
 import { LessonList } from "./components/List";
+import { getLessons } from "./store/main";
 
-import type { Lesson } from "@/types/lessons";
-
+// Lessons page: reflection prompt and filterable list
 export default async function LessonsPage() {
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return <div>Please sign in to view your lessons.</div>;
-  }
-
-  const { data, error } = await supabase
-    .from("lessons")
-    .select("*")
-    .eq("user_id", user.id)
-    .order("date", { ascending: false });
-
-  if (error) {
-    throw new Error("Failed to load lessons.");
-  }
-
-  const lessons: Lesson[] = (data ?? []).map((lesson) => ({
-    id: lesson.id,
-    title: lesson.title,
-    body: lesson.body ?? "",
-    category: lesson.category,
-    impact: lesson.impact,
-    date: lesson.date,
-    createdAt: lesson.created_at,
-  }));
-
-  const categoryCount = new Set(lessons.map((lesson) => lesson.category)).size;
+  const { lessons, error } = await getLessons();
+  const categoryCount = new Set(lessons.map((l) => l.category)).size;
 
   return (
-    <main className="lg:px-32 px-10 py-6 space-y-6">
+    <main className="space-y-6 px-4 py-6 sm:px-8 sm:py-10 lg:px-16">
       <LessonsHeader />
-
-      <ReflectionPrompt totalLessons={lessons.length} categoryCount={categoryCount}/>
-
+      {error && (
+        <p className="rounded-2xl border border-red-500/20 bg-red-500/10 px-5 py-4 text-red-300">
+          Couldn&apos;t load your lessons: {error}
+        </p>
+      )}
+      <ReflectionPrompt totalLessons={lessons.length} categoryCount={categoryCount} />
       <LessonList initialLessons={lessons} />
     </main>
   );

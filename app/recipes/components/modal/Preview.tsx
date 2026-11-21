@@ -3,13 +3,13 @@
 import { Pencil, Trash2, Utensils } from "lucide-react";
 import { useModal } from "@/providers/Modalprovider";
 import { cover, formatCost, formatTime } from "@/app/recipes/data/main";
-import type { Recipe, RecipeFormValues } from "@/types/Recipies/main";
+import type { Recipe, RecipeFormValues, RecipeImageChange } from "@/types/Recipies/main";
 
 // Content only. The shell (PREVIEW_SHELL in the provider) draws the rounded panel and
 // the built-in close button, so the header leaves room for it on the right.
 interface RecipePreviewModalProps {
   recipe: Recipe;
-  onSave: (id: string, values: RecipeFormValues) => void | Promise<void>;
+  onSave: (id: string, values: RecipeFormValues, image?: RecipeImageChange) => void | Promise<void>;
   onDelete: (id: string) => void | Promise<void>;
   onOpenChange: (open: boolean) => void;
 }
@@ -52,7 +52,7 @@ export function RecipePreviewModal({ recipe, onSave, onDelete, onOpenChange }: R
   ].join(" · ");
 
   return (
-    <div className="relative text-white">
+    <div className="relative px-4 text-white lg:px-0">
       <div className="pointer-events-none absolute -right-16 -top-20 h-44 w-44 rounded-full bg-[#55c487]/15 blur-3xl" />
 
       {/* Header */}

@@ -1,19 +1,33 @@
 "use client";
 
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { FILTERS } from "@/constants/journal";
 import type { JournalFilter } from "@/types/journal";
 
+// Filter pills that keep the current search and reset the page
 export function FilterTabs({ active }: { active: JournalFilter }) {
+  const params = useSearchParams();
+
+  // URL for a filter, preserving ?q
+  function href(key: JournalFilter) {
+    const next = new URLSearchParams(params.toString());
+    next.delete("page");
+    if (key === "all") next.delete("filter");
+    else next.set("filter", key);
+    const qs = next.toString();
+    return qs ? `/journal?${qs}` : "/journal";
+  }
+
   return (
-    <div className="flex flex-wrap gap-2 mb-4">
+    <div className="-mx-1 flex gap-1 overflow-x-auto px-1 pb-1">
       {FILTERS.map((f) => (
         <Link
           key={f.key}
-          href={f.key === "all" ? "/journal" : `/journal?filter=${encodeURIComponent(f.key)}`}
+          href={href(f.key)}
           scroll={false}
-          className={`relative rounded-full px-4 py-2 text-sm transition-colors ${
+          className={`relative shrink-0 rounded-full px-4 py-2 text-sm transition-colors ${
             active === f.key ? "text-emerald-300" : "text-zinc-400 hover:text-zinc-200"
           }`}
         >

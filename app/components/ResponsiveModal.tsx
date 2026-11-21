@@ -73,7 +73,7 @@ export function ResponsiveModal({
   // Base UI's onOpenChange may pass additional event-detail args (e.g. for
   // eventDetails.cancel()) — we only care about the boolean here, and block
   // closing entirely via `preventClose` rather than per-source cancellation.
-  function handleOpenChange(next: boolean, ..._rest: unknown[]) {
+  function handleOpenChange(next: boolean) {
     if (preventClose && !next) return;
     onOpenChange(next);
   }
@@ -81,7 +81,7 @@ export function ResponsiveModal({
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={handleOpenChange}>
-        <DrawerContent className="border-white/[0.08] bg-[#0f0f0f]">
+        <DrawerContent className="max-h-[92dvh] border-white/[0.08] bg-[#0f0f0f]">
           {!hideHeader && (title || description) && (
             <DrawerHeader className="text-left">
               {title && (
@@ -97,7 +97,7 @@ export function ResponsiveModal({
             </DrawerHeader>
           )}
 
-          <div className={cn("px-4 pb-2 overflow-y-auto mt-4 mb-9", className)}>{children}</div>
+          <div className={cn("overflow-y-auto pb-6", !hideHeader && "px-4", className)}>{children}</div>
 
           {footer && (
             <DrawerFooter className="pt-2">{footer}</DrawerFooter>
@@ -112,7 +112,7 @@ export function ResponsiveModal({
       <DialogContent
         className={cn(
           "border-white/[0.08] bg-[#0f0f0f] p-6 shadow-2xl",
-          desktopClassName ?? "max-w-sm",
+          desktopClassName ?? "sm:max-w-md",
         )}
       >
         {!hideHeader && (title || description) && (

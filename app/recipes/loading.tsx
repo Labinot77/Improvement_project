@@ -7,11 +7,11 @@ const pulse = "animate-pulse bg-white/[0.06]";
 // so nothing jumps when the real page replaces this.
 export default function Loading() {
   return (
-    <main className="px-10 py-6 " aria-busy="true">
+    <main className="px-4 py-6 sm:px-8 sm:py-10" aria-busy="true">
       <span className="sr-only" role="status">Loading recipes…</span>
 
       <p className="text-sm font-medium tracking-[0.3em] text-emerald-300">KITCHEN COLLECTION</p>
-      <h1 className="mt-3 text-5xl font-semibold tracking-tight sm:text-6xl">Recipes</h1>
+      <h1 className="mt-3 text-4xl font-semibold tracking-tight sm:text-6xl">Recipes</h1>
       <p className="mt-4 text-lg text-zinc-500">Save favorites, plan meals, and make healthy choices easier.</p>
 
       {/* Filter pills, widths follow the real labels */}
