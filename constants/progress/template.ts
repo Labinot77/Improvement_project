@@ -49,3 +49,19 @@ export const FOCUS_TIPS: [string, string][] = [
   ["Write tomorrow's first step", "before you close the day."],
   ["Done beats perfect.", "Ship the rough version."],
 ];
+// --- Insights ---
+
+// Weeks shown in the activity heatmap
+export const HEATMAP_WEEKS = 18;
+
+// Momentum: weight of the newest day, and decay for days with no tasks
+export const MOMENTUM_ALPHA = 0.35;
+export const MOMENTUM_DECAY = 0.9;
+
+// Range options for the completion chart (days)
+export const CHART_RANGES = [7, 14, 30] as const;
+
+// Chart palette
+export const DONE_COLOR = ACCENT;
+export const OPEN_COLOR = "rgba(255,255,255,0.08)";
+export const MOMENTUM_COLOR = "#e9a25c";

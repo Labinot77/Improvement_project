@@ -1,10 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/user/getUser_server";
 import { formatDate, today } from "@/lib/mics/date";
-import { computeStreak } from "@/lib/progress/streak";
-import type { Days } from "@/types/Progress/progress";
+import { computeProgressStats, type TasksByDate } from "@/lib/progress/stats";
+import type { ProgressStats } from "@/types/Progress/progress";
 import { DEFAULT_CATEGORY, MAX_UPCOMING } from "@/constants/progress/template";
-import { wait } from "../mics/helpers";
 
 export type TodoTask = {
   id: string;
@@ -24,6 +23,7 @@ type TaskRow = {
   created_at: string;
 };
 
+// Today, upcoming and insight stats for the Progress page
 export async function getTodosData() {
   const dateKey = today();
   const empty = {
@@ -31,7 +31,7 @@ export async function getTodosData() {
     todayTasks: [] as TodoTask[],
     upcoming: [] as TodoTask[],
     journal: "",
-    streak: 0,
+    stats: null as ProgressStats | null,
   };
 
   const user = await getUser();
@@ -78,17 +78,22 @@ export async function getTodosData() {
     .flatMap((r) => toTasks(r.date, r.tasks))
     .slice(0, MAX_UPCOMING);
 
-  // Same streak logic as the Progress page
-  const daysMap = Object.fromEntries(
-    rows.map((r) => [r.date, { tasks: r.tasks ?? [], journal: r.journal ?? "" }]),
-  ) as unknown as Days;
+  // Past + today tasks grouped by date (duplicate day rows merged)
+  const byDate: TasksByDate = {};
+  for (const r of rows) {
+    if (r.date > dateKey) continue;
+    byDate[r.date] = [
+      ...(byDate[r.date] ?? []),
+      ...toTasks(r.date, r.tasks).map(({ title, category, completed }) => ({ title, category, completed })),
+    ];
+  }
 
   return {
     dateKey,
     todayTasks: toTasks(dateKey, todayRow?.tasks ?? null),
     upcoming,
     journal: todayRow?.journal ?? "",
-    streak: computeStreak(daysMap),
+    stats: computeProgressStats(byDate),
     error: null as string | null,
   };
 }

@@ -5,9 +5,9 @@ import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/user/getUser_server";
 import { CATEGORIES, DEFAULT_CATEGORY } from "@/constants/progress/template";
 
-// The dashboard also shows today's tasks
+// Re-render Progress (and the dashboard, which shows today's tasks)
 function refresh() {
-  revalidatePath("/todos");
+  revalidatePath("/progress");
   revalidatePath("/");
 }
 
