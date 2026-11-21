@@ -17,7 +17,7 @@ export function useQuickAdd(): QuickAction[] {
 
   return [
     { href: "/progress", label: "Task", icon: ListChecks, color: "#7c6cf0", run: () => open("progress_create", {}) },
-    { href: "/activity", label: "Session", icon: Dumbbell, color: "#f97362", run: () => open("activity_form", {}) },
+    { href: "/activity", label: "Workout", icon: Dumbbell, color: "#f97362", run: () => open("workout_form", {}) },
     { href: "/sleep", label: "Night", icon: Moon, color: "#8b9cf7", run: () => open("sleep_form", {}) },
     {
       href: "/lessons",

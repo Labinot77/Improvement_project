@@ -12,7 +12,9 @@ import { ResponsiveModal } from "@/app/components/ResponsiveModal";
 import { JournalForm } from "@/app/journal/components/Modal/Form";
 import { JournalPreviewModal } from "@/app/journal/components/Modal/Preview";
 import { TaskModal } from "@/app/progress/components/Create";
-import { ActivityModal } from "@/app/activity/components/ActivityModal";
+import { WorkoutModal } from "@/app/activity/components/WorkoutModal";
+import { TemplateModal } from "@/app/activity/components/TemplateModal";
+import type { WorkoutSet, WorkoutTemplate } from "@/types/fitness";
 import { SleepModal } from "@/app/sleep/components/SleepModal";
 import type { SleepEntry } from "@/types/sleep";
 import type { Lesson } from "@/types/lessons";
@@ -47,7 +49,13 @@ export type ModalProps = {
     destructive?: boolean;
   };
   progress_create: { date?: string };
-  activity_form: { date?: string };
+  workout_form: {
+    date?: string;
+    template?: WorkoutTemplate;
+    last?: Record<string, Pick<WorkoutSet, "reps" | "weightKg">[]>;
+    known?: string[];
+  };
+  template_form: { template?: WorkoutTemplate };
   sleep_form: { date?: string; entry?: SleepEntry };
   // CHANGED: onSave may be async so the form can show "Saving…" and errors
   recipe_form: { recipe?: Recipe; onSave: (id: string, values: RecipeFormValues, image?: RecipeImageChange) => void | Promise<void> };
@@ -89,8 +97,10 @@ function renderModal(entry: Entry, base: any) {
       return <ConfirmModal {...base} {...entry.props} />;
     case "progress_create":
       return <TaskModal {...base} {...entry.props} />;
-    case "activity_form":
-      return <ActivityModal {...base} {...entry.props} />;
+    case "workout_form":
+      return <WorkoutModal {...base} {...entry.props} />;
+    case "template_form":
+      return <TemplateModal {...base} {...entry.props} />;
     case "sleep_form":
       return <SleepModal {...base} {...entry.props} />;
     case "recipe_form":
@@ -126,7 +136,8 @@ const SHELL: Partial<Record<ModalName, { desktopClassName?: string; hideHeader?:
   recipe_form: { desktopClassName: "sm:max-w-3xl max-h-[90dvh] overflow-y-auto", hideHeader: true },
   recipe_preview: { desktopClassName: "sm:max-w-2xl max-h-[90dvh] overflow-y-auto", hideHeader: true },
   progress_create: { desktopClassName: TASK_SHELL, hideHeader: true },
-  activity_form: { desktopClassName: TASK_SHELL.replace("sm:max-w-lg", "sm:max-w-xl"), hideHeader: true },
+  workout_form: { desktopClassName: PREVIEW_SHELL, hideHeader: true },
+  template_form: { desktopClassName: TASK_SHELL, hideHeader: true },
   sleep_form: { desktopClassName: TASK_SHELL, hideHeader: true },
   journal_form: { desktopClassName: WIDE_SHELL, hideHeader: true },
   journal_preview: { desktopClassName: PREVIEW_SHELL, hideHeader: true },

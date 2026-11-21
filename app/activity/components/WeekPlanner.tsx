@@ -3,15 +3,23 @@
 import { motion } from "framer-motion";
 import { Plus } from "lucide-react";
 import { useModal } from "@/providers/Modalprovider";
-import { ACTIVITY_COLOR, ACTIVITY_META, WEEKLY_GOAL } from "@/constants/fitness";
+import { ACTIVITY_COLOR, ACTIVITY_META, CARDIO_META, WEEKLY_GOAL } from "@/constants/fitness";
+import type { WorkoutSet } from "@/types/fitness";
 import { CARD } from "@/constants/ui";
 import { formatMins, type weekPlan } from "@/app/activity/data/main";
 
 type Day = ReturnType<typeof weekPlan>[number];
 type Stat = { label: string; value: string; foot: string };
 
-// Mon..Sun columns with this week's sessions, plus the headline stats
-export function WeekPlanner({ days, stats }: { days: Day[]; stats: Stat[] }) {
+type Props = {
+  days: Day[];
+  stats: Stat[];
+  last: Record<string, Pick<WorkoutSet, "reps" | "weightKg">[]>;
+  known: string[];
+};
+
+// Mon..Sun columns with this week's workouts, plus the headline stats
+export function WeekPlanner({ days, stats, last, known }: Props) {
   const { open } = useModal();
   const done = days.reduce((s, d) => s + d.sessions.length, 0);
 
@@ -21,7 +29,7 @@ export function WeekPlanner({ days, stats }: { days: Day[]; stats: Stat[] }) {
         <div>
           <h2 className="text-lg font-medium">This week</h2>
           <p className="text-sm text-zinc-500">
-            {done}/{WEEKLY_GOAL} sessions · tap an open day to log one
+            {done}/{WEEKLY_GOAL} sessions · tap a day to log a workout
           </p>
         </div>
         <div className="h-2 w-40 overflow-hidden rounded-full bg-white/[0.06]">
@@ -42,7 +50,7 @@ export function WeekPlanner({ days, stats }: { days: Day[]; stats: Stat[] }) {
             key={d.date}
             type="button"
             disabled={d.isFuture}
-            onClick={() => open("activity_form", { date: d.date })}
+            onClick={() => open("workout_form", { date: d.date, last, known })}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.04 }}
@@ -56,11 +64,13 @@ export function WeekPlanner({ days, stats }: { days: Day[]; stats: Stat[] }) {
               {d.sessions.map((s) => (
                 <span
                   key={s.id}
-                  title={`${s.type} · ${s.durationMins}m`}
-                  className="grid size-8 place-items-center rounded-lg text-base sm:size-9"
+                  title={`${s.workoutName ?? s.type} · ${s.durationMins}m`}
+                  className="flex w-full flex-col items-center gap-0.5 rounded-lg px-1 py-1.5 text-center"
                   style={{ background: `${ACTIVITY_META[s.type].color}26` }}
                 >
-                  {ACTIVITY_META[s.type].icon}
+                  <span className="text-base leading-none">{ACTIVITY_META[s.type].icon}</span>
+                  <span className="hidden w-full truncate text-[10px] text-zinc-300 sm:block">{s.workoutName ?? s.type}</span>
+                  {s.cardioType && <span className="text-xs leading-none">{CARDIO_META[s.cardioType].icon}</span>}
                 </span>
               ))}
               {!d.sessions.length && !d.isFuture && (
