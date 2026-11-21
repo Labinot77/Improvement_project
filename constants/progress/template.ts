@@ -15,7 +15,7 @@ export const TEMPLATE = `## What went well today?
 export const ACCENT = "#7c6cf0";
 export const EYEBROW_COLOR = "text-[#e9a25c]";
 
-export const CARD = "rounded-3xl border border-white/[0.06] bg-[#16181b]";
+export { CARD } from "@/constants/ui";
 
 export const CATEGORIES = [
   "Personal",

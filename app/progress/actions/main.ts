@@ -39,11 +39,6 @@ export async function setTaskCompleted(id: string, completed: boolean) {
   refresh();
 }
 
-// Same as setTaskCompleted, for a no-JS <form action> (dashboard)
-export async function toggleTaskForm(formData: FormData) {
-  await setTaskCompleted(String(formData.get("id")), formData.get("completed") === "true");
-}
-
 // Delete a task
 export async function removeTask(id: string) {
   await deleteTask(id);

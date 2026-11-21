@@ -27,3 +27,18 @@ export const ALL_ACTIVITY_TYPES: ActivityType[] = [
 ];
 
 export const ALL_INTENSITIES: IntensityLevel[] = [1, 2, 3, 4, 5];
+// --- Activity page ---
+
+// Page accent (warm red/orange)
+export const ACTIVITY_COLOR = "#f97362";
+
+// Weeks offered by the volume chart
+export const VOLUME_RANGES = [8, 12, 26] as const;
+
+// Acute:chronic load zones (upper bounds)
+export const LOAD_ZONES = [
+  { max: 0.8, label: "Detraining", tip: "Load is well below your usual. Add a session.", color: "#60a5fa" },
+  { max: 1.3, label: "Sweet spot", tip: "Training in line with what you're used to.", color: "#4ade80" },
+  { max: 1.5, label: "Pushing", tip: "Ramping up fast. Watch recovery.", color: "#facc15" },
+  { max: Infinity, label: "Spike", tip: "A big jump over your norm. Injury risk rises here.", color: "#f87171" },
+] as const;

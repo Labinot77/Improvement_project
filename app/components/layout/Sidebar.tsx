@@ -17,7 +17,6 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import { Button } from "@/components/ui/button";
 import { getUser } from "@/lib/user/getUser_client";
 import { useModal } from "@/providers/Modalprovider";
 
@@ -28,7 +27,7 @@ import { useModal } from "@/providers/Modalprovider";
 
 export default function AppSidebar() {
   const pathname = usePathname();
-  const { user, loading, isLoggedIn } = getUser();
+  const { user, isLoggedIn } = getUser();
   const { open } = useModal();
 
   const name = user?.user_metadata?.user_name ?? "Unknown";
@@ -40,12 +39,12 @@ export default function AppSidebar() {
       <SidebarHeader className="p-3 pt-5">
         <SidebarMenu>
           <SidebarMenuItem>
-            <div className="flex w-full items-center gap-3">
+            <div className="flex w-full items-center gap-3 group-data-[collapsible=icon]:justify-center">
               <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-emerald-300 to-emerald-600 text-base font-semibold text-emerald-950 shadow-lg shadow-emerald-500/20">
                 {user?.user_metadata.user_name?.slice(0, 2).toUpperCase()}
               </div>
 
-              <div className="grid min-w-0 text-left leading-tight">
+              <div className="grid min-w-0 text-left leading-tight group-data-[collapsible=icon]:hidden">
                 <span className="truncate text-lg font-semibold">
                   {user?.user_metadata.user_name}
                 </span>
@@ -58,7 +57,7 @@ export default function AppSidebar() {
         </SidebarMenu>
       </SidebarHeader>
 
-      <SidebarContent className="px-2">
+      <SidebarContent className="px-2 group-data-[collapsible=icon]:px-0">
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu className="gap-1.5">
@@ -71,7 +70,7 @@ export default function AppSidebar() {
                       asChild
                       isActive={active}
                       tooltip={title}
-                      className="h-12 gap-4 rounded-xl px-4 text-base text-muted-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-foreground [&>svg]:size-5"
+                      className="h-12 gap-4 rounded-xl px-4 text-base text-muted-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-foreground [&>svg]:size-5 group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:size-11! group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0! group-data-[collapsible=icon]:[&>span]:hidden"
                     >
                       <Link href={href}>
                         <Icon />

@@ -1,12 +1,3 @@
-export interface Task {
-  id: string;
-  title: string;
-  description?: string;
-  completed: boolean;
-  reflection?: string;
-  createdAt: string; // ISO
-}
-
 // A task as shown on the Progress page
 export interface TodoTask {
   id: string;

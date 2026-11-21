@@ -6,17 +6,14 @@ import { LoginModal } from "@/app/components/dashboard/modal/login";
 import { ProfileModal } from "@/app/components/dashboard/modal/profile";
 import { LessonModal } from "@/app/lessons/components/Modal/Edit";
 import { ConfirmModal } from "@/app/components/dashboard/modal/Confirm";
-import { DayActivityModal } from "@/app/activity/components/modal/Day";
 import { RecipeForm } from "@/app/recipes/components/Form"; // NEW
 import { RecipePreviewModal } from "@/app/recipes/components/modal/Preview";
 import { ResponsiveModal } from "@/app/components/ResponsiveModal";
 import { JournalForm } from "@/app/journal/components/Modal/Form";
 import { JournalPreviewModal } from "@/app/journal/components/Modal/Preview";
 import { TaskModal } from "@/app/progress/components/Create";
-import type { Activity } from "@/types/fitness";
 import type { Lesson } from "@/types/lessons";
-import type { Recipe, RecipeFilters, RecipeFormValues } from "@/types/Recipies/main"; // CHANGED: + RecipeFormValues
-import type { ProgressTemplate } from "@/types/Progress/templates";
+import type { Recipe, RecipeFormValues } from "@/types/Recipies/main";
 import { LessonFormValues } from "@/app/lessons/components/Form_modal";
 import Preview from "@/app/lessons/components/Modal/Preview";
 import type { JournalEntry, JournalFormValues } from "@/types/journal";
@@ -46,7 +43,6 @@ export type ModalProps = {
     cancelLabel?: string;
     destructive?: boolean;
   };
-  dayActivity: { date: string; sessions: Activity[] };
   progress_create: { date?: string };
   // CHANGED: onSave may be async so the form can show "Saving…" and errors
   recipe_form: { recipe?: Recipe; onSave: (id: string, values: RecipeFormValues) => void | Promise<void> };
@@ -86,8 +82,6 @@ function renderModal(entry: Entry, base: any) {
     return <Preview {...base} {...entry.props} />;
     case "confirm":
       return <ConfirmModal {...base} {...entry.props} />;
-    case "dayActivity":
-      return <DayActivityModal {...base} {...entry.props} />;
     case "progress_create":
       return <TaskModal {...base} {...entry.props} />;
     case "recipe_form":
