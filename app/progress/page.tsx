@@ -1,5 +1,5 @@
 import { Flame } from "lucide-react";
-import { getTodosData } from "@/lib/progress/getTodos";
+import { getTodosData } from "@/app/progress/store/main";
 import { CARD, EYEBROW_COLOR } from "@/constants/progress/template";
 import { TodayProvider } from "./components/TodayProvider";
 import { TodayTasks } from "./components/TodayTasks";

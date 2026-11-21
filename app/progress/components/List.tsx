@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useModal } from "@/providers/Modalprovider";
-import type { TodoTask } from "@/lib/progress/getTodos";
+import type { TodoTask } from "@/types/Progress/progress";
 import { ACCENT } from "@/constants/progress/template";
 
 // "Mon, Nov 24"

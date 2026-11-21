@@ -1,8 +1,8 @@
 "use client";
 
 import { useOptimistic, useTransition } from "react";
-import { removeTask, setTaskCompleted } from "@/app/progress/actions/actions";
-import type { TodoTask } from "@/lib/progress/getTodos";
+import { removeTask, setTaskCompleted } from "@/app/progress/actions/main";
+import type { TodoTask } from "@/types/Progress/progress";
 
 type Action = { type: "toggle"; id: string } | { type: "remove"; id: string };
 

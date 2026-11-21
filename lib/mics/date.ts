@@ -1,19 +1,11 @@
 import { format } from "date-fns"
 
+// Date -> "YYYY-MM-DD"
 export function formatDate(date: Date): string {
   return format(date, "yyyy-MM-dd"); 
 }
 
+// Today as "YYYY-MM-DD"
 export function today(): string {
   return formatDate(new Date());
 }
-
-export function getLast7Days(): string[] {
-  return Array.from({ length: 7}, (_, i) => {
-    const d = new Date();
-    d.setDate(d.getDate() - (6 - i));
-    return formatDate(d)
-  })
-}
-
-

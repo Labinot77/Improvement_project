@@ -1,6 +1,6 @@
 "use client";
 
-import type { TodoTask } from "@/lib/progress/getTodos";
+import type { TodoTask } from "@/types/Progress/progress";
 import { CARD } from "@/constants/progress/template";
 import { useOptimisticTasks } from "../hooks/useOptimisticTasks";
 import { TaskList } from "./List";

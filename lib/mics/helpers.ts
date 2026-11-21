@@ -3,11 +3,6 @@ export function capitalizeFirstLetter(str: string) {
     return str.at(0)?.toUpperCase() + str.slice(1);
 }
 
-export async function wait(seconds: number) {
-    await new Promise((res) => setTimeout(res, seconds))
-}
-
-
 export function formatCurrency(amount: number, currency?: string | null) {
   try {
     return new Intl.NumberFormat(undefined, {

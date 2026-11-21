@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, type ReactNode } from "react";
-import type { TodoTask } from "@/lib/progress/getTodos";
+import type { TodoTask } from "@/types/Progress/progress";
 import { useOptimisticTasks } from "../hooks/useOptimisticTasks";
 
 type TodayContext = ReturnType<typeof useOptimisticTasks>;

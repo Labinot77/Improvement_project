@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Check, ChevronRight } from "lucide-react";
 import { getUser } from "@/lib/user/getUser_server";
 import { getDashboardData } from "@/constants/temp/logic";
-import { toggleTask } from "@/constants/temp/toggleTask";
+import { toggleTaskForm } from "@/app/progress/actions/main";
 import { formatDate, today } from "@/lib/mics/date";
 import {
 CARD,
@@ -165,7 +165,7 @@ export default async function Dashboard() {
               <ul className="mt-6 max-h-[22rem] space-y-3 overflow-y-auto overscroll-contain pr-1 [scrollbar-width:thin]">
                 {visible.map((t) => (
                   <li key={t.id}>
-                    <form action={toggleTask}>
+                    <form action={toggleTaskForm}>
                       <input type="hidden" name="id" value={t.id} />
                       <input type="hidden" name="completed" value={String(!t.completed)} />
                       <button

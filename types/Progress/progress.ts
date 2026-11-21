@@ -7,14 +7,15 @@ export interface Task {
   createdAt: string; // ISO
 }
 
-export interface DayData {
-  date: string
-  tasks: Task[];
-  journal: string;
+// A task as shown on the Progress page
+export interface TodoTask {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  completed: boolean;
+  date: string; // YYYY-MM-DD
 }
-
-
-export type Days = Record<string, DayData>; // key = "YYYY-MM-DD"
 
 // --- Insights (Progress page analytics) ---
 
